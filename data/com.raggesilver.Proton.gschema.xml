@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="proton">
+	<schema id="com.raggesilver.Proton" path="/com/raggesilver/Proton/">
+	  <key name="dark-mode" type="b">
+	    <default>true</default>
+	    <summary>Use dark mode</summary>
+	    <description>Use dark mode</description>
+	  </key>
+	</schema>
+</schemalist>

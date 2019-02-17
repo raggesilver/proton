@@ -1,0 +1,7 @@
+data/com.raggesilver.Proton.desktop.in
+data/com.raggesilver.Proton.appdata.xml.in
+data/com.raggesilver.Proton.gschema.xml
+src/window.ui
+src/main.vala
+src/window.vala
+

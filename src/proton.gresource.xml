@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/raggesilver/Proton">
+    <file>window.ui</file>
+    <file>layouts/TreeView.ui</file>
+    <file>resources/style.css</file>
+  </gresource>
+</gresources>

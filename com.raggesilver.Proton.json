@@ -1,0 +1,58 @@
+{
+    "app-id": "com.raggesilver.Proton",
+    "runtime": "org.gnome.Sdk",
+    "runtime-version": "master",
+    "sdk": "org.gnome.Sdk",
+    "command": "proton",
+    "finish-args": [
+        "--share=network",
+        "--share=ipc",
+        "--socket=x11",
+        "--socket=wayland",
+        "--filesystem=xdg-run/dconf",
+        "--filesystem=~/.config/dconf:ro",
+        "--talk-name=ca.desrt.dconf",
+        "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
+    ],
+    "build-options": {
+        "cflags": "-O2 -g",
+        "cxxflags": "-O2 -g",
+        "env": {
+            "V": "1"
+        }
+    },
+    "cleanup": [
+        "/include",
+        "/lib/pkgconfig",
+        "/man",
+        "/share/doc",
+        "/share/gtk-doc",
+        "/share/man",
+        "/share/pkgconfig",
+        "/share/vala",
+        "*.la",
+        "*.a"
+    ],
+    "modules": [
+    	{
+    	    "name": "gtksourceview",
+    	    "sources": [
+    	    	{
+    	    	    "type": "archive",
+    	    	    "url": "https://gitlab.gnome.org/GNOME/gtksourceview/-/archive/3.24.9/gtksourceview-3.24.9.tar.bz2",
+    	    	    "sha256": "a370c5039fe5e8a6f461bd9a9d7cf38223549946fb7c6e85760199243ec8949a"
+    	    	}
+    	    ]
+    	},
+        {
+            "name": "proton",
+            "buildsystem": "meson",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "file:///home/pqueiroz/Projects/proton"
+                }
+            ]
+        }
+    ]
+}
