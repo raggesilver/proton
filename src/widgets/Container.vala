@@ -1,6 +1,6 @@
-/* Settings.vala
+/* Container.vala
  *
- * Copyright 2019 Paulo Queiroz <pvaqueiroz@gmail.com>
+ * Copyright 2019 Paulo Queiroz <unknown@domain.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,25 +23,39 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.Settings : Granite.Services.Settings {
+public class Proton.Container : Gtk.Stack {
 
-    private static Proton.Settings? instance = null;
+    public  Gtk.Widget  widget;
+    private Gtk.Spinner spinner;
 
-    public bool dark_mode { get; set; }
-    public int width { get; set; }
-    public int height { get; set; }
-    public int pos_x { get; set; }
-    public int pos_y { get; set; }
+    private bool _working { get; set; default = false; }
+    public  bool  working { get { return _working; } }
 
-    private Settings() {
-        base ("com.raggesilver.Proton");
+    public Container(Gtk.Widget w, bool working = false) {
+        widget = w;
+        _working = working;
+
+        spinner = new Gtk.Spinner ();
+        spinner.start ();
+        spinner.show ();
+
+        add_named (widget, "widget");
+        add_named (spinner, "spinner");
+
+        set_working (_working);
+        show ();
     }
 
-    public static Proton.Settings get_instance() {
-        if (instance == null)
-            instance = new Proton.Settings ();
-        return instance;
+    public Container.with_scroller (Gtk.Widget w, bool working = false) {
+        var scroll = new Gtk.ScrolledWindow (null, null);
+        scroll.show ();
+        scroll.add (w);
+        this(scroll, working);
     }
 
+    public void set_working(bool working) {
+        _working = working;
+        set_visible_child_name (_working ? "spinner" : "widget");
+    }
 }
 

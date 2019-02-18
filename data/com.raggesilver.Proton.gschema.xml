@@ -6,5 +6,25 @@
 	    <summary>Use dark mode</summary>
 	    <description>Use dark mode</description>
 	  </key>
+	  <key name="width" type="i">
+	    <default>800</default>
+	    <summary>Width</summary>
+	    <description>window width</description>
+	  </key>
+	  <key name="height" type="i">
+	    <default>400</default>
+	    <summary>Height</summary>
+	    <description>Window height</description>
+	  </key>
+	  <key name="pos-x" type="i">
+	    <default>-1</default>
+	    <summary>X Pos</summary>
+	    <description>X Pos</description>
+	  </key>
+	  <key name="pos-y" type="i">
+	    <default>-1</default>
+	    <summary>Y Pos</summary>
+	    <description>Y Pos</description>
+	  </key>
 	</schema>
 </schemalist>

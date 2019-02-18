@@ -14,6 +14,9 @@
         "--talk-name=ca.desrt.dconf",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
+    "x-run-args": [
+        "Projects/proton"
+    ],
     "build-options": {
         "cflags": "-O2 -g",
         "cxxflags": "-O2 -g",
@@ -43,6 +46,16 @@
     	    	    "sha256": "a370c5039fe5e8a6f461bd9a9d7cf38223549946fb7c6e85760199243ec8949a"
     	    	}
     	    ]
+    	},
+    	{
+            "name": "libgranite",
+            "buildsystem": "meson",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/elementary/granite"
+                }
+            ]
     	},
         {
             "name": "proton",

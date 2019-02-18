@@ -26,12 +26,23 @@
 public class Proton.Editor : Gtk.SourceView {
 
     File? file;
+    Gtk.SourceLanguage? language;
 
-    public Editor(File? file) {
+    private uint id;
+    private Gtk.SourceLanguageManager lm;
+
+    public Editor(uint id, File? file) {
+        Object (show_line_numbers: true,
+                wrap_mode: Gtk.WrapMode.WORD_CHAR);
+
+        this.id = id;
         this.file = file;
+        lm = Gtk.SourceLanguageManager.get_default ();
 
+        // TODO handle null files
         if (file != null)
             open_file ();
+
         show_all ();
     }
 
@@ -39,10 +50,19 @@ public class Proton.Editor : Gtk.SourceView {
         string content;
         try {
             FileUtils.get_contents (file.get_path (), out content);
-            buffer.set_text(content);
+            buffer.set_text (content);
+            set_language (null);
         } catch (GLib.FileError err) {
             print(err.message);
         }
+    }
+
+    private void set_language(Gtk.SourceLanguage? _lang) {
+        Gtk.SourceLanguage? lang = _lang;
+        if (lang == null)
+            lang = lm.guess_language (file.get_path (), null);
+        (buffer as Gtk.SourceBuffer).set_language (lang);
+        language = lang;
     }
 }
 

@@ -1,6 +1,6 @@
-/* Settings.vala
+/* EditorManager.vala
  *
- * Copyright 2019 Paulo Queiroz <pvaqueiroz@gmail.com>
+ * Copyright 2019 Paulo Queiroz <unknown@domain.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,25 +23,26 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.Settings : Granite.Services.Settings {
 
-    private static Proton.Settings? instance = null;
 
-    public bool dark_mode { get; set; }
-    public int width { get; set; }
-    public int height { get; set; }
-    public int pos_x { get; set; }
-    public int pos_y { get; set; }
+public class Proton.EditorManager : Object {
 
-    private Settings() {
-        base ("com.raggesilver.Proton");
+    public Proton.Editor? current_editor;
+
+    private GLib.HashTable<string, Proton.Editor> _editors;
+    public GLib.HashTable<string, Proton.Editor> editors {
+        get {
+            return _editors;
+        }
     }
 
-    public static Proton.Settings get_instance() {
-        if (instance == null)
-            instance = new Proton.Settings ();
-        return instance;
+    public EditorManager() {
+        _editors = new GLib.HashTable<string, Proton.Editor> (str_hash,
+                                                              str_equal);
     }
 
+    Proton.Editor new_editor(File f) {
+
+    }
 }
 

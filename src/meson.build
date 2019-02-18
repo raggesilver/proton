@@ -4,12 +4,14 @@ proton_sources = [
   'services/Settings.vala',
   'widgets/TreeView.vala',
   'widgets/Editor.vala',
+  'widgets/Container.vala',
 ]
 
 proton_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gtk+-3.0', version: '>= 3.22'),
-  dependency('gtksourceview-3.0')
+  dependency('gtksourceview-3.0', version: '>= 3.22'),
+  dependency('granite')
 ]
 
 gnome = import('gnome')
