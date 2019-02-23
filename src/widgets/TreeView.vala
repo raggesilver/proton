@@ -27,15 +27,17 @@
 public class Proton.TreeView : Gtk.TreeView {
     public Gtk.TreeSelection selection;
     private Gtk.TreeStore store;
+    private Gtk.IconTheme icon_theme;
 
-    public signal void selected (File file);
+    public signal void selected (GLib.File file);
 
-    public TreeView (File root) {
+    public TreeView (GLib.File root) {
 
         Object (activate_on_single_click: true,
                 fixed_height_mode: true);
 
         // get_style_context ().add_class ("bg-color");
+        icon_theme = Gtk.IconTheme.get_default ();
 
         build_treeview ();
         fill_tree (root, null);
@@ -65,7 +67,7 @@ public class Proton.TreeView : Gtk.TreeView {
         });
     }
 
-    void fill_tree(File _root, Gtk.TreeIter? parent) {
+    void fill_tree(GLib.File _root, Gtk.TreeIter? parent) {
         try {
             Dir dir = Dir.open (_root.get_path ());
             string? f = null;
@@ -73,11 +75,19 @@ public class Proton.TreeView : Gtk.TreeView {
             while ((f = dir.read_name ()) != null) {
                 string name = Path.build_filename (_root.get_path (), f);
 
-                File ff = File.new_for_path (name);
-
                 Gtk.TreeIter current;
                 store.append (out current, parent);
+
+                GLib.File ff = GLib.File.new_for_path (name);
+                /* ff.query_info_async.begin ("standard::icon", 0, Priority.DEFAULT, null, (obj, res) => {
+                    FileInfo fi = ff.query_info_async.end (res);
+                    Icon icon = fi.get_icon ();
+                    var icinf = icon_theme.lookup_by_gicon (icon, 16, Gtk.IconLookupFlags.FORCE_SYMBOLIC);
+                    store.set (current, 0, icinf.load_icon (), 1, ff.get_basename (), -1);
+                }); */
+
                 store.set (current, 0, ff.get_basename (), -1);
+
 
                 if (ff.query_file_type (0) == FileType.DIRECTORY)
                     fill_tree (ff, current);
@@ -90,11 +100,12 @@ public class Proton.TreeView : Gtk.TreeView {
     }
 
     void build_treeview() {
+        // store = new Gtk.TreeStore(2, typeof (Gdk.Pixbuf), typeof (string));
         store = new Gtk.TreeStore(1, typeof (string));
         set_model (store);
 
-        // insert_column_with_attributes (-1, "", new Gtk.CellRendererPixbuf(), "pixbuf", 0, null);
-        insert_column_with_attributes (-1, "", new Gtk.CellRendererText(), "text", 0, null);
+        // insert_column_with_attributes (0, "", new Gtk.CellRendererPixbuf(), "pixbuf", 0, null);
+        insert_column_with_attributes (0, "", new Gtk.CellRendererText(), "text", 0, null);
 
         selection = get_selection ();
         get_column (0).set_sizing (Gtk.TreeViewColumnSizing.AUTOSIZE);
@@ -102,9 +113,9 @@ public class Proton.TreeView : Gtk.TreeView {
         // selection.changed.connect (() => {});
     }
 
-    public File get_file_from_selection (File root,
-                                         Gtk.TreeModel model,
-                                         Gtk.TreeIter current)
+    public GLib.File get_file_from_selection (GLib.File root,
+                                              Gtk.TreeModel model,
+                                              Gtk.TreeIter current)
     {
         string fullpath = "";
 
@@ -120,10 +131,10 @@ public class Proton.TreeView : Gtk.TreeView {
 
         // Abspath
         fullpath = Path.build_filename (root.get_path (), fullpath);
-        return File.new_for_path (fullpath);
+        return GLib.File.new_for_path (fullpath);
     }
 
-    bool left_button_clicked_row (File root,
+    bool left_button_clicked_row (GLib.File root,
                                   Gtk.TreeModel model,
                                   Gtk.TreeIter current)
     {
@@ -142,7 +153,7 @@ public class Proton.TreeView : Gtk.TreeView {
         return false;
     }
 
-    bool right_button_clicked_row (File root,
+    bool right_button_clicked_row (GLib.File root,
                                    Gtk.TreeModel model,
                                    Gtk.TreeIter current,
                                    Gdk.Event e)

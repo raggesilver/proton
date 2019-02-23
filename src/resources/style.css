@@ -1,1 +1,25 @@
 .bg-color, #side_treeview { background: @theme_base_color; }
+
+.bg-transparent { background: transparent; }
+
+button { outline: 0; }
+
+stackswitcher > button {
+	background: transparent;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+	min-width: 0;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	margin: 2px 5px;
+	box-shadow: none;
+}
+
+stackswitcher > button:checked {
+  border-bottom-color: @theme_selected_bg_color;
+}
+stackswitcher > button:not(:checked):hover {
+  border-bottom-color: alpha(@theme_selected_bg_color, .5);
+}
+

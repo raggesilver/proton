@@ -23,46 +23,84 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.Editor : Gtk.SourceView {
 
-    File? file;
-    Gtk.SourceLanguage? language;
+
+public class Proton.Editor : Object {
+
+    public signal void modified(bool is_modified);
 
     private uint id;
-    private Gtk.SourceLanguageManager lm;
+    private string? last_saved_content = null;
+    public Proton.File? file { get; private set; }
+    public bool is_modified { get; private set; default = false; }
 
-    public Editor(uint id, File? file) {
-        Object (show_line_numbers: true,
-                wrap_mode: Gtk.WrapMode.WORD_CHAR);
+    public Gtk.SourceView sview { get; private set; }
+    public Gtk.SourceLanguage language { get; private set; }
 
+    public Gtk.Widget container;
+
+    public Editor (string? path, uint id) {
+        this.sview = new Gtk.SourceView ();
+        this.sview.show ();
         this.id = id;
-        this.file = file;
-        lm = Gtk.SourceLanguageManager.get_default ();
 
-        // TODO handle null files
-        if (file != null)
-            open_file ();
-
-        show_all ();
-    }
-
-    private void open_file() {
-        string content;
-        try {
-            FileUtils.get_contents (file.get_path (), out content);
-            buffer.set_text (content);
-            set_language (null);
-        } catch (GLib.FileError err) {
-            print(err.message);
+        if (path != null) {
+            this.file = new Proton.File (path);
+            open ();
         }
     }
 
-    private void set_language(Gtk.SourceLanguage? _lang) {
-        Gtk.SourceLanguage? lang = _lang;
-        if (lang == null)
-            lang = lm.guess_language (file.get_path (), null);
-        (buffer as Gtk.SourceBuffer).set_language (lang);
-        language = lang;
+    private void _set_language (Gtk.SourceLanguage? _lang) {
+        this.language = _lang;
+
+        if (this.language == null) {
+            var lm = Gtk.SourceLanguageManager.get_default ();
+            this.language = lm.guess_language (file.name,
+                                               file.content_type);
+        }
+
+        (sview.buffer as Gtk.SourceBuffer).set_language (this.language);
+    }
+
+    private void open () {
+        file.read_async.begin ((obj, res) => {
+            string text = file.read_async.end (res);
+            sview.buffer.set_text (text);
+            _set_language (null);
+
+            if (last_saved_content == null) {
+                last_saved_content = text;
+                sview.buffer.changed.connect (update_modified);
+            }
+            else
+                last_saved_content = text;
+        });
+    }
+
+    private void update_modified () {
+        var im = (bool) (get_text () == last_saved_content);
+
+        if (im != is_modified) {
+            is_modified = im;
+            modified (is_modified);
+        }
+    }
+
+    public void save () {
+        string content = get_text ();
+        file.write_async.begin (content, (obj, res) => {
+            file.write_async.end (res);
+            last_saved_content = content;
+            update_modified ();
+            stdout.printf ("File %s saved.\n", file.name);
+        });
+    }
+
+    private string get_text () {
+        Gtk.TextIter s, e;
+        sview.buffer.get_start_iter (out s);
+        sview.buffer.get_end_iter (out e);
+
+        return sview.buffer.get_text (s, e, true);
     }
 }
-

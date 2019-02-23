@@ -24,7 +24,7 @@ Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w) {
     return (s);
 }
 
-[GtkTemplate (ui = "/com/raggesilver/Proton/window.ui")]
+[GtkTemplate (ui = "/com/raggesilver/Proton/layouts/window.ui")]
 public class Proton.Window : Gtk.ApplicationWindow {
 
     // [GtkChild]
@@ -33,24 +33,40 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild]
     Gtk.Stack side_panel_stack;
 
-    // [GtkChild]
-    // Gtk.Stack editor_stack;
+    [GtkChild]
+    Gtk.Stack bottom_panel_stack;
+
+    [GtkChild]
+    Gtk.Stack editor_stack;
+
+    [GtkChild]
+    Gtk.Button save_button;
+
+    private Proton.EditorManager manager;
 
     public Proton.Settings settings;
     public Proton.TreeView tree_view;
+    public GLib.File root;
+    public Gtk.AccelGroup accel_group { get; private set; }
 
-    public Window (Gtk.Application app, File root) {
+    public Window (Gtk.Application app, GLib.File root) {
 
         Object (application: app);
 
         // Initialize stuff
+        accel_group = new Gtk.AccelGroup ();
+        manager = Proton.EditorManager.get_instance ();
         settings = Proton.Settings.get_instance ();
         tree_view = new Proton.TreeView (root);
+        this.root = root;
 
         set_default_size (settings.width,
                           settings.height);
 
-        int x = settings.get_instance ().pos_x;
+        add_accel_group (accel_group);
+        manager.connect_accels (accel_group);
+
+        /* int x = settings.get_instance ().pos_x;
         int y = settings.get_instance ().pos_y;
 
         if (x != -1 && y != -1) {
@@ -59,15 +75,27 @@ public class Proton.Window : Gtk.ApplicationWindow {
             x = (Gdk.Screen.width () - default_width) / 2;
             y = (Gdk.Screen.height () - default_height) / 2;
             move (x, y);
-        }
+        } */
 
         build_ui ();
 
         // Connect events
+        manager.changed.connect (current_editor_changed);
+        save_button.clicked.connect (save_button_clicked);
         tree_view.selected.connect (tree_view_selected);
         delete_event.connect (on_delete);
 
         apply_settings ();
+    }
+
+    private void current_editor_changed (Proton.Editor? ed) {
+        save_button.set_sensitive (false);
+        if (ed != null && ed.file != null)
+            save_button.set_sensitive (true);
+    }
+
+    private void save_button_clicked () {
+        manager.save ();
     }
 
     private void build_ui() {
@@ -75,21 +103,22 @@ public class Proton.Window : Gtk.ApplicationWindow {
                                      "treeview",
                                      "Project");
         side_panel_stack.set_visible_child_name ("treeview");
+        bottom_panel_stack.add_titled (new Proton.Terminal (this),
+                                       "terminal",
+                                       "Terminal");
+        bottom_panel_stack.set_visible_child_name ("terminal");
     }
 
-    private void tree_view_selected(File f) {
-        /*if (f.query_file_type (0) == FileType.DIRECTORY)
+    private void tree_view_selected(GLib.File f) {
+        if (f.query_file_type (0) == FileType.DIRECTORY)
             return ;
 
-        var c = new Proton.Container (wrap_scroller (new Proton.Editor (f)),
-                                      true);
-        editor_stack.add_titled (c, "editor" + f.get_path(), "Editor");
-        editor_stack.set_visible_child (c);
-
-        GLib.Timeout.add(500, () => {
-            c.set_working (false);
-            return false;
-        });*/
+        var editor = Proton.EditorManager.get_instance ().open (f);
+        if (editor_stack.get_child_by_name ("editor" + f.get_path ()) == null)
+            editor_stack.add_titled (editor.sview, "editor" + f.get_path(), "Editor");
+        editor_stack.set_visible_child_name ("editor" + f.get_path());
+        editor.sview.grab_focus ();
+        this.set_title ("Proton - " + editor.file.name);
     }
 
     private bool on_delete() {

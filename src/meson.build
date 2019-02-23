@@ -1,14 +1,22 @@
 proton_sources = [
   'main.vala',
   'window.vala',
+  'utils/File.vala',
   'services/Settings.vala',
+  #'services/PluginManager.vala',
+  'services/Core.vala',
+  'services/EditorManager.vala',
   'widgets/TreeView.vala',
   'widgets/Editor.vala',
   'widgets/Container.vala',
+  'widgets/Terminal.vala',
+  'widgets/LinkedToggler.vala',
 ]
 
 proton_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
+  dependency('gmodule-2.0', version: '>= 2.50'),
+  dependency('vte-2.91', version: '>= 0.55.90'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('gtksourceview-3.0', version: '>= 3.22'),
   dependency('granite')

@@ -23,10 +23,12 @@
  * SPDX-License-Identifier: MIT
  */
 
-
-
 public class Proton.EditorManager : Object {
 
+    public signal void changed(Proton.Editor? editor);
+    public signal void modified(bool is_modified);
+
+    private static Proton.EditorManager? instance = null;
     public Proton.Editor? current_editor;
 
     private GLib.HashTable<string, Proton.Editor> _editors;
@@ -36,13 +38,63 @@ public class Proton.EditorManager : Object {
         }
     }
 
-    public EditorManager() {
+    private EditorManager() {
         _editors = new GLib.HashTable<string, Proton.Editor> (str_hash,
                                                               str_equal);
     }
 
-    Proton.Editor new_editor(File f) {
+    private Proton.Editor new_editor(GLib.File f) {
+        var e = new Proton.Editor(f.get_path (), _editors.size() + 1);
+        e.modified.connect ((is_modified) => {
+            if (current_editor != null && Proton.File.equ(current_editor.file,
+                                                      e.file)) {
+                modified (is_modified);
+            }
+        });
+        e.sview.focus_in_event.connect ((ev) => {
+            current_editor = e;
+            modified (e.is_modified);
+            changed (e);
+            return false;
+        });
+        return e;
+    }
 
+    public Proton.Editor open(GLib.File f) {
+        Proton.Editor? ed = null;
+
+        _editors.foreach((key, val) => {
+            if (val.file != null && val.file.file.equal(f)) {
+                ed = val;
+                return ;
+            }
+        });
+
+        if (ed == null) {
+            ed = new_editor(f);
+            _editors.insert(f.get_path (), ed);
+        }
+        return ed;
+    }
+
+    public static Proton.EditorManager get_instance() {
+        if (instance == null)
+            instance = new Proton.EditorManager ();
+        return instance;
+    }
+
+    public void connect_accels (Gtk.AccelGroup ac) {
+        ac.connect (Gdk.keyval_from_name ("s"),
+                    Gdk.ModifierType.CONTROL_MASK,
+                    0,
+                    save);
+    }
+
+    public bool save () {
+        if (current_editor != null && current_editor.file != null) {
+            current_editor.save ();
+        }
+        return false;
     }
 }
 

@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+namespace Proton {
+    public GLib.File root;
+    public Core core;
+}
+
 int main (string[] args) {
 
     var app = new Gtk.Application ("com.raggesilver.Proton",
@@ -28,6 +33,8 @@ int main (string[] args) {
     app.open.connect ((files, hint) => {
         var win = app.active_window;
         if (win == null) {
+            Proton.root = files[0];
+            Proton.core = Proton.Core.get_instance ();
             win = new Proton.Window (app, files[0]);
         }
         win.present ();
