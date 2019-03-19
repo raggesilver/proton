@@ -37,26 +37,55 @@ public class Proton.Editor : Object {
 
     public Gtk.Widget container;
 
-    public Editor (string? path, uint id) {
-        this.sview = new Gtk.SourceView ();
-        this.sview.show ();
+    public Editor(string? path, uint id) {
+        sview = new Gtk.SourceView();
+        sview.show();
         this.id = id;
 
-        editor_apply_settings ();
+        editor_apply_settings();
 
         if (path != null) {
-            this.file = new Proton.File (path);
-            open ();
+            file = new Proton.File(path);
+            open();
         }
+
+        // TODO make this optional
+        sview.parent_set.connect((_) => {
+
+            // Prevents on window close critical error messages
+            if (sview.parent == null || _ != null)
+                return ;
+
+            Gtk.TextIter it;
+            int lh;
+
+            sview.buffer.get_start_iter(out it);
+            sview.get_line_yrange(it, null, out lh);
+
+            var scroller = this.sview.parent.parent;
+            this.sview.bottom_margin = scroller.get_allocated_height() - lh;
+
+            scroller.size_allocate.connect((a) => {
+                sview.buffer.get_start_iter(out it);
+                sview.get_line_yrange(it, null, out lh);
+                sview.bottom_margin = a.height - lh;
+            });
+        });
     }
 
     // TODO use some actual settings
-    private void editor_apply_settings () {
-        this.sview.set_monospace (true);
-        this.sview.set_insert_spaces_instead_of_tabs (true);
-        this.sview.set_indent_width (4);
-        this.sview.set_smart_backspace (true);
-        this.sview.set_smart_home_end (Gtk.SourceSmartHomeEndType.ALWAYS);
+    private void editor_apply_settings() {
+        sview.set_monospace(true);
+        sview.set_insert_spaces_instead_of_tabs(true);
+        sview.set_indent_width(4);
+        sview.set_smart_backspace(true);
+        sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
+        sview.set_show_line_numbers(true);
+        sview.set_left_margin(5);
+        sview.set_right_margin(5);
+        sview.set_show_right_margin(true);
+        sview.right_margin_position = 80;
+        sview.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
     }
 
     private void _set_language(Gtk.SourceLanguage? _lang) {
