@@ -3,3 +3,8 @@ _build/
 \#*#
 *test*
 _native_build/
+Makefile
+
+src/services/PluginManager.vala
+src/widgets/LinkedToggler.vala
+src/widgets/StatusBox.vala

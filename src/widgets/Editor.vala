@@ -128,14 +128,14 @@ public class Proton.Editor : Object {
         }
     }
 
-    public void save () {
-        string content = get_text ();
-        file.write_async.begin (content, (obj, res) => {
-            file.write_async.end (res);
+    public async bool save() {
+        string content = get_text();
+        bool _saved = yield file.write_async(content);
+        if (_saved) {
             last_saved_content = content;
-            update_modified ();
-            stdout.printf ("File %s saved.\n", file.name);
-        });
+            update_modified();
+        }
+        return (_saved);
     }
 
     private string get_text () {

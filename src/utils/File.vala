@@ -146,6 +146,12 @@ public class Proton.File : Object {
     }
 
     public async string? read_async() {
+
+        if (!exists) {
+            warning(@"File does not exist $(name)");
+            return null;
+        }
+
         try {
             var s = new StringBuilder();
             DataInputStream d = new DataInputStream(file.read());

@@ -12,7 +12,7 @@ Use `flatpak` or `meson` (ninja) to install or compile Proton.
 
 ## Todos <span style="font-size: 10pt">(sorted by importance)</span>
 1. ~~File modified characted on the window title (e.g "Proton - filename.c •")~~
-2. Prevent app quiting when modified editors are still open
+2. ~~Prevent app quiting when modified editors are still open~~
 3. TreeView updates - ongoing
 4. File operations
 	- [ ] New File

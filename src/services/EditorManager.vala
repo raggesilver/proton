@@ -60,7 +60,14 @@ public class Proton.EditorManager : Object {
         string cfg = yield f.read_async();
         // Get the config groups `(...),(...)`
         foreach (string s in cfg.split(",")) {
-            var cfgs = s.replace("(", "").replace(")", "").split(",");
+            var _cfgs = s.replace("(", "").replace(")", "");
+            string[] cfgs;
+
+            if (_cfgs != null)
+                cfgs = _cfgs.split(",");
+            else
+                break ;
+
             if (cfgs.length % 2 != 1) {
                 warning(@"Invalid config $s\n");
                 continue ;
@@ -126,7 +133,7 @@ public class Proton.EditorManager : Object {
 
     public bool save() {
         if (current_editor != null && current_editor.file != null) {
-            current_editor.save();
+            current_editor.save.begin();
         }
         return false;
     }

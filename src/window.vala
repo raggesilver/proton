@@ -163,7 +163,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
         if (f.is_directory)
             return ;
 
-        stdout.printf("window.vala tree_view_selected() reached\n");
         var editor = Proton.EditorManager.get_instance().open(f);
 
         if (editor_stack.get_child_by_name("editor" + f.path) == null) {
@@ -174,7 +173,57 @@ public class Proton.Window : Gtk.ApplicationWindow {
         editor.sview.grab_focus();
     }
 
+    private bool can_close() {
+        int ct = 0;
+
+        foreach (var ed in manager.editors.get_values()) {
+            if (ed.is_modified)
+                ct++;
+        }
+
+        if (ct > 0) {
+
+            var md = new Gtk.MessageDialog(
+                this,
+                Gtk.DialogFlags.MODAL,
+                Gtk.MessageType.WARNING,
+                Gtk.ButtonsType.CANCEL,
+                "Are you sure you want to quit?");
+
+            md.format_secondary_text(
+                @"There are $ct unsaved modified file$((ct > 1) ? "s" : "").");
+            md.add_button("Discard", Gtk.ResponseType.YES);
+            md.add_button("Save all", Gtk.ResponseType.OK);
+
+            var res = md.run();
+            md.destroy();
+
+            if (res == Gtk.ResponseType.CANCEL)
+                return false;
+            else if (res == Gtk.ResponseType.YES)
+                return true;
+            else {
+                save_all_and_close.begin();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private async void save_all_and_close() {
+        foreach (var ed in manager.editors.get_values()) {
+            if (ed.is_modified) {
+                if (!(yield ed.save())) {
+                    stdout.printf("File %s was not saved\n", ed.file.name);
+                    return ;
+                }
+            }
+        }
+        this.destroy();
+    }
+
     private bool on_delete() {
+
         int width, height;
         this.get_size(out width, out height);
         settings.width = width;
@@ -184,6 +233,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
         get_position(out pos_x, out pos_y);
         settings.pos_x = pos_x;
         settings.pos_y = pos_y;
+
+        if (!can_close())
+            return true;
 
         return false;
     }

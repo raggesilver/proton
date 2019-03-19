@@ -142,16 +142,13 @@ public class Proton.TreeView : Gtk.TreeView {
             fullpath = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,
                                             partial,
                                             fullpath);
-            stdout.printf("FP: %s, partial: %s\n", fullpath, partial);
             has_parent = model.iter_parent(out current, current);
         }
 
         // Abspath
         if (this.root == null)
             error("No root");
-        stdout.printf("Root path: %s\n", root.path);
         fullpath = Path.build_filename(root.path, fullpath);
-        stdout.printf("Fullpath: %s\n", fullpath);
         return (new File(fullpath));
     }
 
@@ -159,7 +156,6 @@ public class Proton.TreeView : Gtk.TreeView {
                                  Gtk.TreeIter current)
     {
         // Emit the selected signal
-        stdout.printf("TreeView.vala left_button_clicked_row() reached\n");
         var f = get_file_from_selection(model, current);
         if (f.is_directory) {
             var path = model.get_path(current);
