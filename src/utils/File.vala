@@ -29,15 +29,15 @@ public class Proton.File : Object {
     private GLib.FileInfo info;
 
     public File(string path) {
-        Object (path: path);
+        Object(path: path);
     }
 
     public string path {
         owned get {
-            return file.get_path ();
+            return file.get_path();
         }
         set construct {
-            load_file_for_path (value);
+            load_file_for_path(value);
         }
     }
 
@@ -48,14 +48,14 @@ public class Proton.File : Object {
                 return _name;
             if (info == null)
                 return "";
-            _name = info.get_display_name ();
+            _name = info.get_display_name();
             return _name;
         }
     }
 
     public string content_type {
         get {
-            return info.get_content_type ();
+            return info.get_content_type();
         }
     }
 
@@ -64,22 +64,28 @@ public class Proton.File : Object {
         get {
             if (_icon != null)
                 return _icon;
-            _icon = GLib.ContentType.get_icon (info.get_content_type ());
+            _icon = GLib.ContentType.get_icon(info.get_content_type());
             return _icon;
         }
     }
 
     public bool exists {
-        get { return file.query_exists (); }
+        get { return file.query_exists(); }
+    }
+
+    public bool is_directory {
+        get {
+            return (info.get_file_type() == FileType.DIRECTORY);
+        }
     }
 
     public bool is_valid_textfile {
         get {
-            if (info.get_is_backup ())
+            if (info.get_is_backup())
                 return false;
 
-            if (info.get_file_type () == FileType.REGULAR &&
-                ContentType.is_a (info.get_content_type (), "text/*"))
+            if (info.get_file_type() == FileType.REGULAR &&
+                ContentType.is_a(info.get_content_type(), "text/*"))
                 return true;
 
             return false;
@@ -89,7 +95,7 @@ public class Proton.File : Object {
     public bool is_executable {
         get {
             try {
-                return get_boolean_file_attribute (
+                return get_boolean_file_attribute(
                     GLib.FileAttribute.ACCESS_CAN_EXECUTE);
             } catch (GLib.Error error) {
                 return false;
@@ -98,13 +104,13 @@ public class Proton.File : Object {
     }
 
     private bool get_boolean_file_attribute(string at) throws GLib.Error {
-        var info = file.query_info (at, GLib.FileQueryInfoFlags.NONE);
-        return info.get_attribute_boolean (at);
+        var info = file.query_info(at, GLib.FileQueryInfoFlags.NONE);
+        return info.get_attribute_boolean(at);
     }
 
     private void load_file_for_path(string path) {
-        file = GLib.File.new_for_path (path);
-        info = new FileInfo ();
+        file = GLib.File.new_for_path(path);
+        info = new FileInfo();
 
         try {
             var query = GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," +
@@ -113,60 +119,65 @@ public class Proton.File : Object {
                             GLib.FileAttribute.STANDARD_DISPLAY_NAME + "," +
                             GLib.FileAttribute.STANDARD_TYPE;
 
-            info = file.query_info (query, FileQueryInfoFlags.NONE);
+            info = file.query_info(query, FileQueryInfoFlags.NONE);
         } catch (GLib.Error error) {
             info = null;
-            warning (error.message);
+
+            // Supress error for inexistent file
+            if (error.message.index_of("No such file or directory") == -1)
+                warning(error.message);
         }
     }
 
     public void rename(string name) {
         try {
-            file.set_display_name (name);
+            file.set_display_name(name);
         } catch (GLib.Error error) {
-            warning (error.message);
+            warning(error.message);
         }
     }
 
     public void trash() {
         try {
-            file.trash ();
+            file.trash();
         } catch (GLib.Error error) {
-            warning (error.message);
+            warning(error.message);
         }
     }
 
-    public async string? read_async () {
+    public async string? read_async() {
         try {
-            var s = new StringBuilder ();
-            DataInputStream dis = new DataInputStream (file.read ());
+            var s = new StringBuilder();
+            DataInputStream d = new DataInputStream(file.read());
             string line = null;
 
-            while ((line = yield dis.read_line_async (Priority.DEFAULT)) != null) {
+            while ((line = yield d.read_line_async(Priority.DEFAULT)) != null) {
                 if (s.len != 0)
-                    s.append_c ('\n');
+                    s.append_c('\n');
 
-                s.append (line);
+                s.append(line);
             }
             return s.str;
         } catch (Error e) {
-            warning (e.message);
+            warning(e.message);
             return null;
         }
     }
 
-    public async bool write_async (string text) {
+    public async bool write_async(string text) {
         try {
-            var ios = yield file.replace_readwrite_async (null, false, FileCreateFlags.NONE);
-            var dos = new DataOutputStream (ios.output_stream);
-            return dos.put_string (text);
+            var ios = yield file.replace_readwrite_async(
+                null, false, FileCreateFlags.NONE);
+
+            var dos = new DataOutputStream(ios.output_stream);
+            return dos.put_string(text);
         } catch (Error e) {
-            warning (e.message);
+            warning(e.message);
             return false;
         }
     }
 
-    public static bool equ(Proton.File a, Proton.File b) {
+    public static bool equ(File a, File b) {
         return a.file.equal(b.file);
     }
 }

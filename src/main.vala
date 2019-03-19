@@ -17,28 +17,40 @@
  */
 
 namespace Proton {
-    public GLib.File root;
+    public File root;
     public Core core;
-}
 
-int main (string[] args) {
+    int main (string[] args) {
 
-    var app = new Gtk.Application ("com.raggesilver.Proton",
-        ApplicationFlags.HANDLES_OPEN);
+        var app = Application.instance;
 
-    app.activate.connect (() => {
-        stdout.printf("Provide a directory.\n");
-    });
+        app.activate.connect (() => {
+            // FIXME crete a welcome window
+            stdout.printf("Provide a directory.\n");
+        });
 
-    app.open.connect ((files, hint) => {
-        var win = app.active_window;
-        if (win == null) {
-            Proton.root = files[0];
-            Proton.core = Proton.Core.get_instance ();
-            win = new Proton.Window (app, files[0]);
-        }
-        win.present ();
-    });
+        app.open.connect((files, hint) => {
 
-    return app.run (args);
+            if (files.length != 1) {
+                error("Provide one directory");
+            }
+
+            var f = new File(files[0].get_path());
+
+            if (!f.is_directory) {
+                error("Provide one directory");
+            }
+
+            var win = app.active_window;
+            if (win == null) {
+                root = f;
+                core = Core.get_instance();
+                win = new Window(app);
+            }
+
+            win.show();
+        });
+
+        return app.run (args);
+    }
 }

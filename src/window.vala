@@ -37,98 +37,151 @@ public class Proton.Window : Gtk.ApplicationWindow {
     Gtk.Stack bottom_panel_stack;
 
     [GtkChild]
+    Gtk.Stack bottom_panel_aux_stack;
+
+    [GtkChild]
     Gtk.Stack editor_stack;
 
     [GtkChild]
     Gtk.Button save_button;
 
-    private Proton.EditorManager manager;
+    [GtkChild]
+    Gtk.Button play_button;
 
-    public Proton.Settings settings;
-    public Proton.TreeView tree_view;
-    public GLib.File root;
+    private Proton.EditorManager manager;
+    private TreeView tree_view;
     public Gtk.AccelGroup accel_group { get; private set; }
 
-    public Window (Gtk.Application app, GLib.File root) {
+    public Window (Gtk.Application app) {
 
         Object (application: app);
 
         // Initialize stuff
-        accel_group = new Gtk.AccelGroup ();
-        manager = Proton.EditorManager.get_instance ();
-        settings = Proton.Settings.get_instance ();
-        tree_view = new Proton.TreeView (root);
-        this.root = root;
+        accel_group = new Gtk.AccelGroup();
+        manager = EditorManager.get_instance();
+        tree_view = new TreeView(root);
 
-        set_default_size (settings.width,
-                          settings.height);
+        add_accel_group(accel_group);
+        manager.connect_accels(accel_group);
 
-        add_accel_group (accel_group);
-        manager.connect_accels (accel_group);
+        if (settings.width > 0 && settings.height > 0)
+            resize(settings.width, settings.height);
 
-        /* int x = settings.get_instance ().pos_x;
-        int y = settings.get_instance ().pos_y;
+        if (settings.pos_x > 0 && settings.pos_y > 0)
+            move(settings.pos_x, settings.pos_y);
 
-        if (x != -1 && y != -1) {
-            move (x, y);
-        } else {
-            x = (Gdk.Screen.width () - default_width) / 2;
-            y = (Gdk.Screen.height () - default_height) / 2;
-            move (x, y);
-        } */
-
-        build_ui ();
+        build_ui();
 
         // Connect events
-        manager.changed.connect (current_editor_changed);
-        save_button.clicked.connect (save_button_clicked);
-        tree_view.selected.connect (tree_view_selected);
-        delete_event.connect (on_delete);
+        play_button.set_sensitive(Proton.Core.get_instance().can_play);
+        play_button.clicked.connect(play_button_clicked);
 
-        apply_settings ();
+        Proton.Core.get_instance().play_changed.connect((c) => {
+            set_can_play(c);
+        });
+
+        Proton.Core.get_instance().monitor_changed.connect((f, of, e) => {
+            if (e == GLib.FileMonitorEvent.ATTRIBUTE_CHANGED ||
+                e == GLib.FileMonitorEvent.CHANGED ||
+                e == GLib.FileMonitorEvent.CHANGES_DONE_HINT)
+                return ;
+            stdout.printf("PASSED %s\n", e.to_string());
+            tree_view.refill();
+        });
+
+        manager.changed.connect(current_editor_changed);
+        manager.modified.connect((mod) => {
+            set_title("Proton - " + manager.current_editor.file.name +
+                ((mod) ? " •" : ""));
+        });
+
+        save_button.clicked.connect(save_button_clicked);
+        tree_view.selected.connect(tree_view_selected);
+        delete_event.connect(on_delete);
+
+        apply_settings();
     }
 
-    private void current_editor_changed (Proton.Editor? ed) {
-        save_button.set_sensitive (false);
+    private void set_can_play(bool c) {
+        play_button.set_sensitive(c);
+    }
+
+    private void play_button_clicked() {
+        Terminal? a = null;
+        if ((a = bottom_panel_stack.get_child_by_name("make-term") as Terminal)
+            == null) {
+            bottom_panel_stack.add_titled(new Terminal(this),
+                                          "make-term",
+                                          "Make");
+        }
+        a = (bottom_panel_stack.get_child_by_name("make-term") as Terminal);
+        bottom_panel_stack.set_visible_child_name("make-term");
+        a.feed_child("reset && make\n".to_utf8());
+    }
+
+    private void current_editor_changed(Editor? ed) {
+        save_button.set_sensitive(false);
         if (ed != null && ed.file != null)
-            save_button.set_sensitive (true);
+            save_button.set_sensitive(true);
     }
 
     private void save_button_clicked () {
-        manager.save ();
+        manager.save();
     }
 
     private void build_ui() {
-        side_panel_stack.add_titled (wrap_scroller (tree_view),
-                                     "treeview",
-                                     "Project");
-        side_panel_stack.set_visible_child_name ("treeview");
-        bottom_panel_stack.add_titled (new Proton.Terminal (this),
-                                       "terminal",
-                                       "Terminal");
-        bottom_panel_stack.set_visible_child_name ("terminal");
+        side_panel_stack.add_titled(wrap_scroller(tree_view),
+                                    "treeview",
+                                    "Project");
+
+        side_panel_stack.set_visible_child_name("treeview");
+
+        bottom_panel_stack.add_titled(new Terminal(this),
+                                      "terminal",
+                                      "Terminal");
+
+        bottom_panel_stack.set_visible_child_name("terminal");
+
+        bottom_panel_stack.notify.connect((spec) => {
+            if (spec.name != "visible-child-name")
+                return ;
+
+            stdout.printf("CHANGE VIEW TO %s\n",
+                bottom_panel_stack.visible_child_name);
+
+            Gtk.Widget? child = bottom_panel_aux_stack.get_child_by_name(
+                bottom_panel_stack.visible_child_name);
+
+            if (child != null)
+                bottom_panel_aux_stack.set_visible_child(child);
+            else
+                bottom_panel_aux_stack.set_visible_child_name("empty");
+        });
     }
 
-    private void tree_view_selected(GLib.File f) {
-        if (f.query_file_type (0) == FileType.DIRECTORY)
+    private void tree_view_selected(File f) {
+        if (f.is_directory)
             return ;
 
-        var editor = Proton.EditorManager.get_instance ().open (f);
-        if (editor_stack.get_child_by_name ("editor" + f.get_path ()) == null)
-            editor_stack.add_titled (editor.sview, "editor" + f.get_path(), "Editor");
-        editor_stack.set_visible_child_name ("editor" + f.get_path());
-        editor.sview.grab_focus ();
-        this.set_title ("Proton - " + editor.file.name);
+        stdout.printf("window.vala tree_view_selected() reached\n");
+        var editor = Proton.EditorManager.get_instance().open(f);
+
+        if (editor_stack.get_child_by_name("editor" + f.path) == null) {
+            editor_stack.add_titled(editor.sview, @"editor$(f.path)", "Editor");
+        }
+
+        editor_stack.set_visible_child_name("editor" + f.path);
+        editor.sview.grab_focus();
     }
 
     private bool on_delete() {
         int width, height;
-        this.get_size (out width, out height);
+        this.get_size(out width, out height);
         settings.width = width;
         settings.height = height;
 
         int pos_x, pos_y;
-        get_position (out pos_x, out pos_y);
+        get_position(out pos_x, out pos_y);
         settings.pos_x = pos_x;
         settings.pos_y = pos_y;
 
@@ -136,12 +189,14 @@ public class Proton.Window : Gtk.ApplicationWindow {
     }
 
     public void apply_settings() {
-        var css_provider = new Gtk.CssProvider ();
-		css_provider.load_from_resource ("/com/raggesilver/Proton/resources/style.css");
+        var css_provider = new Gtk.CssProvider();
+        css_provider.load_from_resource(
+            "/com/raggesilver/Proton/resources/style.css");
 
-		Gtk.StyleContext.add_provider_for_screen (
-			Gdk.Screen.get_default (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-		);
+        Gtk.StyleContext.add_provider_for_screen (
+            Gdk.Screen.get_default(),
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }
 

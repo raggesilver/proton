@@ -3,6 +3,7 @@
 .bg-transparent { background: transparent; }
 
 button { outline: 0; }
+button.slim-button { padding-left: 1px; padding-right: 1px; }
 
 stackswitcher > button {
 	background: transparent;

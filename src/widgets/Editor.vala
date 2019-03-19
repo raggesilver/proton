@@ -23,8 +23,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-
-
 public class Proton.Editor : Object {
 
     public signal void modified(bool is_modified);
@@ -44,22 +42,36 @@ public class Proton.Editor : Object {
         this.sview.show ();
         this.id = id;
 
+        editor_apply_settings ();
+
         if (path != null) {
             this.file = new Proton.File (path);
             open ();
         }
     }
 
-    private void _set_language (Gtk.SourceLanguage? _lang) {
+    // TODO use some actual settings
+    private void editor_apply_settings () {
+        this.sview.set_monospace (true);
+        this.sview.set_insert_spaces_instead_of_tabs (true);
+        this.sview.set_indent_width (4);
+        this.sview.set_smart_backspace (true);
+        this.sview.set_smart_home_end (Gtk.SourceSmartHomeEndType.ALWAYS);
+    }
+
+    private void _set_language(Gtk.SourceLanguage? _lang) {
         this.language = _lang;
 
         if (this.language == null) {
-            var lm = Gtk.SourceLanguageManager.get_default ();
-            this.language = lm.guess_language (file.name,
-                                               file.content_type);
+            var lm = Gtk.SourceLanguageManager.get_default();
+            this.language = lm.guess_language(file.name,
+                                              file.content_type);
         }
 
-        (sview.buffer as Gtk.SourceBuffer).set_language (this.language);
+        if (this.language != null && this.language.get_name() == "Makefile")
+            this.sview.set_insert_spaces_instead_of_tabs(false);
+        // if (this.language != null)
+        (sview.buffer as Gtk.SourceBuffer).set_language(this.language);
     }
 
     private void open () {
@@ -70,6 +82,7 @@ public class Proton.Editor : Object {
 
             if (last_saved_content == null) {
                 last_saved_content = text;
+                stdout.printf ("Connected modified signal\n");
                 sview.buffer.changed.connect (update_modified);
             }
             else
@@ -78,7 +91,7 @@ public class Proton.Editor : Object {
     }
 
     private void update_modified () {
-        var im = (bool) (get_text () == last_saved_content);
+        var im = (bool) (get_text () != last_saved_content);
 
         if (im != is_modified) {
             is_modified = im;

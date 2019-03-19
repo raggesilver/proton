@@ -27,21 +27,31 @@ public class Proton.Core : Object {
 
     private static Proton.Core? instance = null;
     private FileMonitor? monitor;
+    private GLib.File makefile;
+    public bool can_play { get; private set; default = false; }
 
+    public signal void play_changed(bool p);
     public signal void monitor_changed(GLib.File f,
                                        GLib.File? other,
                                        FileMonitorEvent e);
 
     private Core() {
         try {
-            monitor = Proton.root.monitor_directory (FileMonitorFlags.NONE,
-                                                     null);
-            monitor.changed.connect ((f, of, e) => {
-                monitor_changed (f, of, e);
+            makefile = GLib.File.new_for_path(root.path + "/Makefile");
+            check_can_play();
+            monitor = root.file.monitor_directory(FileMonitorFlags.NONE, null);
+            monitor.changed.connect((f, of, e) => {
+                monitor_changed(f, of, e);
+                check_can_play();
             });
         } catch(GLib.Error error) {
-            warning (error.message);
+            warning(error.message);
         }
+    }
+
+    private void check_can_play() {
+        this.can_play = makefile.query_exists ();
+        this.play_changed(this.can_play);
     }
 
     public static Proton.Core get_instance() {

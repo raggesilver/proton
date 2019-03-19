@@ -25,46 +25,79 @@
 
 public class Proton.EditorManager : Object {
 
-    public signal void changed(Proton.Editor? editor);
+    public signal void changed(Editor? editor);
     public signal void modified(bool is_modified);
 
-    private static Proton.EditorManager? instance = null;
-    public Proton.Editor? current_editor;
+    private static EditorManager? instance = null;
+    public Editor? current_editor;
 
-    private GLib.HashTable<string, Proton.Editor> _editors;
-    public GLib.HashTable<string, Proton.Editor> editors {
+    private HashTable<string, HashTable<string, string>> configs;
+    private HashTable<string, Editor> _editors;
+    public HashTable<string, Editor> editors {
         get {
             return _editors;
         }
     }
 
+    private bool has_editorconfig;
+
     private EditorManager() {
-        _editors = new GLib.HashTable<string, Proton.Editor> (str_hash,
-                                                              str_equal);
+        _editors = new HashTable<string, Editor> (str_hash, str_equal);
+
+        configs = new HashTable<string, HashTable<string, string>>
+            (str_hash, str_equal);
+
+        conf();
     }
 
-    private Proton.Editor new_editor(GLib.File f) {
-        var e = new Proton.Editor(f.get_path (), _editors.size() + 1);
-        e.modified.connect ((is_modified) => {
-            if (current_editor != null && Proton.File.equ(current_editor.file,
-                                                      e.file)) {
-                modified (is_modified);
+    public void conf() {
+        var f = new File(@"$(root.path)/.protonconfig");
+        has_editorconfig = f.exists;
+        apply_config.begin(f);
+    }
+
+    async void apply_config(File f) {
+        string cfg = yield f.read_async();
+        // Get the config groups `(...),(...)`
+        foreach (string s in cfg.split(",")) {
+            var cfgs = s.replace("(", "").replace(")", "").split(",");
+            if (cfgs.length % 2 != 1) {
+                warning(@"Invalid config $s\n");
+                continue ;
+            }
+            var ht = new HashTable<string, string>(str_hash, str_equal);
+            configs.insert(cfgs[0], ht);
+            for (var i = 1; i < cfgs.length; i += 2)
+                ht.insert(cfgs[i], cfgs[i + 1]);
+        }
+    }
+
+    private Editor new_editor(File f) {
+        var e = new Editor(f.path, _editors.size() + 1);
+
+        e.modified.connect((is_modified) => {
+            if (current_editor != null &&
+                File.equ(current_editor.file, e.file))
+            {
+                modified(is_modified);
             }
         });
+
         e.sview.focus_in_event.connect ((ev) => {
             current_editor = e;
             modified (e.is_modified);
             changed (e);
             return false;
         });
+
         return e;
     }
 
-    public Proton.Editor open(GLib.File f) {
-        Proton.Editor? ed = null;
+    public Editor open(File f) {
+        Editor? ed = null;
 
         _editors.foreach((key, val) => {
-            if (val.file != null && val.file.file.equal(f)) {
+            if (val.file != null && File.equ(f, val.file)) {
                 ed = val;
                 return ;
             }
@@ -72,27 +105,28 @@ public class Proton.EditorManager : Object {
 
         if (ed == null) {
             ed = new_editor(f);
-            _editors.insert(f.get_path (), ed);
+            _editors.insert(f.path, ed);
         }
+
         return ed;
     }
 
-    public static Proton.EditorManager get_instance() {
+    public static EditorManager get_instance() {
         if (instance == null)
-            instance = new Proton.EditorManager ();
+            instance = new EditorManager ();
         return instance;
     }
 
-    public void connect_accels (Gtk.AccelGroup ac) {
+    public void connect_accels(Gtk.AccelGroup ac) {
         ac.connect (Gdk.keyval_from_name ("s"),
                     Gdk.ModifierType.CONTROL_MASK,
                     0,
                     save);
     }
 
-    public bool save () {
+    public bool save() {
         if (current_editor != null && current_editor.file != null) {
-            current_editor.save ();
+            current_editor.save();
         }
         return false;
     }

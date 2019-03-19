@@ -1,4 +1,4 @@
-/* Terminal.vala
+/* application.vala
  *
  * Copyright 2019 Paulo Queiroz <pvaqueiroz@gmail.com>
  *
@@ -23,40 +23,31 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.Terminal : Vte.Terminal {
-    private string shell;
-    public weak Proton.Window window { get; construct; }
+namespace Proton {
+    public Settings settings;
+}
 
-    public Terminal(Proton.Window _window) {
-        Object (window: _window,
-                allow_bold: true,
-                allow_hyperlink: true);
+public class Proton.Application : Gtk.Application {
 
-        shell = GLib.Environ.get_variable(GLib.Environ.get(), "SHELL");
-        string[] shell_arr = {shell};
+    construct {
+        flags |= ApplicationFlags.HANDLES_OPEN;
+        // TODO man up and use command line
+        // flags |= ApplicationFlags.HANDLES_COMMAND_LINE;
 
-        stdout.printf("Shell: %s\n", shell);
+        application_id = "com.raggesilver.Proton";
+    }
 
-        try {
-            spawn_sync(Vte.PtyFlags.DEFAULT,
-                       root.path,
-                       shell_arr,
-                       {},
-                       GLib.SpawnFlags.DO_NOT_REAP_CHILD,
-                       null,
-                       null);
-        } catch (GLib.Error error) {
-            warning(error.message);
+    private Application() {
+        settings = Proton.Settings.get_instance ();
+    }
+
+    public static Application _instance = null;
+    public static Application  instance {
+        get {
+            if (_instance == null)
+                _instance = new Application ();
+            return _instance;
         }
-
-        window.style_updated.connect(set_bg);
-        set_bg();
-        show();
     }
 
-    private void set_bg() {
-        Gdk.RGBA c;
-        window.get_style_context().lookup_color("theme_base_color", out c);
-        set_color_background(c);
-    }
 }

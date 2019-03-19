@@ -1,3 +1,5 @@
 _build/
 *.*~
 \#*#
+*test*
+_native_build/
