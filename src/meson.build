@@ -32,13 +32,16 @@ proton_sources = [
   'widgets/LinkedToggler.vala',
 ]
 
+vala_compiler = meson.get_compiler('vala')
+
 proton_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gmodule-2.0', version: '>= 2.50'),
   dependency('vte-2.91', version: '>= 0.54.1'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('gtksourceview-3.0', version: '>= 3.22'),
-  dependency('granite') # this ain't no elementary app ok babydora?
+  dependency('granite'), # this ain't no elementary app ok babydora?
+  vala_compiler.find_library('posix'),
 ]
 
 gnome = import('gnome')

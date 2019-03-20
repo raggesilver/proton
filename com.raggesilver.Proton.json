@@ -10,6 +10,7 @@
         "--socket=x11",
         "--socket=wayland",
         "--filesystem=host",
+        "--filesystem=home",
         "--filesystem=xdg-run/dconf",
         "--filesystem=~/.config/dconf:ro",
         "--talk-name=ca.desrt.dconf",
@@ -65,6 +66,19 @@
                 }
             ]
     	},
+    	{
+            "name": "toolbox",
+            "buildsystem": "simple",
+            "build-commands": [
+                "gcc -static -o /app/bin/flatpak-toolbox toolbox.c"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "path": "src/extra/toolbox.c"
+                }
+            ]
+        },
         {
             "name": "libeditorconfig",
             "buildsystem": "cmake",
