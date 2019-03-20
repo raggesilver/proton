@@ -2,6 +2,7 @@ proton_sources = [
   'main.vala',
   'window.vala',
   'application.vala',
+  'open_window.vala',
   'utils/File.vala',
   'services/Settings.vala',
   #'services/PluginManager.vala',
@@ -20,7 +21,7 @@ proton_deps = [
   dependency('vte-2.91', version: '>= 0.54.1'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('gtksourceview-3.0', version: '>= 3.22'),
-  dependency('granite')
+  dependency('granite') # this ain't no elementary app ok babydora?
 ]
 
 gnome = import('gnome')

@@ -26,7 +26,8 @@ namespace Proton {
 
         app.activate.connect (() => {
             // FIXME crete a welcome window
-            stdout.printf("Provide a directory.\n");
+            var win = new Proton.OpenWindow(app);
+            win.show();
         });
 
         app.open.connect((files, hint) => {

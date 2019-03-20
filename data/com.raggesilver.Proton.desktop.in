@@ -1,7 +1,8 @@
 [Desktop Entry]
-Name=proton
+Name=Proton
 Exec=proton
 Terminal=false
+Icon=com.raggesilver.Proton
 Type=Application
 Categories=GTK;
 StartupNotify=true

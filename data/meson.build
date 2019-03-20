@@ -1,3 +1,5 @@
+subdir('icons')
+
 desktop_file = i18n.merge_file(
   input: 'com.raggesilver.Proton.desktop.in',
   output: 'com.raggesilver.Proton.desktop',

@@ -26,5 +26,10 @@
 	    <summary>Y Pos</summary>
 	    <description>Y Pos</description>
 	  </key>
+      <key name="recent-projects" type="as">
+	    <default>[]</default>
+	    <summary>Recent projects path</summary>
+	    <description>Recent projects path</description>
+	  </key>
 	</schema>
 </schemalist>

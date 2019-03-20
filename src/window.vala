@@ -191,7 +191,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
                 "Are you sure you want to quit?");
 
             md.format_secondary_text(
-                @"There are $ct unsaved modified file$((ct > 1) ? "s" : "").");
+                @"There are $ct unsaved file$((ct > 1) ? "s" : "").");
             md.add_button("Discard", Gtk.ResponseType.YES);
             md.add_button("Save all", Gtk.ResponseType.OK);
 

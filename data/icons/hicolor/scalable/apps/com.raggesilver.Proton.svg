@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866668"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 5da689c313, 2019-01-14"
+   sodipodi:docname="com.raggesilver.Proton.svg">
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient838">
+      <stop
+         style="stop-color:#885ead;stop-opacity:1"
+         offset="0"
+         id="stop834" />
+      <stop
+         style="stop-color:#551a8b;stop-opacity:1"
+         offset="1"
+         id="stop836" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient838"
+       id="linearGradient840"
+       x1="16.933334"
+       y1="265.25"
+       x2="16.933334"
+       y2="294.88333"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#232323"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="7.9195959"
+     inkscape:cx="61.523798"
+     inkscape:cy="58.742968"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     units="px"
+     inkscape:window-width="3840"
+     inkscape:window-height="2002"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid815"
+       spacingx="2.1166667"
+       spacingy="2.1166667"
+       originx="0"
+       originy="0"
+       empspacing="4"
+       color="#aeaeae"
+       opacity="0.08235294"
+       empcolor="#aeaeae"
+       empopacity="0.25098039" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-263.13333)">
+    <circle
+       style="fill:#dedede;fill-opacity:1;stroke-width:0.26458335"
+       id="path817"
+       cx="16.933334"
+       cy="280.06665"
+       r="16.933334" />
+    <circle
+       style="fill:url(#linearGradient840);fill-opacity:1;stroke-width:0.26458335"
+       id="path817-3"
+       cx="16.933334"
+       cy="280.06665"
+       r="14.2875" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:9.15001869px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.22875045"
+       x="6.8341732"
+       y="310.60568"
+       id="text844"
+       transform="scale(1.0930188,0.91489734)"><tspan
+         sodipodi:role="line"
+         id="tspan842"
+         x="6.8341732"
+         y="318.70129"
+         style="font-size:15.04179096px;line-height:11.43752289px;fill:#ffffff;stroke-width:0.22875045" /></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:19.38588142px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#dedede;fill-opacity:1;stroke:none;stroke-width:0.48464707;"
+       x="7.254591"
+       y="285.91644"
+       id="text852"><tspan
+         sodipodi:role="line"
+         id="tspan850"
+         x="7.254591"
+         y="285.91644"
+         style="fill:#dedede;stroke-width:0.48464707;fill-opacity:1;">🛠</tspan></text>
+  </g>
+</svg>

@@ -32,6 +32,7 @@ public class Proton.Settings : Granite.Services.Settings {
     public int height { get; set; }
     public int pos_x { get; set; }
     public int pos_y { get; set; }
+    public string[] recent_projects { get; set; }
 
     private Settings() {
         base ("com.raggesilver.Proton");
@@ -43,5 +44,16 @@ public class Proton.Settings : Granite.Services.Settings {
         return instance;
     }
 
+    public void add_recent(string s) {
+        string[] _recent = {};
+        _recent += s;
+        foreach (var item in recent_projects) {
+            if (!(item in _recent))
+                _recent += item;
+            if (_recent.length >= 5)
+                break ;
+        }
+        recent_projects = _recent;
+    }
 }
 

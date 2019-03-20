@@ -20,8 +20,15 @@ Use `flatpak` or `meson` (ninja) to install or compile Proton.
 	- [ ] Rename
 	- [ ] Move
 	- [ ] Delete
-5. Open project
+5. ~~Open project~~
+    - Working on new widget `OpenWindow`*
+    - Clone repo - pending
+    - New project - ongoing
+    - Open project - done
 6. Run project
 7. Command palette
 8. Preferences menu
 9. Plugins
+
+*screenshot
+![preview](https://imgur.com/axVOeZv.png)

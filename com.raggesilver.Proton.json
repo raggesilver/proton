@@ -10,15 +10,12 @@
         "--socket=x11",
         "--socket=wayland",
         "--filesystem=host",
-        "--filesystem=home",
         "--filesystem=xdg-run/dconf",
         "--filesystem=~/.config/dconf:ro",
         "--talk-name=ca.desrt.dconf",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
-    "x-run-args": [
-        "Projects/proton"
-    ],
+    "x-run-args": [],
     "build-options": {
         "cflags": "-O2 -g",
         "cxxflags": "-O2 -g",
