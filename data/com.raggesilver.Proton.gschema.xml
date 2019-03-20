@@ -31,5 +31,25 @@
 	    <summary>Recent projects path</summary>
 	    <description>Recent projects path</description>
 	  </key>
+      <key name="bottom-panel-height" type="i">
+	    <default>200</default>
+	    <summary>Bottom panel height</summary>
+	    <description>Bottom panel height</description>
+	  </key>
+      <key name="bottom-panel-visible" type="b">
+	    <default>false</default>
+	    <summary>Bottom panel visible</summary>
+	    <description>Bottom panel visible</description>
+	  </key>
+      <key name="left-panel-width" type="i">
+	    <default>200</default>
+	    <summary>Left panel width</summary>
+	    <description>Left panel width</description>
+	  </key>
+      <key name="left-panel-visible" type="b">
+	    <default>false</default>
+	    <summary>Left panel visible</summary>
+	    <description>Left panel visible</description>
+	  </key>
 	</schema>
 </schemalist>

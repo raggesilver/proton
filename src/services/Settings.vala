@@ -33,6 +33,10 @@ public class Proton.Settings : Granite.Services.Settings {
     public int pos_x { get; set; }
     public int pos_y { get; set; }
     public string[] recent_projects { get; set; }
+    public int bottom_panel_height { get; set; }
+    public int left_panel_width { get; set; }
+    public bool bottom_panel_visible { get; set; }
+    public bool left_panel_visible { get; set; }
 
     private Settings() {
         base ("com.raggesilver.Proton");

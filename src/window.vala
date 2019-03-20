@@ -48,6 +48,18 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild]
     Gtk.Button play_button;
 
+    [GtkChild]
+    Gtk.Box bottom_box;
+
+    [GtkChild]
+    Gtk.Box side_panel_box;
+
+    [GtkChild]
+    Gtk.Paned editor_paned;
+
+    [GtkChild]
+    Gtk.Paned outer_paned;
+
     private Proton.EditorManager manager;
     private TreeView tree_view;
     public Gtk.AccelGroup accel_group { get; private set; }
@@ -100,6 +112,32 @@ public class Proton.Window : Gtk.ApplicationWindow {
         delete_event.connect(on_delete);
 
         apply_settings();
+
+        bind_accels();
+    }
+
+    private void bind_accels() {
+        accel_group.connect(Gdk.Key.grave,
+                            Gdk.ModifierType.CONTROL_MASK,
+                            0,
+                            toggle_bottom_panel);
+
+        accel_group.connect(Gdk.Key.b,
+                            Gdk.ModifierType.CONTROL_MASK,
+                            0,
+                            toggle_left_panel);
+    }
+
+    public bool toggle_left_panel() {
+        settings.left_panel_visible = !settings.left_panel_visible;
+        side_panel_box.set_visible(settings.left_panel_visible);
+        return false;
+    }
+
+    public bool toggle_bottom_panel() {
+        settings.bottom_panel_visible = !settings.bottom_panel_visible;
+        bottom_box.set_visible(settings.bottom_panel_visible);
+        return false;
     }
 
     private void set_can_play(bool c) {
@@ -157,6 +195,12 @@ public class Proton.Window : Gtk.ApplicationWindow {
             else
                 bottom_panel_aux_stack.set_visible_child_name("empty");
         });
+
+        side_panel_box.set_visible(settings.left_panel_visible);
+        bottom_box.set_visible(settings.bottom_panel_visible);
+
+        bottom_box.set_size_request(-1, settings.bottom_panel_height);
+        outer_paned.set_position(settings.left_panel_width);
     }
 
     private void tree_view_selected(File f) {
@@ -233,6 +277,12 @@ public class Proton.Window : Gtk.ApplicationWindow {
         get_position(out pos_x, out pos_y);
         settings.pos_x = pos_x;
         settings.pos_y = pos_y;
+
+        int bph = editor_paned.get_allocated_height()
+            - editor_paned.get_position();
+        settings.bottom_panel_height = bph;
+
+        settings.left_panel_width = outer_paned.get_position();
 
         if (!can_close())
             return true;
