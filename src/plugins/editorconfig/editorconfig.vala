@@ -19,16 +19,54 @@
  */
 
 private class Editorconfig : Object, Proton.PluginIface {
-	public void do_register(Proton.PluginLoader loader) {
-        print ("Loaded\n");
-	}
+    public void do_register(Proton.PluginLoader loader) {
+        print("Editorconfig registered\n");
+
+        loader.editor_changed.connect((ed) => {
+
+            if (ed == null || ed.file == null)
+                return ;
+
+            var handler = new EditorConfig.Handle();
+            if (handler.parse(ed.file.path) != 0) {
+                print("Could not parse file %s\n", ed.file.name);
+                return ;
+            }
+
+            int j = handler.get_name_value_count();
+            for (int i = 0; i < j; i++) {
+                string name, val;
+                handler.get_name_value(i, out name, out val);
+
+                switch (name) {
+                    case "indent_style":
+                        ed.sview.set_insert_spaces_instead_of_tabs(
+                            val == "space");
+                        break;
+
+                    case "tab_width":
+                    case "indent_size":
+                        ed.sview.set_indent_width(int.parse(val));
+                        break;
+
+                    case "max_line_length":
+                        ed.sview.right_margin_position = int.parse(val);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+        });
+    }
 
     public void activate() {
-    	print ("Activate\n");
+        print("Activate\n");
     }
 
     public void deactivate() {
-    	print ("Deactivate");
+        print("Deactivate\n");
     }
 }
 

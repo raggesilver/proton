@@ -10,6 +10,9 @@ Proton is a simple text editor, soon-to-be IDE.
 ## Compile / Install
 Use `flatpak` or `meson` (ninja) to install or compile Proton.
 
+## Features worth sharing
+- Editorconfig plugin
+
 ## Todos <span style="font-size: 10pt">(sorted by importance)</span>
 1. ~~File modified characted on the window title (e.g "Proton - filename.c •")~~
 2. ~~Prevent app quiting when modified editors are still open~~
@@ -23,12 +26,15 @@ Use `flatpak` or `meson` (ninja) to install or compile Proton.
 5. ~~Open project~~
     - Working on new widget `OpenWindow`*
     - Clone repo - pending
-    - New project - ongoing
+    - New project - pending
     - Open project - done
 6. Run project
 7. Command palette
 8. Preferences menu
-9. Plugins
+9. ~~Plugins~~
+    - Basic suport for loading plugins added
+    - Plugins have to be compiled with `proton` (more or less)
+    - Plugins need "portals" to access the main components
 
 *screenshot
 ![preview](https://imgur.com/axVOeZv.png)

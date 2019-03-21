@@ -53,6 +53,11 @@ public class Proton.PluginLoader : Object {
     private PluginIface[] plugins = {};
     private PluginInfo[] infos = {};
 
+    public signal void editor_changed(Editor? ed);
+
+    public PluginLoader() {
+    }
+
     public PluginIface load(string path) throws PluginError {
         if (!Module.supported()) {
             throw new PluginError.NOT_SUPPORTED("Plugins are not supported");

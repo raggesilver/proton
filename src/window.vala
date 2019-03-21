@@ -89,6 +89,11 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         try {
             PluginLoader loader = new PluginLoader();
+
+            manager.changed.connect((e) => {
+                loader.editor_changed(e);
+            });
+
             PluginIface plugin = loader.load(Constants.PLUGINDIR + "/editorconfig/libeditorconfig");
             plugin.activate();
         } catch (PluginError e) {
