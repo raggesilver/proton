@@ -13,6 +13,34 @@
       </row>
     </data>
   </object>
+  <object class="GtkFileFilter" id="filefilter1">
+    <mime-types>
+      <mime-type>folder</mime-type>
+    </mime-types>
+  </object>
+  <object class="GtkListStore" id="languages_list_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0">C</col>
+      </row>
+      <row>
+        <col id="0">JavaScript</col>
+      </row>
+      <row>
+        <col id="0">Vala</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Python</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Other</col>
+      </row>
+    </data>
+  </object>
   <template class="ProtonOpenWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
@@ -79,7 +107,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="version_label">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
@@ -880,32 +908,4 @@
       <class name="inset"/>
     </style>
   </template>
-  <object class="GtkFileFilter" id="filefilter1">
-    <mime-types>
-      <mime-type>folder</mime-type>
-    </mime-types>
-  </object>
-  <object class="GtkListStore" id="languages_list_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0">C</col>
-      </row>
-      <row>
-        <col id="0">JavaScript</col>
-      </row>
-      <row>
-        <col id="0">Vala</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Python</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Other</col>
-      </row>
-    </data>
-  </object>
 </interface>

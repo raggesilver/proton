@@ -40,6 +40,9 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
     Gtk.Label no_recent_label;
 
     [GtkChild]
+    Gtk.Label version_label;
+
+    [GtkChild]
     Gtk.Box recent_box;
 
     [GtkChild]
@@ -115,6 +118,8 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
             Gdk.Screen.get_default(),
             css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+        version_label.set_text(@"Version $(Constants.VERSION)");
     }
 
     private Gtk.Button new_recent_row(File f) {
