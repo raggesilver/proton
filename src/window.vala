@@ -45,6 +45,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
     Gtk.Stack editor_stack;
 
     [GtkChild]
+    Gtk.Button preferences_button;
+
+    [GtkChild]
     Gtk.Button save_button;
 
     [GtkChild]
@@ -65,6 +68,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
     private Proton.EditorManager manager;
     private TreeView tree_view;
     public Gtk.AccelGroup accel_group { get; private set; }
+    private PreferencesWindow preferences_window = null;
     // private PluginManager pm;
 
     public Window (Gtk.Application app) {
@@ -125,10 +129,20 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         save_button.clicked.connect(save_button_clicked);
         tree_view.selected.connect(tree_view_selected);
+
+        preferences_button.clicked.connect(() => {
+            if (preferences_window == null) {
+                preferences_window = new PreferencesWindow(this.application);
+                preferences_window.delete_event.connect(() => {
+                    preferences_window = null;
+                    return false;
+                });
+            }
+            preferences_window.show();
+        });
+
         delete_event.connect(on_delete);
-
         apply_settings();
-
         bind_accels();
     }
 

@@ -43,6 +43,7 @@ public class Proton.Editor : Object {
         this.id = id;
 
         editor_apply_settings();
+        update_ui();
 
         if (path != null) {
             file = new Proton.File(path);
@@ -71,6 +72,12 @@ public class Proton.Editor : Object {
                 sview.bottom_margin = a.height - lh;
             });
         });
+    }
+
+    public void update_ui() {
+        (sview.buffer as Gtk.SourceBuffer).style_scheme =
+            Gtk.SourceStyleSchemeManager.get_default()
+                .get_scheme(settings.style_id);
     }
 
     // TODO use some actual settings

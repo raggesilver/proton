@@ -44,6 +44,17 @@ public class Proton.EditorManager : Object {
 
         configs = new HashTable<string, HashTable<string, string>>
             (str_hash, str_equal);
+
+        var mgr = Gtk.SourceStyleSchemeManager.get_default();
+        mgr.append_search_path(
+            Environment.get_home_dir() + "/.local/share/gtksourceview-4/styles");
+
+        settings.notify.connect((p) => {
+            print("%s\n", p.get_name());
+            if (p.get_name() == "style-id") {
+                update_ui();
+            }
+        });
     }
 
     private Editor new_editor(File f) {
@@ -103,6 +114,12 @@ public class Proton.EditorManager : Object {
             current_editor.save.begin();
         }
         return false;
+    }
+
+    public void update_ui() {
+        _editors.foreach((_, val) => {
+            val.update_ui();
+        });
     }
 }
 

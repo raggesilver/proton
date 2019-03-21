@@ -51,5 +51,10 @@
 	    <summary>Left panel visible</summary>
 	    <description>Left panel visible</description>
 	  </key>
+      <key name="style-id" type="s">
+	    <default>'classic'</default>
+	    <summary>Style scheme id</summary>
+	    <description>Style scheme id</description>
+	  </key>
 	</schema>
 </schemalist>
