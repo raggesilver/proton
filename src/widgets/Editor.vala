@@ -82,18 +82,20 @@ public class Proton.Editor : Object {
 
     // TODO use some actual settings
     private void editor_apply_settings() {
-        sview.set_monospace(true);
-        sview.set_auto_indent(true);
-        sview.set_insert_spaces_instead_of_tabs(true);
-        sview.set_indent_width(4);
-        sview.set_smart_backspace(true);
-        sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
-        sview.set_show_line_numbers(true);
+        sview.set_tab_width(4);
         sview.set_left_margin(5);
         sview.set_right_margin(5);
+        sview.set_indent_width(4);
+        sview.set_monospace(true);
+        sview.set_auto_indent(true);
+        sview.set_smart_backspace(true);
+        sview.set_show_line_numbers(true);
         sview.set_show_right_margin(true);
+        sview.set_indent_on_tab(true);
         sview.right_margin_position = 80;
         sview.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
+        sview.set_insert_spaces_instead_of_tabs(true);
+        sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
     }
 
     private void _set_language(Gtk.SourceLanguage? _lang) {
@@ -111,28 +113,29 @@ public class Proton.Editor : Object {
         (sview.buffer as Gtk.SourceBuffer).set_language(this.language);
     }
 
-    private void open () {
-        file.read_async.begin ((obj, res) => {
-            string text = file.read_async.end (res);
-            sview.buffer.set_text (text);
-            _set_language (null);
+    private void open() {
+        file.read_async.begin((obj, res) => {
+            string text = file.read_async.end(res);
+            (sview.buffer as Gtk.SourceBuffer).begin_not_undoable_action();
+            sview.buffer.set_text(text);
+            (sview.buffer as Gtk.SourceBuffer).end_not_undoable_action();
+            _set_language(null);
 
             if (last_saved_content == null) {
                 last_saved_content = text;
-                stdout.printf ("Connected modified signal\n");
-                sview.buffer.changed.connect (update_modified);
+                sview.buffer.changed.connect(update_modified);
             }
             else
                 last_saved_content = text;
         });
     }
 
-    private void update_modified () {
-        var im = (bool) (get_text () != last_saved_content);
+    private void update_modified() {
+        var im = (bool) (get_text() != last_saved_content);
 
         if (im != is_modified) {
             is_modified = im;
-            modified (is_modified);
+            modified(is_modified);
         }
     }
 
@@ -146,11 +149,11 @@ public class Proton.Editor : Object {
         return (_saved);
     }
 
-    private string get_text () {
+    private string get_text() {
         Gtk.TextIter s, e;
-        sview.buffer.get_start_iter (out s);
-        sview.buffer.get_end_iter (out e);
+        sview.buffer.get_start_iter(out s);
+        sview.buffer.get_end_iter(out e);
 
-        return sview.buffer.get_text (s, e, true);
+        return (sview.buffer.get_text(s, e, true));
     }
 }

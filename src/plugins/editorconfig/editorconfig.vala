@@ -40,11 +40,14 @@ private class Editorconfig : Object, Proton.PluginIface {
 
                 switch (name) {
                     case "indent_style":
-                        ed.sview.set_insert_spaces_instead_of_tabs(
-                            val == "space");
+                        ed.sview.set_insert_spaces_instead_of_tabs(val == "space");
+                        print("insert spaces [%s]\n", ed.sview.insert_spaces_instead_of_tabs ? "true" : "false");
                         break;
 
                     case "tab_width":
+                        ed.sview.set_tab_width(int.parse(val));
+                        break;
+
                     case "indent_size":
                         ed.sview.set_indent_width(int.parse(val));
                         break;
