@@ -39,44 +39,11 @@ public class Proton.EditorManager : Object {
         }
     }
 
-    private bool has_editorconfig;
-
     private EditorManager() {
         _editors = new HashTable<string, Editor> (str_hash, str_equal);
 
         configs = new HashTable<string, HashTable<string, string>>
             (str_hash, str_equal);
-
-        conf();
-    }
-
-    public void conf() {
-        var f = new File(@"$(root.path)/.protonconfig");
-        has_editorconfig = f.exists;
-        apply_config.begin(f);
-    }
-
-    async void apply_config(File f) {
-        string cfg = yield f.read_async();
-        // Get the config groups `(...),(...)`
-        foreach (string s in cfg.split(",")) {
-            var _cfgs = s.replace("(", "").replace(")", "");
-            string[] cfgs;
-
-            if (_cfgs != null)
-                cfgs = _cfgs.split(",");
-            else
-                break ;
-
-            if (cfgs.length % 2 != 1) {
-                warning(@"Invalid config $s\n");
-                continue ;
-            }
-            var ht = new HashTable<string, string>(str_hash, str_equal);
-            configs.insert(cfgs[0], ht);
-            for (var i = 1; i < cfgs.length; i += 2)
-                ht.insert(cfgs[i], cfgs[i + 1]);
-        }
     }
 
     private Editor new_editor(File f) {

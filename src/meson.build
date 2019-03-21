@@ -1,3 +1,5 @@
+pluginsdir = join_paths(get_option('libdir'), 'proton/plugins')
+
 proton_sources = [
   'main.vala',
   'window.vala',
@@ -5,7 +7,7 @@ proton_sources = [
   'open_window.vala',
   'utils/File.vala',
   'services/Settings.vala',
-  #'services/PluginManager.vala',
+  'services/PluginManager.vala',
   'services/Core.vala',
   'services/EditorManager.vala',
   'widgets/TreeView.vala',
@@ -35,3 +37,33 @@ executable('proton', proton_sources,
   vala_args: '--target-glib=2.50',  dependencies: proton_deps,
   install: true,
 )
+
+proton_core = library(
+    'proton_core',
+    proton_sources,
+    [],
+    dependencies: proton_deps,
+    install: true,
+    install_dir: [true, true, true],
+    version: '0.0'
+)
+
+pkg = import('pkgconfig')
+
+pkg.generate(
+    version: '0.1',
+    libraries: proton_core,
+    description: 'Proton core',
+    name: 'proton_core',
+    filebase: 'proton_core'
+)
+
+install_data('proton_core.deps',
+             install_dir: join_paths(get_option('datadir'), 'vala/vapi'))
+
+proton_core_dep = declare_dependency(
+    link_with: proton_core,
+    dependencies: proton_deps,
+    include_directories: [include_directories('.')])
+
+subdir('plugins')

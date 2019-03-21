@@ -76,6 +76,7 @@ public class Proton.Editor : Object {
     // TODO use some actual settings
     private void editor_apply_settings() {
         sview.set_monospace(true);
+        sview.set_auto_indent(true);
         sview.set_insert_spaces_instead_of_tabs(true);
         sview.set_indent_width(4);
         sview.set_smart_backspace(true);

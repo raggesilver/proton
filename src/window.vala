@@ -24,6 +24,8 @@ Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w) {
     return (s);
 }
 
+static TypeModule module = null;
+
 [GtkTemplate (ui = "/com/raggesilver/Proton/layouts/window.ui")]
 public class Proton.Window : Gtk.ApplicationWindow {
 
@@ -63,6 +65,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
     private Proton.EditorManager manager;
     private TreeView tree_view;
     public Gtk.AccelGroup accel_group { get; private set; }
+    // private PluginManager pm;
 
     public Window (Gtk.Application app) {
 
@@ -83,6 +86,13 @@ public class Proton.Window : Gtk.ApplicationWindow {
             move(settings.pos_x, settings.pos_y);
 
         build_ui();
+
+        module = new Plugin("editorconfig");
+        module.load();
+
+        var o = (IPlugin) Object.new(Type.from_name("Editorconfig"));
+        o.activate(this);
+        o = null;
 
         // Connect events
         play_button.set_sensitive(Proton.Core.get_instance().can_play);
@@ -126,6 +136,15 @@ public class Proton.Window : Gtk.ApplicationWindow {
                             Gdk.ModifierType.CONTROL_MASK,
                             0,
                             toggle_left_panel);
+        accel_group.connect(Gdk.Key.F5,
+                            0,
+                            0,
+                            do_build);
+    }
+
+    public bool do_build() {
+        play_button_clicked();
+        return false;
     }
 
     public bool toggle_left_panel() {
@@ -301,4 +320,3 @@ public class Proton.Window : Gtk.ApplicationWindow {
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }
-

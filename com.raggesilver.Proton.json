@@ -66,6 +66,16 @@
             ]
     	},
         {
+            "name": "libeditorconfig",
+            "buildsystem": "cmake",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/editorconfig/editorconfig-core-c"
+                }
+            ]
+        },
+        {
             "name": "proton",
             "buildsystem": "meson",
             "sources": [
