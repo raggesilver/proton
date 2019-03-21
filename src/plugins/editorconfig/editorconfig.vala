@@ -18,21 +18,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-class Editorconfig : Object, Proton.IPlugin {
+private class Editorconfig : Object, Proton.PluginIface {
+	public void do_register(Proton.PluginLoader loader) {
+        print ("Loaded\n");
+	}
 
-    public void activate(Proton.Window w) {
-        stdout.printf("Activated\n");
-        w.set_title("Proton - La batata");
+    public void activate() {
+    	print ("Activate\n");
     }
 
     public void deactivate() {
-        stdout.printf("Deactivated\n");
+    	print ("Deactivate");
     }
-
-    public Editorconfig() {}
 }
 
-[ModuleInit]
-public static Type plugin_init(TypeModule module) {
+public Type register_plugin (Module module) {
     return typeof(Editorconfig);
 }

@@ -1,4 +1,18 @@
-pluginsdir = join_paths(get_option('libdir'), 'proton/plugins')
+
+pluginsdir = join_paths(get_option('prefix'), get_option('libdir'), 'proton/plugins')
+
+conf_data = configuration_data()
+conf_data.set_quoted('PROJECT_NAME', meson.project_name())
+conf_data.set_quoted('GETTEXT_PACKAGE', meson.project_name())
+conf_data.set_quoted('VERSION', meson.project_version())
+conf_data.set_quoted('PREFIX', get_option('prefix'))
+conf_data.set_quoted('PLUGINDIR', pluginsdir)
+conf_data.set_quoted('DATADIR', join_paths (get_option('prefix'), get_option('datadir')))
+config_header = configure_file(
+    input : 'config.vala.in',
+    output : 'config.vala',
+    configuration : conf_data
+)
 
 proton_sources = [
   'main.vala',
@@ -33,7 +47,7 @@ proton_sources += gnome.compile_resources('proton-resources',
   c_name: 'proton'
 )
 
-executable('proton', proton_sources,
+executable('proton', proton_sources, config_header,
   vala_args: '--target-glib=2.50',  dependencies: proton_deps,
   install: true,
 )
@@ -41,7 +55,7 @@ executable('proton', proton_sources,
 proton_core = library(
     'proton_core',
     proton_sources,
-    [],
+    config_header,
     dependencies: proton_deps,
     install: true,
     install_dir: [true, true, true],
@@ -59,7 +73,7 @@ pkg.generate(
 )
 
 install_data('proton_core.deps',
-             install_dir: join_paths(get_option('datadir'), 'vala/vapi'))
+             install_dir: join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi'))
 
 proton_core_dep = declare_dependency(
     link_with: proton_core,

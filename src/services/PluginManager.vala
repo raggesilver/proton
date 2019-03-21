@@ -23,50 +23,66 @@
  * SPDX-License-Identifier: MIT
  */
 
-public interface Proton.IPlugin : Object {
-    public abstract void activate(Window window);
+public errordomain Proton.PluginError {
+	NOT_SUPPORTED,
+	UNEXPECTED_TYPE,
+	NO_REGISTRATION_FUNCTION,
+	FAILED
+}
+
+public interface Proton.PluginIface : Object {
+    public abstract void do_register(PluginLoader loader);
+    public abstract void activate();
     public abstract void deactivate();
 }
 
-public class Proton.Plugin : TypeModule {
-    [CCode (has_target=false)]
-    private delegate Type PluginInitFunction (TypeModule module);
-    private Module module = null;
-    private string name = null;
+private class Proton.PluginInfo : Object {
+    public Module module;
+    public Type gtype;
 
-    public Plugin(string name) {
-        this.name = name;
-    }
-
-    public override bool load() {
-        string path = Module.build_path("/home/pqueiroz/Projects/proton/_native_build/src/plugins/editorconfig", name);
-        module = Module.open(path, ModuleFlags.BIND_LAZY);
-        if (null == module) {
-            error ("Module not found");
-        }
-
-        void* plugin_init = null;
-        if (!module.symbol("plugin_init", out plugin_init)) {
-            error("No such symbol");
-        }
-
-        ((PluginInitFunction) plugin_init)(this);
-        return true;
-    }
-
-    public override void unload() {
-        module = null;
-        message("Library unloaded");
+    public PluginInfo(Type type, owned Module module) {
+        this.module = (owned) module;
+        this.gtype = type;
     }
 }
 
-//  public class Proton.PluginManager : Object {
+public class Proton.PluginLoader : Object {
+    [CCode (has_target = false)]
+    private delegate Type RegisterPluginFunction(Module module);
 
-//      public PluginManager() {
+    private PluginIface[] plugins = {};
+    private PluginInfo[] infos = {};
 
-//      }
+    public PluginIface load(string path) throws PluginError {
+        if (!Module.supported()) {
+            throw new PluginError.NOT_SUPPORTED("Plugins are not supported");
+        }
 
-//      public void load_plugin(string name) {
+        Module module = Module.open(path, ModuleFlags.BIND_LAZY);
+        if (module == null) {
+            throw new PluginError.FAILED(Module.error());
+        }
 
-//      }
-//  }
+        void *function;
+        module.symbol("register_plugin", out function);
+        if (function == null) {
+            throw new PluginError.NO_REGISTRATION_FUNCTION(
+                "register_plugin not found");
+        }
+
+        RegisterPluginFunction register_plugin = (RegisterPluginFunction) function;
+        Type type = register_plugin(module);
+        if (type.is_a(typeof(PluginIface)) == false) {
+            throw new PluginError.UNEXPECTED_TYPE("Unexpected type");
+        }
+
+        PluginInfo info = new PluginInfo(type, (owned)module);
+        infos += info;
+
+        PluginIface plugin = (PluginIface) Object.new(type);
+        plugins += plugin;
+        plugin.do_register(this);
+
+        return plugin;
+    }
+}

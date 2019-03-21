@@ -24,7 +24,7 @@ Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w) {
     return (s);
 }
 
-static TypeModule module = null;
+//  static TypeModule module = null;
 
 [GtkTemplate (ui = "/com/raggesilver/Proton/layouts/window.ui")]
 public class Proton.Window : Gtk.ApplicationWindow {
@@ -87,12 +87,13 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         build_ui();
 
-        module = new Plugin("editorconfig");
-        module.load();
-
-        var o = (IPlugin) Object.new(Type.from_name("Editorconfig"));
-        o.activate(this);
-        o = null;
+        try {
+            PluginLoader loader = new PluginLoader();
+            PluginIface plugin = loader.load(Constants.PLUGINDIR + "/editorconfig/libeditorconfig");
+            plugin.activate();
+        } catch (PluginError e) {
+            print("Error: %s\n", e.message);
+        }
 
         // Connect events
         play_button.set_sensitive(Proton.Core.get_instance().can_play);
