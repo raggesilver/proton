@@ -151,10 +151,12 @@ public class Proton.TreeView : Gtk.TreeView {
                 fill_tree(ff, it);
         }
         else if (e == FileMonitorEvent.MOVED_IN) {
-            it = _place_file(f.get_path().offset(root.path.length + 1));
-            if (ff.is_directory)
+            it = _place_file(of.get_path().offset(root.path.length + 1));
+            ff = new File(of.get_path());
+            if (ff.exists && ff.is_directory)
                 fill_tree(ff, it);
-            renamed(f.get_path(), of.get_path());
+
+            renamed(of.get_path(), f.get_path());
         }
         else if (e == FileMonitorEvent.MOVED_OUT) {
             _remove_file(f.get_path().offset(root.path.length + 1));
