@@ -27,11 +27,11 @@ public class Proton.EditorManager : Object {
 
     public signal void changed(Editor? editor);
     public signal void modified(bool is_modified);
+    public signal void created(Editor editor);
 
     private static EditorManager? instance = null;
     public Editor? current_editor;
 
-    private HashTable<string, HashTable<string, string>> configs;
     private HashTable<string, Editor> _editors;
     public HashTable<string, Editor> editors {
         get {
@@ -42,15 +42,11 @@ public class Proton.EditorManager : Object {
     private EditorManager() {
         _editors = new HashTable<string, Editor> (str_hash, str_equal);
 
-        configs = new HashTable<string, HashTable<string, string>>
-            (str_hash, str_equal);
-
         var mgr = Gtk.SourceStyleSchemeManager.get_default();
         mgr.append_search_path(
             Environment.get_home_dir() + "/.local/share/gtksourceview-4/styles");
 
         settings.notify.connect((p) => {
-            print("%s\n", p.get_name());
             if (p.get_name() == "style-id") {
                 update_ui();
             }
@@ -68,10 +64,10 @@ public class Proton.EditorManager : Object {
             }
         });
 
-        e.sview.focus_in_event.connect ((ev) => {
+        e.sview.focus_in_event.connect((ev) => {
             current_editor = e;
-            modified (e.is_modified);
-            changed (e);
+            modified(e.is_modified);
+            changed(e);
             return false;
         });
 
@@ -91,7 +87,12 @@ public class Proton.EditorManager : Object {
         if (ed == null) {
             ed = new_editor(f);
             _editors.insert(f.path, ed);
+            created(ed);
         }
+
+        current_editor = ed;
+        modified(ed.is_modified);
+        changed(ed);
 
         return ed;
     }
@@ -120,6 +121,28 @@ public class Proton.EditorManager : Object {
         _editors.foreach((_, val) => {
             val.update_ui();
         });
+    }
+
+    public void renamed(string old, string _new) {
+
+        bool is_cur = false;
+
+        Editor? ed = _editors.get(old);
+
+        if (ed != null) {
+
+            is_cur = (current_editor != null
+                        && File.equ(current_editor.file, ed.file));
+
+            _editors.steal(old);
+            ed.file = new File(_new);
+            ed._set_language();
+            _editors.set(_new, ed);
+
+            current_editor = ed;
+            changed(ed);
+            modified(ed.is_modified);
+        }
     }
 }
 

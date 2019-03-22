@@ -92,7 +92,6 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
             if (res == Gtk.ResponseType.OK) {
                 var f = new File(d.get_filename());
-                stdout.printf("Open path %s\n", f.path);
                 root = f;
                 settings.add_recent(f.path);
                 var w = new Window(this.get_application());

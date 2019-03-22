@@ -20,7 +20,6 @@
 
 private class Editorconfig : Object, Proton.PluginIface {
     public void do_register(Proton.PluginLoader loader) {
-        print("Editorconfig registered\n");
 
         loader.editor_changed.connect((ed) => {
 
@@ -29,7 +28,7 @@ private class Editorconfig : Object, Proton.PluginIface {
 
             var handler = new EditorConfig.Handle();
             if (handler.parse(ed.file.path) != 0) {
-                print("Could not parse file %s\n", ed.file.name);
+                warning("Could not parse file %s\n", ed.file.name);
                 return ;
             }
 
@@ -41,7 +40,6 @@ private class Editorconfig : Object, Proton.PluginIface {
                 switch (name) {
                     case "indent_style":
                         ed.sview.set_insert_spaces_instead_of_tabs(val == "space");
-                        print("insert spaces [%s]\n", ed.sview.insert_spaces_instead_of_tabs ? "true" : "false");
                         break;
 
                     case "tab_width":
@@ -65,11 +63,9 @@ private class Editorconfig : Object, Proton.PluginIface {
     }
 
     public void activate() {
-        print("Activate\n");
     }
 
     public void deactivate() {
-        print("Deactivate\n");
     }
 }
 

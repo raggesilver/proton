@@ -183,7 +183,9 @@ public class Proton.File : Object {
         }
     }
 
-    public static bool equ(File a, File b) {
+    public static bool equ(File? a, File? b) {
+        if (a == null || b == null)
+            return false;
         return a.file.equal(b.file);
     }
 }

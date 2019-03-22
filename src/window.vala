@@ -77,8 +77,37 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         // Initialize stuff
         accel_group = new Gtk.AccelGroup();
-        manager = EditorManager.get_instance();
         tree_view = new TreeView(root);
+        manager = EditorManager.get_instance();
+
+        tree_view.selected.connect((f) => {
+            if (f.is_directory)
+                return ;
+
+            Proton.EditorManager.get_instance().open(f);
+        });
+
+        tree_view.renamed.connect((o, n) => {
+            manager.renamed(o, n);
+        });
+
+        manager.created.connect((ed) => {
+            editor_stack.add_named(ed.sview, ed.file.path);
+        });
+
+        manager.changed.connect((ed) => {
+            save_button.set_sensitive(false);
+
+            if (ed != null && ed.file != null) {
+                save_button.set_sensitive(true);
+                editor_stack.set_visible_child(ed.sview);
+            }
+        });
+
+        manager.modified.connect((mod) => {
+            set_title("Proton - " + manager.current_editor.file.name +
+                ((mod) ? " •" : ""));
+        });
 
         add_accel_group(accel_group);
         manager.connect_accels(accel_group);
@@ -98,10 +127,11 @@ public class Proton.Window : Gtk.ApplicationWindow {
                 loader.editor_changed(e);
             });
 
-            PluginIface plugin = loader.load(Constants.PLUGINDIR + "/editorconfig/libeditorconfig");
+            PluginIface plugin = loader.load(
+                @"$(Constants.PLUGINDIR)/editorconfig/libeditorconfig");
             plugin.activate();
         } catch (PluginError e) {
-            print("Error: %s\n", e.message);
+            warning("Error: %s\n", e.message);
         }
 
         // Connect events
@@ -112,23 +142,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
             set_can_play(c);
         });
 
-        Proton.Core.get_instance().monitor_changed.connect((f, of, e) => {
-            if (e == GLib.FileMonitorEvent.ATTRIBUTE_CHANGED ||
-                e == GLib.FileMonitorEvent.CHANGED ||
-                e == GLib.FileMonitorEvent.CHANGES_DONE_HINT)
-                return ;
-            stdout.printf("PASSED %s\n", e.to_string());
-            tree_view.refill();
-        });
-
-        manager.changed.connect(current_editor_changed);
-        manager.modified.connect((mod) => {
-            set_title("Proton - " + manager.current_editor.file.name +
-                ((mod) ? " •" : ""));
-        });
-
         save_button.clicked.connect(save_button_clicked);
-        tree_view.selected.connect(tree_view_selected);
 
         preferences_button.clicked.connect(() => {
             if (preferences_window == null) {
@@ -196,12 +210,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
         a.feed_child("reset && make\n".to_utf8());
     }
 
-    private void current_editor_changed(Editor? ed) {
-        save_button.set_sensitive(false);
-        if (ed != null && ed.file != null)
-            save_button.set_sensitive(true);
-    }
-
     private void save_button_clicked () {
         manager.save();
     }
@@ -223,9 +231,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
             if (spec.name != "visible-child-name")
                 return ;
 
-            stdout.printf("CHANGE VIEW TO %s\n",
-                bottom_panel_stack.visible_child_name);
-
             Gtk.Widget? child = bottom_panel_aux_stack.get_child_by_name(
                 bottom_panel_stack.visible_child_name);
 
@@ -240,20 +245,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         bottom_box.set_size_request(-1, settings.bottom_panel_height);
         outer_paned.set_position(settings.left_panel_width);
-    }
-
-    private void tree_view_selected(File f) {
-        if (f.is_directory)
-            return ;
-
-        var editor = Proton.EditorManager.get_instance().open(f);
-
-        if (editor_stack.get_child_by_name("editor" + f.path) == null) {
-            editor_stack.add_titled(editor.sview, @"editor$(f.path)", "Editor");
-        }
-
-        editor_stack.set_visible_child_name("editor" + f.path);
-        editor.sview.grab_focus();
     }
 
     private bool can_close() {
@@ -297,7 +288,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         foreach (var ed in manager.editors.get_values()) {
             if (ed.is_modified) {
                 if (!(yield ed.save())) {
-                    stdout.printf("File %s was not saved\n", ed.file.name);
+                    warning("File %s was not saved\n", ed.file.name);
                     return ;
                 }
             }

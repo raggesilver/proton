@@ -27,6 +27,7 @@
 public class Proton.TreeView : Gtk.TreeView {
 
     public signal void selected(File file);
+    public signal void renamed(string old, string _new);
 
     public File root { get; private set; }
     public Gtk.TreeSelection selection;
@@ -141,9 +142,6 @@ public class Proton.TreeView : Gtk.TreeView {
 
     private void on_changed(GLib.File f, GLib.File? of, FileMonitorEvent e) {
 
-        print("%s (%s): %s\n",
-            f.get_path(), (of != null) ? of.get_path() : "" , e.to_string());
-
         var ff = new File(f.get_path());
 
         Gtk.TreeIter it;
@@ -156,12 +154,16 @@ public class Proton.TreeView : Gtk.TreeView {
             it = _place_file(f.get_path().offset(root.path.length + 1));
             if (ff.is_directory)
                 fill_tree(ff, it);
+            renamed(f.get_path(), of.get_path());
         }
-        else if (e == FileMonitorEvent.MOVED_OUT)
+        else if (e == FileMonitorEvent.MOVED_OUT) {
             _remove_file(f.get_path().offset(root.path.length + 1));
+            renamed(f.get_path(), of.get_path());
+        }
         else if (e == FileMonitorEvent.RENAMED) {
             _remove_file(f.get_path().offset(root.path.length + 1));
             _place_file(of.get_path().offset(root.path.length + 1));
+            renamed(f.get_path(), of.get_path());
         }
         else if (e == FileMonitorEvent.DELETED)
             _remove_file(f.get_path().offset(root.path.length + 1));

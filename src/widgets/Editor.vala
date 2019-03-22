@@ -29,7 +29,7 @@ public class Proton.Editor : Object {
 
     private uint id;
     private string? last_saved_content = null;
-    public Proton.File? file { get; private set; }
+    public File? file { get; set; }
     public bool is_modified { get; private set; default = false; }
 
     public Gtk.SourceView sview { get; private set; }
@@ -98,7 +98,7 @@ public class Proton.Editor : Object {
         sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
     }
 
-    private void _set_language(Gtk.SourceLanguage? _lang) {
+    public void _set_language(Gtk.SourceLanguage? _lang = null) {
         this.language = _lang;
 
         if (this.language == null) {
@@ -119,7 +119,7 @@ public class Proton.Editor : Object {
             (sview.buffer as Gtk.SourceBuffer).begin_not_undoable_action();
             sview.buffer.set_text(text);
             (sview.buffer as Gtk.SourceBuffer).end_not_undoable_action();
-            _set_language(null);
+            _set_language();
 
             if (last_saved_content == null) {
                 last_saved_content = text;

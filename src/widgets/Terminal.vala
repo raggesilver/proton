@@ -35,8 +35,6 @@ public class Proton.Terminal : Vte.Terminal {
         shell = GLib.Environ.get_variable(GLib.Environ.get(), "SHELL");
         string[] shell_arr = {shell};
 
-        stdout.printf("Shell: %s\n", shell);
-
         try {
             spawn_sync(Vte.PtyFlags.DEFAULT,
                        root.path,
