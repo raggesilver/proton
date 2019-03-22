@@ -25,13 +25,15 @@
 
 [GtkTemplate (ui = "/com/raggesilver/Proton/layouts/TreeView.ui")]
 public class Proton.TreeView : Gtk.TreeView {
-    public Gtk.TreeSelection selection;
-    private Gtk.TreeStore store;
-    private Gtk.IconTheme icon_theme;
-
-    public File root { get; private set; }
 
     public signal void selected(File file);
+
+    public File root { get; private set; }
+    public Gtk.TreeSelection selection;
+
+    private Gtk.TreeStore store;
+    private Gtk.IconTheme icon_theme;
+    private FileMonitor[] monitors = {};
 
     public TreeView(File root) {
 
@@ -46,9 +48,6 @@ public class Proton.TreeView : Gtk.TreeView {
         fill_tree(root, null);
 
         button_press_event.connect ((e) => {
-
-            // Make sure the right iter is selected
-
             Gtk.TreePath path;
             Gtk.TreeViewColumn col;
             Gtk.TreeIter iter;
@@ -60,7 +59,7 @@ public class Proton.TreeView : Gtk.TreeView {
 
             if (path == null)
                 return true;
-
+            // Make sure the right iter is selected
             grab_focus();
             set_cursor(path, col, false);
 
@@ -84,11 +83,20 @@ public class Proton.TreeView : Gtk.TreeView {
             Dir dir = Dir.open(_root.path);
             string? f = null;
 
+            // Add monitor
+            try {
+                var m = _root.file.monitor_directory(FileMonitorFlags.WATCH_MOVES);
+                m.changed.connect(on_changed);
+
+                monitors += m;
+            } catch {
+                warning("Could not create monitor for %s\n", _root.path);
+            }
+
             while ((f = dir.read_name()) != null) {
                 string name = Path.build_filename(_root.path, f);
 
-                Gtk.TreeIter current;
-                store.append(out current, parent);
+                // store.append(out current, parent);
 
                 File ff = new File(name);
                 /* ff.query_info_async.begin ("standard::icon", 0, Priority.DEFAULT, null, (obj, res) => {
@@ -103,8 +111,9 @@ public class Proton.TreeView : Gtk.TreeView {
                 //  img.show ();
                 //  Gdk.Pixbuf ic = img.get_pixbuf ();
                 //  store.set (current, 0, ic, 1, ff.get_basename (), -1);
-                store.set(current, 0, ff.name, -1);
-
+                // store.set(current, 0, ff.name, -1);
+                // current = ;
+                Gtk.TreeIter current = _place_file(ff.name, parent);
 
                 if (ff.is_directory)
                     fill_tree(ff, current);
@@ -117,7 +126,7 @@ public class Proton.TreeView : Gtk.TreeView {
 
     void build_treeview() {
         //  store = new Gtk.TreeStore(2, typeof (Gdk.Pixbuf), typeof (string));
-        store = new Gtk.TreeStore(1, typeof (string));
+        store = new Gtk.TreeStore(1, typeof(string));
         set_model(store);
 
         //  insert_column_with_attributes (0, "", new Gtk.CellRendererPixbuf(), "pixbuf", 0, null);
@@ -128,6 +137,105 @@ public class Proton.TreeView : Gtk.TreeView {
         get_column(0).set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE);
         set_headers_visible(false);
         // selection.changed.connect (() => {});
+    }
+
+    private void on_changed(GLib.File f, GLib.File? of, FileMonitorEvent e) {
+
+        print("%s (%s): %s\n",
+            f.get_path(), (of != null) ? of.get_path() : "" , e.to_string());
+
+        var ff = new File(f.get_path());
+
+        Gtk.TreeIter it;
+        if (e == FileMonitorEvent.CREATED) {
+            it = _place_file(f.get_path().offset(root.path.length + 1));
+            if (ff.is_directory)
+                fill_tree(ff, it);
+        }
+        else if (e == FileMonitorEvent.MOVED_IN) {
+            it = _place_file(f.get_path().offset(root.path.length + 1));
+            if (ff.is_directory)
+                fill_tree(ff, it);
+        }
+        else if (e == FileMonitorEvent.MOVED_OUT)
+            _remove_file(f.get_path().offset(root.path.length + 1));
+        else if (e == FileMonitorEvent.RENAMED) {
+            _remove_file(f.get_path().offset(root.path.length + 1));
+            _place_file(of.get_path().offset(root.path.length + 1));
+        }
+        else if (e == FileMonitorEvent.DELETED)
+            _remove_file(f.get_path().offset(root.path.length + 1));
+    }
+
+    Gtk.TreeIter _place_file(string path, Gtk.TreeIter? _parent = null) {
+
+        var path_arr = path.split("/");
+        Gtk.TreeIter current = {};
+
+        // If there is no parent or there is a child check the current level for
+        // the target, if it doesn't exist, crete it (outside the if)
+        if (_parent == null || this.model.iter_children(out current, _parent)) {
+
+            bool b = true;
+
+            if (_parent == null)
+                b = this.model.get_iter_first(out current);
+
+            while(b) {
+                string s;
+                this.model.get(current, 0, out s, -1);
+
+                // If the target exists, deal with it maybe not being the last
+                // target and return
+                if (s == path_arr[0]) {
+                    if(path_arr.length > 1)
+                        return _place_file(
+                            path.offset(path_arr[0].length + 1), current);
+                    return current;
+                }
+
+                b = this.model.iter_next(ref current);
+            }
+        }
+
+        // The target doesn't exist yet, so create it
+        store.append(out current, _parent);
+        store.set(current, 0, path_arr[0], -1);
+
+        if(path_arr.length > 1)
+            return _place_file(path.offset(path_arr[0].length + 1), current);
+        else
+            return current;
+    }
+
+    void _remove_file(string path, Gtk.TreeIter? _parent = null) {
+
+        var path_arr = path.split("/");
+        Gtk.TreeIter current = {};
+
+        // If there is no parent or there is a child check the current level for
+        // the target, if it doesn't exist, crete it (outside the if)
+        if (_parent == null || this.model.iter_children(out current, _parent)) {
+            if (_parent == null)
+                this.model.get_iter_first(out current);
+
+            do {
+                string s;
+                this.model.get(current, 0, out s, -1);
+
+                // If the target exists, deal with it maybe not being the last
+                // target and return
+                if (s == path_arr[0]) {
+                    if(path_arr.length > 1)
+                        _remove_file(
+                            path.offset(path_arr[0].length + 1), current);
+                    else
+                            store.remove(ref current);
+                    return ;
+                }
+
+            } while (this.model.iter_next(ref current));
+        }
     }
 
     public File get_file_from_selection(Gtk.TreeModel model,

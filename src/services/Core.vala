@@ -26,8 +26,7 @@
 public class Proton.Core : Object {
 
     private static Proton.Core? instance = null;
-    private FileMonitor? monitor;
-    private GLib.File makefile;
+    // private File makefile;
     public bool can_play { get; private set; default = false; }
 
     public signal void play_changed(bool p);
@@ -36,23 +35,28 @@ public class Proton.Core : Object {
                                        FileMonitorEvent e);
 
     private Core() {
-        try {
-            makefile = GLib.File.new_for_path(root.path + "/Makefile");
+        /*try {
+            makefile = new File(@"$(root.path)/Makefile");
             check_can_play();
-            monitor = root.file.monitor_directory(FileMonitorFlags.NONE, null);
+            monitor = root.file.monitor_directory(FileMonitorFlags.WATCH_MOVES);
             monitor.changed.connect((f, of, e) => {
+
+                if (e == GLib.FileMonitorEvent.RENAMED) {
+                    print("File moved (%s) -> (%s)\n", f.get_path(), of.get_path());
+                }
+
                 monitor_changed(f, of, e);
                 check_can_play();
             });
         } catch(GLib.Error error) {
             warning(error.message);
-        }
+        }*/
     }
 
-    private void check_can_play() {
-        this.can_play = makefile.query_exists ();
-        this.play_changed(this.can_play);
-    }
+    // private void check_can_play() {
+    //     this.can_play = makefile.exists;
+    //     this.play_changed(this.can_play);
+    // }
 
     public static Proton.Core get_instance() {
         if (instance == null)
