@@ -13,7 +13,9 @@
         "--filesystem=home",
         "--filesystem=xdg-run/dconf",
         "--filesystem=~/.config/dconf:ro",
+        "--own-name=com.raggesilver.Proton",
         "--talk-name=ca.desrt.dconf",
+        "--talk-name=org.freedesktop.Flatpak",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
     "x-run-args": [],
