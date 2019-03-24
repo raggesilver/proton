@@ -18,27 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-private static bool process_line (IOChannel channel, IOCondition condition, string stream_name) {
-	if (condition == IOCondition.HUP) {
-		print("%s: The fd has been closed.\n", stream_name);
-		return false;
-	}
-
-	try {
-		string line;
-		channel.read_line(out line, null, null);
-		print("%s: %s", stream_name, line);
-	} catch(IOChannelError e) {
-		print("%s: IOChannelError: %s\n", stream_name, e.message);
-		return false;
-	} catch(ConvertError e) {
-		print("%s: ConvertError: %s\n", stream_name, e.message);
-		return false;
-	}
-
-	return true;
-}
-
 private class Runner : Object, Proton.PluginIface {
 
     Gtk.Button btn;

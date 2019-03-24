@@ -97,10 +97,14 @@ public class Proton.FlatpakSubprocess : Object {
         _stdout = sout;
         _stderr = serr;
 
-        _init(env, argv, cwd);
+        try {
+            _init(env, argv, cwd);
+        } catch (Error e) {
+            warning(e.message);
+        }
     }
 
-    private bool _init(string[] env, string[] argv, string? cwd) {
+    private bool _init(string[] env, string[] argv, string? cwd) throws Error {
         var fd_builder = new VariantBuilder(new VariantType("a{uh}"));
         var env_builder = new VariantBuilder(new VariantType("a{ss}"));
         var fd_list = new UnixFDList();
@@ -113,18 +117,13 @@ public class Proton.FlatpakSubprocess : Object {
         int stdout_handle = -1;
         int stderr_handle = -1;
 
-        try {
-            connection = new DBusConnection.for_address_sync(
-                Environ.get_variable(Environ.get(), "DBUS_SESSION_BUS_ADDRESS"),
-                DBusConnectionFlags.AUTHENTICATION_CLIENT |
-                    DBusConnectionFlags.MESSAGE_BUS_CONNECTION,
-                null,
-                null
-            );
-        } catch {
-            warning("Could not create dbus connection.");
-            return false;
-        }
+        connection = new DBusConnection.for_address_sync(
+            Environ.get_variable(Environ.get(), "DBUS_SESSION_BUS_ADDRESS"),
+            DBusConnectionFlags.AUTHENTICATION_CLIENT |
+                DBusConnectionFlags.MESSAGE_BUS_CONNECTION,
+            null,
+            null
+        );
 
         connection.set_exit_on_close(false);
 
@@ -136,6 +135,7 @@ public class Proton.FlatpakSubprocess : Object {
         {
             flags &= ~SubprocessFlags.STDIN_PIPE;
             stdin_pair[0] = _stdin;
+            warning("STDIN SET %d", _stdin);
             _stdin = -1;
         }
         else if ((flags & SubprocessFlags.STDIN_INHERIT) != 0)
@@ -177,6 +177,7 @@ public class Proton.FlatpakSubprocess : Object {
         {
             flags &= ~SubprocessFlags.STDOUT_PIPE;
             stdout_pair[1] = _stdout;
+            warning("STDOUT SET %d", _stdout);
             _stdout = -1;
         }
         else if ((flags & SubprocessFlags.STDOUT_SILENCE) != 0)
@@ -218,6 +219,7 @@ public class Proton.FlatpakSubprocess : Object {
         {
             flags &= ~SubprocessFlags.STDERR_PIPE;
             stderr_pair[1] = _stderr;
+            warning("STDERR SET %d", _stderr);
             _stderr = -1;
         }
         else if ((flags & SubprocessFlags.STDERR_SILENCE) != 0)
@@ -254,11 +256,9 @@ public class Proton.FlatpakSubprocess : Object {
         /*
          * Build FDs for the message
          */
-        try {
-            fd_builder.add("{uh}", 0, stdin_handle);
-            fd_builder.add("{uh}", 1, stdout_handle);
-            fd_builder.add("{uh}", 2, stderr_handle);
-        } catch(Error e) { warning(e.message); return false; }
+        fd_builder.add("{uh}", 0, stdin_handle);
+        fd_builder.add("{uh}", 1, stdout_handle);
+        fd_builder.add("{uh}", 2, stderr_handle);
 
         maybe_create_output_stream(&stdin_pipe,
                                    &stdin_pair[1],
@@ -273,14 +273,12 @@ public class Proton.FlatpakSubprocess : Object {
         /*
          * Create env
          */
-        try {
-            foreach (var ev in env) {
-                string[] e = ev.split("=");
+        foreach (var ev in env) {
+            string[] e = ev.split("=");
 
-                if (e.length > 0)
-                    env_builder.add("{ss}", e[0], (e.length > 1) ? e[1] : "");
-            }
-        } catch(Error e) { warning(e.message); return false; }
+            if (e.length > 0)
+                env_builder.add("{ss}", e[0], (e.length > 1) ? e[1] : "");
+        }
 
         sigterm = Unix.signal_add(Posix.Signal.TERM, sigterm_handler);
         sigint = Unix.signal_add(Posix.Signal.INT, sigint_handler);
@@ -356,16 +354,18 @@ public class Proton.FlatpakSubprocess : Object {
 
     private bool sigterm_handler() {
 
-        connection.call_sync(
-            "org.freedesktop.Flatpak",
-            "/org/freedesktop/Flatpak/Development",
-            "org.freedesktop.Flatpak.Development",
-            "HostCommandSignal",
-            new Variant("(uub)", client_pid, Posix.Signal.TERM, true),
-            null,
-            DBusCallFlags.NONE, -1,
-            null
-        );
+        try {
+            connection.call_sync(
+                "org.freedesktop.Flatpak",
+                "/org/freedesktop/Flatpak/Development",
+                "org.freedesktop.Flatpak.Development",
+                "HostCommandSignal",
+                new Variant("(uub)", client_pid, Posix.Signal.TERM, true),
+                null,
+                DBusCallFlags.NONE, -1,
+                null
+            );
+        } catch (Error e) { warning(e.message); return true; }
 
         Posix.kill(Posix.getpid(), Posix.Signal.TERM);
 
@@ -374,16 +374,18 @@ public class Proton.FlatpakSubprocess : Object {
 
     private bool sigint_handler() {
 
-        connection.call_sync(
-            "org.freedesktop.Flatpak",
-            "/org/freedesktop/Flatpak/Development",
-            "org.freedesktop.Flatpak.Development",
-            "HostCommandSignal",
-            new Variant("(uub)", client_pid, Posix.Signal.INT, true),
-            null,
-            DBusCallFlags.NONE, -1,
-            null
-        );
+        try {
+            connection.call_sync(
+                "org.freedesktop.Flatpak",
+                "/org/freedesktop/Flatpak/Development",
+                "org.freedesktop.Flatpak.Development",
+                "HostCommandSignal",
+                new Variant("(uub)", client_pid, Posix.Signal.INT, true),
+                null,
+                DBusCallFlags.NONE, -1,
+                null
+            );
+        } catch (Error e) { warning(e.message); return true; }
 
         Posix.kill(Posix.getpid(), Posix.Signal.INT);
 

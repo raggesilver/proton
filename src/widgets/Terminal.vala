@@ -120,9 +120,6 @@ int pty_create_slave(Vte.Pty pty)
 
 public class Proton.Terminal : Vte.Terminal {
 
-    private char[] ptyname = new char[1024];
-
-    private string shell;
     public weak Proton.Window window { get; construct; }
 
     int tty_fd = -1;
@@ -174,6 +171,11 @@ public class Proton.Terminal : Vte.Terminal {
                                           tty_fd,
                                           out_fd,
                                           err_fd);
+
+            s.finished.connect(() => {
+                // TODO connect this to a "destroy terminal tab" function
+                print("terminal exited");
+            });
 
             pty.child_setup();
 
