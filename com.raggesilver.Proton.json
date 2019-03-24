@@ -13,6 +13,7 @@
         "--filesystem=xdg-run/dconf",
         "--filesystem=~/.config/dconf:ro",
         "--talk-name=ca.desrt.dconf",
+        "--talk-name=org.freedesktop.Flatpak",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
     "x-run-args": [],

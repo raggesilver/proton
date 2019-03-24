@@ -21,6 +21,8 @@ proton_sources = [
   'open_window.vala',
   'preferences_window.vala',
   'utils/File.vala',
+  'utils/utils.vala',
+  'utils/threading.vala',
   'services/Settings.vala',
   'services/PluginManager.vala',
   'services/Core.vala',
@@ -38,7 +40,9 @@ proton_deps = [
   dependency('vte-2.91', version: '>= 0.54.1'),
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('gtksourceview-3.0', version: '>= 3.22'),
-  dependency('granite') # this ain't no elementary app ok babydora?
+  dependency('granite'), # this ain't no elementary app ok babydora?
+  meson.get_compiler('vala').find_library('posix'),
+  meson.get_compiler('vala').find_library('linux'),
 ]
 
 gnome = import('gnome')

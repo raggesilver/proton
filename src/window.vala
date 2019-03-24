@@ -29,8 +29,14 @@ Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w) {
 [GtkTemplate (ui = "/com/raggesilver/Proton/layouts/window.ui")]
 public class Proton.Window : Gtk.ApplicationWindow {
 
-    // [GtkChild]
-    // Gtk.Box side_panel_box;
+    [GtkChild]
+    public Gtk.HeaderBar header_bar;
+
+    [GtkChild]
+    public Gtk.Box left_hb_box;
+
+    [GtkChild]
+    public Gtk.Box right_hb_box;
 
     [GtkChild]
     Gtk.Stack side_panel_stack;
@@ -49,9 +55,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
     [GtkChild]
     Gtk.Button save_button;
-
-    [GtkChild]
-    Gtk.Button play_button;
 
     [GtkChild]
     Gtk.Box bottom_box;
@@ -120,27 +123,23 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         build_ui();
 
-        try {
-            PluginLoader loader = new PluginLoader();
-
-            manager.changed.connect((e) => {
-                loader.editor_changed(e);
-            });
-
-            PluginIface plugin = loader.load(
-                @"$(Constants.PLUGINDIR)/editorconfig/libeditorconfig");
-            plugin.activate();
-        } catch (PluginError e) {
-            warning("Error: %s\n", e.message);
-        }
-
-        // Connect events
-        play_button.set_sensitive(Proton.Core.get_instance().can_play);
-        play_button.clicked.connect(play_button_clicked);
-
-        Proton.Core.get_instance().play_changed.connect((c) => {
-            set_can_play(c);
+        PluginLoader loader = new PluginLoader(this);
+        PluginIface[] _iplugins = {};
+        string[] _plugins = {"editorconfig", "runner"};
+        manager.changed.connect((e) => {
+            loader.editor_changed(e);
         });
+
+        foreach (var p in _plugins) {
+            try {
+                PluginIface plugin = loader.load(
+                    @"$(Constants.PLUGINDIR)/$p/lib$p");
+                plugin.activate();
+                _iplugins += plugin;
+            } catch (PluginError e) {
+                warning("Error: %s\n", e.message);
+            }
+        }
 
         save_button.clicked.connect(save_button_clicked);
 
@@ -170,15 +169,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
                             Gdk.ModifierType.CONTROL_MASK,
                             0,
                             toggle_left_panel);
-        accel_group.connect(Gdk.Key.F5,
-                            0,
-                            0,
-                            do_build);
-    }
-
-    public bool do_build() {
-        play_button_clicked();
-        return false;
     }
 
     public bool toggle_left_panel() {
@@ -191,23 +181,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
         settings.bottom_panel_visible = !settings.bottom_panel_visible;
         bottom_box.set_visible(settings.bottom_panel_visible);
         return false;
-    }
-
-    private void set_can_play(bool c) {
-        play_button.set_sensitive(c);
-    }
-
-    private void play_button_clicked() {
-        Terminal? a = null;
-        if ((a = bottom_panel_stack.get_child_by_name("make-term") as Terminal)
-            == null) {
-            bottom_panel_stack.add_titled(new Terminal(this),
-                                          "make-term",
-                                          "Make");
-        }
-        a = (bottom_panel_stack.get_child_by_name("make-term") as Terminal);
-        bottom_panel_stack.set_visible_child_name("make-term");
-        a.feed_child("reset && make\n".to_utf8());
     }
 
     private void save_button_clicked () {
