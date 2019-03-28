@@ -134,6 +134,19 @@ public class Proton.TreeView : Gtk.TreeView {
         insert_column_with_attributes(
             0, "", new Gtk.CellRendererText(), "text", 0, null);
 
+        store.set_sort_column_id(0, Gtk.SortType.ASCENDING);
+        store.set_sort_func(0, (mod, a, b) => {
+            File fa = get_file_from_selection(mod, a);
+            File fb = get_file_from_selection(mod, b);
+
+            if (fa.is_directory && !fb.is_directory)
+                return (-1);
+            else if (fb.is_directory && !fa.is_directory)
+                return (1);
+
+            return (strcmp(fa.name, fb.name));
+        });
+
         selection = get_selection();
         get_column(0).set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE);
         set_headers_visible(false);
