@@ -1,7 +1,7 @@
 {
     "app-id": "com.raggesilver.Proton",
     "runtime": "org.gnome.Sdk",
-    "runtime-version": "master",
+    "runtime-version": "3.32",
     "sdk": "org.gnome.Sdk",
     "command": "proton",
     "finish-args": [
@@ -88,3 +88,4 @@
         }
     ]
 }
+
