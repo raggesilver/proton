@@ -29,7 +29,6 @@ proton_sources = [
   'widgets/Editor.vala',
   'widgets/Container.vala',
   'widgets/Terminal.vala',
-  'widgets/LinkedToggler.vala',
 ]
 
 proton_deps = [
@@ -82,3 +81,4 @@ proton_core_dep = declare_dependency(
     include_directories: [include_directories('.')])
 
 subdir('plugins')
+
