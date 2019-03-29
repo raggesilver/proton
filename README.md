@@ -18,9 +18,10 @@ Use `flatpak` or `meson` (ninja) to install or compile Proton.
 4. Plugins: run, 42, git
 5. Finish terminal widget
 6. Finish `OpenWindow`[^1]
-~~File modified characted on the window title (e.g "Proton - filename.c •")~~
-~~Prevent app quiting when modified editors are still open~~
-~~TreeView updates~~
+
+- ~~File modified characted on the window title (e.g "Proton - filename.c •")~~
+- ~~Prevent app quiting when modified editors are still open~~
+- ~~TreeView updates~~
 
 ---
 
