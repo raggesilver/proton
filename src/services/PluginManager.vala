@@ -55,7 +55,14 @@ public class Proton.PluginLoader : Object {
 
     public signal void editor_changed(Editor? ed);
 
-    public PluginLoader() {
+    public Gtk.Box left_hb_box { get; private set; }
+    public Gtk.Box right_hb_box { get; private set; }
+    public string root_path { get; private set; }
+
+    public PluginLoader(Window w) {
+        left_hb_box = w.left_hb_box;
+        right_hb_box = w.right_hb_box;
+        root_path = root.path;
     }
 
     public PluginIface load(string path) throws PluginError {

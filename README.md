@@ -3,14 +3,14 @@
 Proton is a simple text editor, soon-to-be IDE.
 
 <br />
-<center style="padding: 0 2em">
-	<img src="preview.png" alt="Screenshot">
-</center>
+
+![Preview](preview.png)
 
 ## Compile / Install
 Use `flatpak` or `meson` (ninja) to install or compile Proton.
 
 ## Features worth sharing
+- Integrated terminal
 - Editorconfig plugin
 
 ## Todos <span style="font-size: 10pt">(sorted by importance)</span>
@@ -24,7 +24,7 @@ Use `flatpak` or `meson` (ninja) to install or compile Proton.
 	- [ ] Move
 	- [ ] Delete
 5. ~~Open project~~
-    - Working on new widget `OpenWindow`*
+    - Working on new widget `OpenWindow`[^1]
     - Clone repo - pending
     - New project - pending
     - Open project - done
@@ -34,7 +34,7 @@ Use `flatpak` or `meson` (ninja) to install or compile Proton.
 9. ~~Plugins~~
     - Basic suport for loading plugins added
     - Plugins have to be compiled with `proton` (more or less)
-    - Plugins need "portals" to access the main components
 
-*screenshot
-![preview](https://imgur.com/axVOeZv.png)
+---
+
+[^1]: ![preview](https://imgur.com/axVOeZv.png)
