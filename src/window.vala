@@ -83,8 +83,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
         tree_view = new TreeView(root);
         manager = EditorManager.get_instance();
 
-        tree_view.selected.connect((f) => {
-            if (f.is_directory)
+        tree_view.changed.connect((f) => {
+            if (f.is_directory || !f.is_valid_textfile)
                 return ;
 
             Proton.EditorManager.get_instance().open(f);
@@ -194,11 +194,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         side_panel_stack.set_visible_child_name("treeview");
 
-        bottom_panel_stack.add_titled(new Terminal(this),
-                                      "terminal",
-                                      "Terminal");
-
-        bottom_panel_stack.set_visible_child_name("terminal");
+        // bottom_panel_stack.add_titled(wrap_scroller(new Terminal(this)),
+        //                               "terminal",
+        //                               "Terminal");
 
         bottom_panel_stack.notify.connect((spec) => {
             if (spec.name != "visible-child-name")
@@ -212,6 +210,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
             else
                 bottom_panel_aux_stack.set_visible_child_name("empty");
         });
+
+        bottom_panel_stack.set_visible_child_name("initial");
 
         side_panel_box.set_visible(settings.left_panel_visible);
         bottom_box.set_visible(settings.bottom_panel_visible);

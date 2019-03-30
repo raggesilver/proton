@@ -50,20 +50,6 @@
       </packing>
     </child>
   </object>
-  <object class="GtkListStore" id="terminal_combo_store">
-    <columns>
-      <!-- column-name terminal_name -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Default</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Batata</col>
-      </row>
-    </data>
-  </object>
   <template class="ProtonWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
     <property name="default_width">600</property>
@@ -219,75 +205,6 @@
                         <property name="hhomogeneous">False</property>
                         <property name="transition_type">slide-up-down</property>
                         <child>
-                          <object class="GtkBox">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkButton" id="terminal_add_button">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="relief">none</property>
-                                <child>
-                                  <object class="GtkImage">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">list-add-symbolic</property>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkButton" id="terminal_add_button1">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">True</property>
-                                <property name="relief">none</property>
-                                <child>
-                                  <object class="GtkImage">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="icon_name">user-trash-symbolic</property>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkComboBox" id="terminal_combo">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="model">terminal_combo_store</property>
-                                <property name="active">0</property>
-                                <child>
-                                  <object class="GtkCellRendererText" id="cellrendertext1"/>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="name">terminal</property>
-                            <property name="title" translatable="yes">Terminal</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
@@ -296,7 +213,6 @@
                           <packing>
                             <property name="name">empty</property>
                             <property name="title" translatable="yes">Empty</property>
-                            <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
@@ -328,7 +244,7 @@
                         <property name="label" translatable="yes">Batata</property>
                       </object>
                       <packing>
-                        <property name="name">Initial</property>
+                        <property name="name">initial</property>
                         <property name="title" translatable="yes">Initial</property>
                       </packing>
                     </child>
@@ -366,6 +282,7 @@
           <object class="GtkBox" id="right_hb_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">6</property>
             <child>
               <object class="GtkMenuButton">
                 <property name="visible">True</property>
@@ -396,6 +313,7 @@
           <object class="GtkBox" id="left_hb_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">6</property>
             <child>
               <object class="GtkButton" id="save_button">
                 <property name="visible">True</property>
@@ -424,4 +342,18 @@
       </object>
     </child>
   </template>
+  <object class="GtkListStore" id="terminal_combo_store">
+    <columns>
+      <!-- column-name terminal_name -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Default</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Batata</col>
+      </row>
+    </data>
+  </object>
 </interface>

@@ -23,312 +23,368 @@
  * SPDX-License-Identifier: MIT
  */
 
-[GtkTemplate (ui = "/com/raggesilver/Proton/layouts/TreeView.ui")]
-public class Proton.TreeView : Gtk.TreeView {
+public class Proton.SortableBox : Gtk.Box
+{
+    public delegate int PCompareFunction(void *a, void *b);
+    public delegate SortableBox? PIsSortableFunction(void *a);
 
-    public signal void selected(File file);
+    public SortableBox(Gtk.Orientation orientation, int spacing)
+    {
+        Object(orientation: orientation,
+               spacing: spacing);
+    }
+
+    public void sort(PCompareFunction comp, PIsSortableFunction? is_sort)
+    {
+        // EventBox > Box > Image + Label
+        var lst = new Array<Gtk.Widget>();
+
+        get_children().foreach((k) => { lst.append_val(k); });
+
+        var len = lst.length;
+
+        for (uint i = 0; i < len; i++)
+        {
+            for (uint j = i; j < len; j++)
+                if (comp(lst.index(j), lst.index(i)) < 0)
+                {
+                    reorder_child(lst.index(j), (int)i);
+                    Gtk.Widget tmp = lst.index(i);
+                    lst.data[i] = lst.index(j);
+                    lst.data[j] = tmp;
+                }
+        }
+
+        if (is_sort != null)
+        {
+            for (uint i = 0; i < len; i++)
+            {
+                var s = is_sort(lst.index(i));
+                if (s != null)
+                    s.sort(comp, is_sort);
+            }
+        }
+    }
+}
+
+public class Proton.TreeItem : Gtk.Box
+{
+    public signal bool left_click();
+    public signal bool right_click();
+
+    public File file { get; protected set; }
+    public SortableBox container = null;
+    public bool is_directory {
+        get {
+            return (file.is_directory);
+        }
+    }
+
+    Gtk.Label label;
+    Gtk.Image icon;
+    Gtk.Box   box;
+    int       level;
+
+    public TreeItem(File _file, int _level = 0)
+    {
+        Object(orientation: Gtk.Orientation.VERTICAL,
+               spacing: 0);
+
+        get_style_context().add_class("treeitem");
+
+        file = _file;
+        level = _level;
+
+        build_ui();
+    }
+
+    public TreeItem.from_path(string s, int _level = 0)
+    {
+        this(new File(s), _level);
+    }
+
+    public void toggle_expanded()
+    {
+        if (!is_directory)
+            return ;
+
+        bool s = !container.get_visible();
+
+        if (get_icon_name() == "folder-symbolic")
+        {
+            icon.set_from_icon_name(
+                s ? "folder-open-symbolic" : "folder-symbolic",
+                Gtk.IconSize.MENU);
+        }
+
+        container.set_visible(s);
+    }
+
+    public static SortableBox? tree_is_sortable_function(void *_a)
+    {
+        var a = (_a as TreeItem);
+        return ((a.is_directory) ? a.container : null);
+    }
+
+    public static int tree_sort_function(void *_a, void *_b)
+    {
+        var a = (_a as TreeItem);
+        var b = (_b as TreeItem);
+
+        if (a.is_directory)
+        {
+            if (!b.is_directory)
+                return (-1);
+        }
+        if (b.is_directory)
+        {
+            if (!a.is_directory)
+                return (1);
+        }
+
+        return (strcmp(a.file.name, b.file.name));
+    }
+
+    public void do_sort()
+    {
+        container.sort(tree_sort_function, tree_is_sortable_function);
+    }
+
+    void build_ui()
+    {
+        var eb = new Gtk.EventBox();
+
+        box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        eb.button_release_event.connect((e) => {
+            if (e.button == 1)
+                return (left_click());
+            else if (e.button == 3)
+                return (right_click());
+            return (false);
+        });
+        eb.add(box);
+
+        box.set_size_request(-1, 25);
+
+        icon = new Gtk.Image.from_icon_name(
+            get_icon_name(), Gtk.IconSize.MENU);
+        icon.margin_start += 5 + (level * 16);
+
+        label = new Gtk.Label(file.name);
+        label.xalign = 0;
+
+        box.pack_start(icon, false, true, 10);
+        box.pack_start(label, false, true, 0);
+
+        pack_start(eb, false, true, 0);
+        show_all();
+
+        if (file.is_directory)
+        {
+            container = new SortableBox(Gtk.Orientation.VERTICAL, 0);
+            pack_end(container, false, true, 0);
+        }
+    }
+
+    string get_icon_name()
+    {
+        Icon ic = file.icon;
+
+        if (ic == null)
+            return ("text-x-generic");
+
+        string[] arr = ic.to_string().split(" ");
+
+        return (arr[arr.length - 1]);
+    }
+}
+
+public class Proton.TreeView : SortableBox
+{
+    public signal void changed(File file);
     public signal void renamed(string old, string _new);
 
-    public File root { get; private set; }
-    public Gtk.TreeSelection selection;
+    public File root { get; protected set; }
+    public HashTable<string, TreeItem> items { get; protected set; }
+    public TreeItem? selected { get; protected set; }
 
-    private Gtk.TreeStore store;
-    private Gtk.IconTheme icon_theme;
-    private FileMonitor[] monitors = {};
+    FileMonitor[] monitors = {};
+    Gtk.Popover popover;
 
-    public TreeView(File root) {
+    public TreeView(File root)
+    {
+        Object(orientation: Gtk.Orientation.VERTICAL,
+               spacing: 0,
+               items: new HashTable<string, TreeItem>(str_hash, str_equal),
+               root: root,
+               selected: null);
 
-        Object(activate_on_single_click: true,
-               fixed_height_mode: true);
+        var b = new Gtk.Builder.from_resource(
+            "/com/raggesilver/Proton/layouts/treeview_popover.ui");
+        popover = b.get_object("menu") as Gtk.Popover;
 
-        this.root = root;
-        // get_style_context ().add_class ("bg-color");
-        icon_theme = Gtk.IconTheme.get_default();
-
-        build_treeview();
-        fill_tree(root, null);
-
-        button_press_event.connect ((e) => {
-            Gtk.TreePath path;
-            Gtk.TreeViewColumn col;
-            Gtk.TreeIter iter;
-            Gtk.TreeModel model;
-            int x, y;
-
-            get_path_at_pos(
-                (int)e.x, (int)e.y, out path, out col, out x, out y);
-
-            if (path == null)
-                return true;
-            // Make sure the right iter is selected
-            grab_focus();
-            set_cursor(path, col, false);
-
-            selection.get_selected(out model, out iter);
-
-            if (e.button == 1)
-                return left_button_clicked_row(model, iter);
-            else if (e.button == 3)
-                return right_button_clicked_row(model, iter, e);
-            return false;
-        });
+        build(this.root);
+        show();
     }
 
-    public void refill() {
-        store.clear();
-        fill_tree(root, null);
-    }
+    void build(File _root)
+    {
+        print("Build %s\n", _root.path);
 
-    void fill_tree(File _root, Gtk.TreeIter? parent) {
-        try {
-            Dir dir = Dir.open(_root.path);
-            string? f = null;
+        try
+        {
+            var dir = Dir.open(_root.path);
+            string? fname = null;
 
-            // Add monitor
-            try {
-                var m = _root.file.monitor_directory(FileMonitorFlags.WATCH_MOVES);
-                m.changed.connect(on_changed);
+            // Attach monitor
+            try
+            {
+                var m = _root.file.monitor_directory(
+                            FileMonitorFlags.WATCH_MOVES);
 
+                m.changed.connect(on_monitor_changed);
                 monitors += m;
-            } catch {
+            }
+            catch
+            {
                 warning("Could not create monitor for %s\n", _root.path);
             }
 
-            while ((f = dir.read_name()) != null) {
-                string name = Path.build_filename(_root.path, f);
+            while ((fname = dir.read_name()) != null)
+            {
+                var f = new File(@"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
 
-                // store.append(out current, parent);
+                insert_file(f);
 
-                File ff = new File(name);
-                /* ff.query_info_async.begin ("standard::icon", 0, Priority.DEFAULT, null, (obj, res) => {
-                    FileInfo fi = ff.query_info_async.end (res);
-                    Icon icon = fi.get_icon ();
-                    var icinf = icon_theme.lookup_by_gicon (icon, 16, Gtk.IconLookupFlags.FORCE_SYMBOLIC);
-                    store.set (current, 0, icinf.load_icon (), 1, ff.get_basename (), -1);
-                }); */
-
-                //  var img = new Gtk.Image.from_icon_name (
-                    //  ((is_dir) ? "folder-symbolic" : "text-x-generic-symbolic"), Gtk.IconSize.MENU);
-                //  img.show ();
-                //  Gdk.Pixbuf ic = img.get_pixbuf ();
-                //  store.set (current, 0, ic, 1, ff.get_basename (), -1);
-                // store.set(current, 0, ff.name, -1);
-                // current = ;
-                Gtk.TreeIter current = _place_file(ff.name, parent);
-
-                if (ff.is_directory)
-                    fill_tree(ff, current);
+                if (f.is_directory)
+                    build(f);
             }
-
-        } catch (FileError err) {
-            error(err.message);
         }
+        catch (Error e) { warning(e.message); }
+
+        if (_root.path == this.root.path)
+            do_sort();
     }
 
-    void build_treeview() {
-        //  store = new Gtk.TreeStore(2, typeof (Gdk.Pixbuf), typeof (string));
-        store = new Gtk.TreeStore(1, typeof(string));
-        set_model(store);
+    void select(TreeItem r, bool soft = false)
+    {
+        if (selected != null)
+            selected.get_style_context().remove_class("selected");
 
-        //  insert_column_with_attributes (0, "", new Gtk.CellRendererPixbuf(), "pixbuf", 0, null);
-        insert_column_with_attributes(
-            0, "", new Gtk.CellRendererText(), "text", 0, null);
+        r.get_style_context().add_class("selected");
+        selected = r;
 
-        store.set_sort_column_id(0, Gtk.SortType.ASCENDING);
-        store.set_sort_func(0, (mod, a, b) => {
-            File fa = get_file_from_selection(mod, a);
-            File fb = get_file_from_selection(mod, b);
-
-            if (fa.is_directory && !fb.is_directory)
-                return (-1);
-            else if (fb.is_directory && !fa.is_directory)
-                return (1);
-
-            return (strcmp(fa.name, fb.name));
-        });
-
-        selection = get_selection();
-        get_column(0).set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE);
-        set_headers_visible(false);
-        // selection.changed.connect (() => {});
+        if (!soft)
+            changed(r.file);
     }
 
-    private void on_changed(GLib.File f, GLib.File? of, FileMonitorEvent e) {
+    void do_sort()
+    {
+        sort(TreeItem.tree_sort_function, TreeItem.tree_is_sortable_function);
+    }
 
-        var ff = new File(f.get_path());
+    void on_monitor_changed(GLib.File _f, GLib.File? _of, FileMonitorEvent e)
+    {
+        var f = new File(_f.get_path());
+        var of = (_of == null) ? null : new File(_of.get_path());
 
-        Gtk.TreeIter it;
-        if (e == FileMonitorEvent.CREATED) {
-            it = _place_file(f.get_path().offset(root.path.length + 1));
-            if (ff.is_directory)
-                fill_tree(ff, it);
-        }
-        else if (e == FileMonitorEvent.MOVED_IN) {
-            it = _place_file(of.get_path().offset(root.path.length + 1));
-            ff = new File(of.get_path());
-            if (ff.exists && ff.is_directory)
-                fill_tree(ff, it);
+        if (e == FileMonitorEvent.CREATED)
+            insert_file(f);
+        else if (e == FileMonitorEvent.MOVED_OUT)
+            remove_file(f);
+        else if (e == FileMonitorEvent.MOVED_IN)
+        {
+            insert_file(f);
 
-            renamed(of.get_path(), f.get_path());
+            renamed(of.path, f.path);
+
+            if (f.is_directory)
+                build(f);
         }
-        else if (e == FileMonitorEvent.MOVED_OUT) {
-            _remove_file(f.get_path().offset(root.path.length + 1));
-            renamed(f.get_path(), of.get_path());
+        else if (e == FileMonitorEvent.MOVED_OUT)
+        {
+            remove_file(f);
+            renamed(f.path, of.path);
         }
-        else if (e == FileMonitorEvent.RENAMED) {
-            _remove_file(f.get_path().offset(root.path.length + 1));
-            _place_file(of.get_path().offset(root.path.length + 1));
-            renamed(f.get_path(), of.get_path());
+        else if (e == FileMonitorEvent.RENAMED)
+        {
+            remove_file(f);
+            insert_file(of);
+            renamed(f.path, of.path);
         }
         else if (e == FileMonitorEvent.DELETED)
-            _remove_file(f.get_path().offset(root.path.length + 1));
+            remove_file(f);
     }
 
-    Gtk.TreeIter _place_file(string path, Gtk.TreeIter? _parent = null) {
+    void insert_file(File f)
+    {
+        if (items.get(f.path) != null)
+            return ;
 
-        var path_arr = path.split("/");
-        Gtk.TreeIter current = {};
+        var r = new TreeItem(f,
+            f.path.replace(@"$(this.root.path)/", "").split("/").length - 1);
 
-        // If there is no parent or there is a child check the current level for
-        // the target, if it doesn't exist, crete it (outside the if)
-        if (_parent == null || this.model.iter_children(out current, _parent)) {
+        r.left_click.connect(() => {
+            select(r);
 
-            bool b = true;
+            if (r.is_directory)
+                r.toggle_expanded();
 
-            if (_parent == null)
-                b = this.model.get_iter_first(out current);
+            return (false);
+        });
 
-            while(b) {
-                string s;
-                this.model.get(current, 0, out s, -1);
+        r.right_click.connect(() => {
+            select(r, true);
 
-                // If the target exists, deal with it maybe not being the last
-                // target and return
-                if (s == path_arr[0]) {
-                    if(path_arr.length > 1)
-                        return _place_file(
-                            path.offset(path_arr[0].length + 1), current);
-                    return current;
-                }
+            popover.relative_to = r;
+            popover.popup();
+            return (false);
+        });
 
-                b = this.model.iter_next(ref current);
+        var p = f.file.get_parent();
+        if (p != null && p.get_path() == root.path)
+        {
+            pack_start(r, false, true, 0);
+            items.insert(f.path, r);
+            sort(TreeItem.tree_sort_function, null);
+        }
+        else if (p != null)
+        {
+            var parent = items.get(p.get_path());
+
+            if (parent == null)
+            {
+                insert_file(new File(p.get_path()));
+                parent = items.get(p.get_path());
+            }
+
+            if (parent != null)
+            {
+                items.insert(f.path, r);
+                parent.container.pack_start(r, false, true, 0);
+                parent.container.queue_resize();
+                parent.container.sort(TreeItem.tree_sort_function, null);
             }
         }
-
-        // The target doesn't exist yet, so create it
-        store.append(out current, _parent);
-        store.set(current, 0, path_arr[0], -1);
-
-        if(path_arr.length > 1)
-            return _place_file(path.offset(path_arr[0].length + 1), current);
-        else
-            return current;
     }
 
-    void _remove_file(string path, Gtk.TreeIter? _parent = null) {
-
-        var path_arr = path.split("/");
-        Gtk.TreeIter current = {};
-
-        // If there is no parent or there is a child check the current level for
-        // the target, if it doesn't exist, crete it (outside the if)
-        if (_parent == null || this.model.iter_children(out current, _parent)) {
-            if (_parent == null)
-                this.model.get_iter_first(out current);
-
-            do {
-                string s;
-                this.model.get(current, 0, out s, -1);
-
-                // If the target exists, deal with it maybe not being the last
-                // target and return
-                if (s == path_arr[0]) {
-                    if(path_arr.length > 1)
-                        _remove_file(
-                            path.offset(path_arr[0].length + 1), current);
-                    else
-                            store.remove(ref current);
-                    return ;
-                }
-
-            } while (this.model.iter_next(ref current));
-        }
-    }
-
-    public File get_file_from_selection(Gtk.TreeModel model,
-                                        Gtk.TreeIter current)
+    void remove_file(File f)
     {
-        string fullpath = "";
+        string target = f.file.get_path();
+        var r = items.get(target);
+        if (r == null)
+            return ;
 
-        bool has_parent = true;
-        while (has_parent) {
-            string partial;
-            model.get(current, 0, out partial);
-            fullpath = GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,
-                                            partial,
-                                            fullpath);
-            has_parent = model.iter_parent(out current, current);
+        if (r.container != null)
+        {
+            var lst = r.container.get_children();
+            lst.foreach((k) => {
+                remove_file((k as TreeItem).file);
+            });
         }
 
-        // Abspath
-        if (this.root == null)
-            error("No root");
-        fullpath = Path.build_filename(root.path, fullpath);
-        return (new File(fullpath));
-    }
-
-    bool left_button_clicked_row(Gtk.TreeModel model,
-                                 Gtk.TreeIter current)
-    {
-        // Emit the selected signal
-        var f = get_file_from_selection(model, current);
-        if (f.is_directory) {
-            var path = model.get_path(current);
-
-            if (is_row_expanded(path))
-                collapse_row(path);
-            else
-                expand_row(path, false);
-
-        }
-        selected(f);
-
-        return false;
-    }
-
-    // FIXME change this for a "get_instance" model
-    // TODO change from menu to a Gtk.Popover
-    bool right_button_clicked_row(Gtk.TreeModel model,
-                                  Gtk.TreeIter current,
-                                  Gdk.Event e)
-    {
-        var menu = new Gtk.Menu();
-
-        Gtk.MenuItem menu_item;
-
-        // File ff = get_file_from_selection(model, current);
-        // if (ff.is_directory) {
-        // }
-
-        menu_item = new Gtk.MenuItem.with_label("New File");
-        menu.add(menu_item);
-
-        menu_item = new Gtk.MenuItem.with_label("New Folder");
-        menu.add(menu_item);
-
-        var sep = new Gtk.SeparatorMenuItem();
-        menu.add(sep);
-
-        menu_item = new Gtk.MenuItem.with_label("Rename");
-        menu.add(menu_item);
-
-        menu_item = new Gtk.MenuItem.with_label("Delete");
-        menu.add(menu_item);
-
-        menu.show_all();
-        menu.attach_to_widget(this, null);
-        menu.popup_at_pointer(e);
-        return false;
+        items.remove(target);
+        r.destroy();
     }
 }
 

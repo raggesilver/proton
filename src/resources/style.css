@@ -26,3 +26,14 @@ stackswitcher > button:not(:checked):hover {
 }
 
 .open-window .titlebar { background: @theme_bg_color; border-bottom: 0; }
+
+.treeitem.selected > widget:first-child > box.horizontal {
+    background-color: @theme_selected_bg_color;
+}
+
+.treeitem.modified > widget:first-child > box.horizontal,
+.treeitem.modified > widget:first-child > box.horizontal label:backdrop { color: orange; }
+.treeitem.untracked > widget:first-child > box.horizontal,
+.treeitem.untracked > widget:first-child > box.horizontal label:backdrop { color: green; }
+.treeitem.error > widget:first-child > box.horizontal,
+.treeitem.error > widget:first-child > box.horizontal label:backdrop { color: red; }

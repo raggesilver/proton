@@ -131,8 +131,23 @@ public class Proton.Terminal : Vte.Terminal {
                 allow_bold: true,
                 allow_hyperlink: true);
 
-        if (!_init())
-            warning("Couldn't initialize terminal");
+        if (is_flatpak())
+        {
+            if (!_init())
+                warning("Couldn't initialize terminal");
+        }
+        else
+        {
+            try {
+                spawn_sync(Vte.PtyFlags.DEFAULT,
+                       root.path,
+                       {Environ.get_variable(GLib.Environ.get(), "SHELL")},
+                       {},
+                       GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+                       null,
+                       null);
+            } catch {}
+        }
 
         window.style_updated.connect(set_bg);
         set_bg();
@@ -193,3 +208,4 @@ public class Proton.Terminal : Vte.Terminal {
         set_color_background(c);
     }
 }
+

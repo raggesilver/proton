@@ -392,3 +392,39 @@ public class Proton.FlatpakSubprocess : Object {
         return false;
     }
 }
+
+public class Proton.Subprocess : Object {
+
+    public signal void finished(int status);
+
+    public string[] _argv { get; protected set; }
+    public SubprocessFlags flags { get; set; default = SubprocessFlags.NONE; }
+
+    public GLib.Subprocess sub { get; protected set; default = null; }
+
+    public Subprocess(string[] _argv, SubprocessFlags _flags)
+    {
+        flags |= _flags;
+        this._argv = _argv;
+    }
+
+    public void start() throws Error {
+        sub = new GLib.Subprocess.newv(_argv, flags);
+        _wait.begin();
+    }
+
+    private async void _wait() {
+        try {
+            yield sub.wait_async();
+            finished(sub.get_exit_status());
+        } catch (Error e) {
+            warning(e.message);
+        }
+    }
+
+    public void kill() {
+        assert(sub != null);
+
+        sub.send_signal(Posix.Signal.KILL);
+    }
+}

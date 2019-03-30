@@ -4,7 +4,7 @@
     <file>layouts/window.ui</file>
     <file>layouts/open_window.ui</file>
     <file>layouts/preferences_window.ui</file>
-    <file>layouts/TreeView.ui</file>
+    <file>layouts/treeview_popover.ui</file>
     <file>resources/style.css</file>
   </gresource>
 </gresources>
