@@ -78,6 +78,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         Object (application: app);
 
+        Gtk.IconTheme.get_default().append_search_path(
+            @"$(Constants.DATADIR)/proton/icons");
+
         // Initialize stuff
         accel_group = new Gtk.AccelGroup();
         tree_view = new TreeView(root);
@@ -108,8 +111,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
         });
 
         manager.modified.connect((mod) => {
-            set_title("Proton - " + manager.current_editor.file.name +
-                ((mod) ? " •" : ""));
+            // set_title("Proton - " + manager.current_editor.file.name +
+                // ((mod) ? " •" : ""));
         });
 
         add_accel_group(accel_group);

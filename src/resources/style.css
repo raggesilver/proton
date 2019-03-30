@@ -31,6 +31,11 @@ stackswitcher > button:not(:checked):hover {
     background-color: @theme_selected_bg_color;
 }
 
+.treeitem.selected > widget:first-child > box.horizontal,
+.treeitem.selected > widget:first-child > box.horizontal label:backdrop {
+    color: @theme_selected_fg_color;
+}
+
 .treeitem.modified > widget:first-child > box.horizontal,
 .treeitem.modified > widget:first-child > box.horizontal label:backdrop { color: orange; }
 .treeitem.untracked > widget:first-child > box.horizontal,

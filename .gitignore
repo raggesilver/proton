@@ -10,3 +10,5 @@ src/widgets/StatusBox.vala
 
 .vscode
 .idea
+
+data/icons/hicolor/icons.gresource.xml
