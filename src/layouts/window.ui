@@ -179,7 +179,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="bottom_box">
+                  <object class="GtkBox" id="bottom_panel_box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -345,7 +345,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkToggleButton">
+                      <object class="GtkToggleButton" id="toggle_left_panel_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -364,7 +364,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkToggleButton">
+                      <object class="GtkToggleButton" id="toggle_bottom_panel_button">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>

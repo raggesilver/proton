@@ -57,7 +57,13 @@ public class Proton.Window : Gtk.ApplicationWindow {
     Gtk.Button save_button;
 
     [GtkChild]
-    Gtk.Box bottom_box;
+    Gtk.ToggleButton toggle_left_panel_button;
+
+    [GtkChild]
+    Gtk.ToggleButton toggle_bottom_panel_button;
+
+    [GtkChild]
+    Gtk.Box bottom_panel_box;
 
     [GtkChild]
     Gtk.Box side_panel_box;
@@ -122,6 +128,44 @@ public class Proton.Window : Gtk.ApplicationWindow {
                 // ((mod) ? " •" : ""));
         });
 
+        toggle_left_panel_button.set_active(settings.left_panel_visible);
+        toggle_left_panel_button.clicked.connect(() => {
+            if (toggle_left_panel_button.active != settings.left_panel_visible)
+            {
+                settings.left_panel_visible = !settings.left_panel_visible;
+            }
+        });
+
+        settings.notify["left-panel-visible"].connect(() => {
+            side_panel_box.set_visible(settings.left_panel_visible);
+
+            if (toggle_left_panel_button.active != settings.left_panel_visible)
+            {
+                toggle_left_panel_button
+                    .set_active(settings.left_panel_visible);
+            }
+        });
+
+        toggle_bottom_panel_button.set_active(settings.bottom_panel_visible);
+        toggle_bottom_panel_button.clicked.connect(() => {
+            if (toggle_bottom_panel_button.active
+                    != settings.bottom_panel_visible)
+            {
+                settings.bottom_panel_visible = !settings.bottom_panel_visible;
+            }
+        });
+
+        settings.notify["bottom-panel-visible"].connect(() => {
+            bottom_panel_box.set_visible(settings.bottom_panel_visible);
+
+            if (toggle_bottom_panel_button.active
+                    != settings.bottom_panel_visible)
+            {
+                toggle_bottom_panel_button
+                    .set_active(settings.bottom_panel_visible);
+            }
+        });
+
         add_accel_group(accel_group);
         manager.connect_accels(accel_group);
 
@@ -183,13 +227,11 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
     public bool toggle_left_panel() {
         settings.left_panel_visible = !settings.left_panel_visible;
-        side_panel_box.set_visible(settings.left_panel_visible);
         return false;
     }
 
     public bool toggle_bottom_panel() {
         settings.bottom_panel_visible = !settings.bottom_panel_visible;
-        bottom_box.set_visible(settings.bottom_panel_visible);
         return false;
     }
 
@@ -224,9 +266,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
         bottom_panel_stack.set_visible_child_name("initial");
 
         side_panel_box.set_visible(settings.left_panel_visible);
-        bottom_box.set_visible(settings.bottom_panel_visible);
+        bottom_panel_box.set_visible(settings.bottom_panel_visible);
 
-        bottom_box.set_size_request(-1, settings.bottom_panel_height);
+        bottom_panel_box.set_size_request(-1, settings.bottom_panel_height);
         outer_paned.set_position(settings.left_panel_width);
     }
 
