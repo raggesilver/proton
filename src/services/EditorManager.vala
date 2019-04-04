@@ -29,8 +29,8 @@ public class Proton.EditorManager : Object {
     public signal void modified(bool is_modified);
     public signal void created(Editor editor);
 
-    private static EditorManager? instance = null;
     public Editor? current_editor;
+    public weak Window win { get; private set; }
 
     private HashTable<string, Editor> _editors;
     public HashTable<string, Editor> editors {
@@ -39,17 +39,22 @@ public class Proton.EditorManager : Object {
         }
     }
 
-    private EditorManager() {
+    public EditorManager(Window _win) {
+        win = _win;
         _editors = new HashTable<string, Editor> (str_hash, str_equal);
 
-        var mgr = Gtk.SourceStyleSchemeManager.get_default();
-        mgr.append_search_path(
-            Environment.get_home_dir() + "/.local/share/gtksourceview-4/styles");
+        Gtk.SourceStyleSchemeManager.get_default()
+            .append_search_path(
+                Environment.get_home_dir() +
+                "/.local/share/gtksourceview-4/styles"
+            );
 
-        settings.notify.connect((p) => {
-            if (p.get_name() == "style-id") {
-                update_ui();
-            }
+        settings.notify["style-id"].connect((p) => {
+            update_ui();
+        });
+
+        win.command_palette.add_command("File", "save", () => {
+            save();
         });
     }
 
@@ -95,12 +100,6 @@ public class Proton.EditorManager : Object {
         changed(ed);
 
         return ed;
-    }
-
-    public static EditorManager get_instance() {
-        if (instance == null)
-            instance = new EditorManager ();
-        return instance;
     }
 
     public void connect_accels(Gtk.AccelGroup ac) {

@@ -63,9 +63,11 @@ public class Proton.File : Object {
     public GLib.Icon icon {
         get {
             if (_icon != null)
-                return _icon;
+                return (_icon);
+            if (info == null)
+                return (null);
             _icon = GLib.ContentType.get_icon(info.get_content_type());
-            return _icon;
+            return (_icon);
         }
     }
 
@@ -110,7 +112,7 @@ public class Proton.File : Object {
 
     private void load_file_for_path(string path) {
         file = GLib.File.new_for_path(path);
-        info = new FileInfo();
+        info = null;
 
         try {
             var query = GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," +
@@ -121,8 +123,6 @@ public class Proton.File : Object {
 
             info = file.query_info(query, FileQueryInfoFlags.NONE);
         } catch (GLib.Error error) {
-            info = null;
-
             // Supress error for inexistent file
             if (error.message.index_of("No such file or directory") == -1)
                 warning(error.message);

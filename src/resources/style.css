@@ -31,10 +31,13 @@ stackswitcher > button:not(:checked):hover {
     background-color: @theme_selected_bg_color;
 }
 
-.treeitem.selected > widget:first-child > box.horizontal,
-.treeitem.selected > widget:first-child > box.horizontal label:backdrop {
+.treeitem.selected > widget:first-child > box.horizontal {
     color: @theme_selected_fg_color;
 }
+
+/*.treeitem.selected > widget:first-child > box.horizontal label:backdrop {
+    color: @theme_selected_fg_color;
+}*/
 
 .treeitem.modified > widget:first-child > box.horizontal,
 .treeitem.modified > widget:first-child > box.horizontal label:backdrop { color: orange; }
@@ -42,3 +45,5 @@ stackswitcher > button:not(:checked):hover {
 .treeitem.untracked > widget:first-child > box.horizontal label:backdrop { color: green; }
 .treeitem.error > widget:first-child > box.horizontal,
 .treeitem.error > widget:first-child > box.horizontal label:backdrop { color: red; }
+
+.completionpalette { background-color: alpha(darker(@theme_bg_color), .7); }

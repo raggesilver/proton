@@ -34,7 +34,9 @@ public class Proton.SortableBox : Gtk.Box
                spacing: spacing);
     }
 
-    public void sort(PCompareFunction comp, PIsSortableFunction? is_sort)
+    public void sort(PCompareFunction comp,
+                     PIsSortableFunction? is_sort,
+                     bool do_recursion = true)
     {
         // EventBox > Box > Image + Label
         var lst = new Array<Gtk.Widget>();
@@ -55,7 +57,7 @@ public class Proton.SortableBox : Gtk.Box
                 }
         }
 
-        if (is_sort != null)
+        if (is_sort != null && do_recursion)
         {
             for (uint i = 0; i < len; i++)
             {
@@ -223,14 +225,17 @@ public class Proton.TreeView : SortableBox
             "/com/raggesilver/Proton/layouts/treeview_popover.ui");
         popover = b.get_object("menu") as Gtk.Popover;
 
+        // FIXME this crashes randomly "munmap_chunk(): invalid pointer"
+        // new Thread<bool>("load_tree_view", () => {
+        //     build(this.root);
+        //     return (true);
+        // });
         build(this.root);
         show();
     }
 
     void build(File _root)
     {
-        print("Build %s\n", _root.path);
-
         try
         {
             var dir = Dir.open(_root.path);
@@ -254,7 +259,7 @@ public class Proton.TreeView : SortableBox
             {
                 var f = new File(@"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
 
-                insert_file(f);
+                insert_file(f, false);
 
                 if (f.is_directory)
                     build(f);
@@ -316,7 +321,7 @@ public class Proton.TreeView : SortableBox
             remove_file(f);
     }
 
-    void insert_file(File f)
+    void insert_file(File f, bool do_sort = true)
     {
         if (items.get(f.path) != null)
             return ;
@@ -346,7 +351,8 @@ public class Proton.TreeView : SortableBox
         {
             pack_start(r, false, true, 0);
             items.insert(f.path, r);
-            sort(TreeItem.tree_sort_function, null);
+            if (do_sort)
+                sort(TreeItem.tree_sort_function, null);
         }
         else if (p != null)
         {
@@ -354,7 +360,7 @@ public class Proton.TreeView : SortableBox
 
             if (parent == null)
             {
-                insert_file(new File(p.get_path()));
+                insert_file(new File(p.get_path()), do_sort);
                 parent = items.get(p.get_path());
             }
 
@@ -363,7 +369,8 @@ public class Proton.TreeView : SortableBox
                 items.insert(f.path, r);
                 parent.container.pack_start(r, false, true, 0);
                 parent.container.queue_resize();
-                parent.container.sort(TreeItem.tree_sort_function, null);
+                if (do_sort)
+                    parent.container.sort(TreeItem.tree_sort_function, null);
             }
         }
     }

@@ -68,29 +68,36 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild]
     Gtk.Paned outer_paned;
 
-    private Proton.EditorManager manager;
-    private TreeView tree_view;
-    public Gtk.AccelGroup accel_group { get; private set; }
-    private PreferencesWindow preferences_window = null;
-    // private PluginManager pm;
+    [GtkChild]
+    public Gtk.Overlay overlay;
 
-    public Window (Gtk.Application app) {
+    EditorManager     manager;
+    TreeView          tree_view;
+    PreferencesWindow preferences_window = null;
 
-        Object (application: app);
+    public Gtk.AccelGroup accel_group      { get; private set; }
+    public CommandPalette command_palette  { get; private set; }
+    public File           root             { get; protected set; }
+
+    public Window(Gtk.Application app, File root) {
+
+        Object(application: app,
+               root: root);
 
         Gtk.IconTheme.get_default().append_search_path(
             @"$(Constants.DATADIR)/proton/icons");
 
         // Initialize stuff
         accel_group = new Gtk.AccelGroup();
+        command_palette = new CommandPalette(this);
         tree_view = new TreeView(root);
-        manager = EditorManager.get_instance();
+        manager = new EditorManager(this);
 
         tree_view.changed.connect((f) => {
             if (f.is_directory || !f.is_valid_textfile)
                 return ;
 
-            Proton.EditorManager.get_instance().open(f);
+            manager.open(f);
         });
 
         tree_view.renamed.connect((o, n) => {

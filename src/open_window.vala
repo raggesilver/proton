@@ -92,9 +92,8 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
             if (res == Gtk.ResponseType.OK) {
                 var f = new File(d.get_filename());
-                root = f;
                 settings.add_recent(f.path);
-                var w = new Window(this.get_application());
+                var w = new Window(this.application, f);
                 w.show();
                 d.destroy();
                 destroy();
@@ -146,9 +145,8 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
         b.pack_start(lbl, true, true, 0);
 
         r.clicked.connect(() => {
-            root = f;
             settings.add_recent(f.path);
-            var w = new Window(this.application);
+            var w = new Window(this.application, f);
             w.show();
             destroy();
         });

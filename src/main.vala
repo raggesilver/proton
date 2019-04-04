@@ -16,42 +16,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Proton {
-    public File root;
-    public Core core;
+int main (string[] args) {
 
-    int main (string[] args) {
+    var app = Proton.Application.instance;
 
-        var app = Application.instance;
+    app.activate.connect (() => {
+        var win = new Proton.OpenWindow(app);
+        win.show();
+    });
 
-        app.activate.connect (() => {
-            // FIXME crete a welcome window
-            var win = new Proton.OpenWindow(app);
-            win.show();
-        });
+    app.open.connect((files, hint) => {
 
-        app.open.connect((files, hint) => {
+        if (files.length != 1) {
+            error("Provide one directory");
+        }
 
-            if (files.length != 1) {
-                error("Provide one directory");
-            }
+        var f = new Proton.File(files[0].get_path());
 
-            var f = new File(files[0].get_path());
+        if (!f.is_directory) {
+            error("Provide one directory");
+        }
 
-            if (!f.is_directory) {
-                error("Provide one directory");
-            }
+        var win = new Proton.Window(app, f);
+        win.show();
+    });
 
-            var win = app.active_window;
-            if (win == null) {
-                root = f;
-                core = Core.get_instance();
-                win = new Window(app);
-            }
-
-            win.show();
-        });
-
-        return app.run (args);
-    }
+    return app.run (args);
 }

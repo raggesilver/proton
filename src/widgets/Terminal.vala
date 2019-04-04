@@ -140,7 +140,7 @@ public class Proton.Terminal : Vte.Terminal {
         {
             try {
                 spawn_sync(Vte.PtyFlags.DEFAULT,
-                       root.path,
+                       window.root.path,
                        {Environ.get_variable(GLib.Environ.get(), "SHELL")},
                        {},
                        GLib.SpawnFlags.DO_NOT_REAP_CHILD,
@@ -179,7 +179,7 @@ public class Proton.Terminal : Vte.Terminal {
                 return false;
             }
 
-            var s = new FlatpakSubprocess(root.path,
+            var s = new FlatpakSubprocess(window.root.path,
                                           {"/bin/bash"},
                                           {"TERM=xterm-256color", "SHELL=/bin/bash"},
                                           SubprocessFlags.NONE,
