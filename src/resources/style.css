@@ -46,4 +46,4 @@ stackswitcher > button:not(:checked):hover {
 .treeitem.error > widget:first-child > box.horizontal,
 .treeitem.error > widget:first-child > box.horizontal label:backdrop { color: red; }
 
-.completionpalette { background-color: alpha(darker(@theme_bg_color), .7); }
+.completionpalette { background-color: alpha(darker(@theme_bg_color), .6); }

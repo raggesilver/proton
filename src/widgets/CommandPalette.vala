@@ -34,14 +34,14 @@ class Proton.Command
     public Command(string group,
                    string command,
                    string? icon,
-                   CommandCallback callback,
+                   owned CommandCallback callback,
                    bool multiple = false)
     {
         g = group;
         c = command;
         icon_name = icon;
         m = multiple;
-        cb = callback;
+        cb = (owned) callback;
     }
 }
 
@@ -50,15 +50,16 @@ public class Proton.CommandPalette : Object
     weak Window    win;
     Gtk.Entry      entry;
     Array<Command> commands;
-    Gtk.ListStore  store;
-    Gtk.Window     palette;
+    // Gtk.ListStore  store;
+    Gtk.Box        palette;
+    // Gtk.Stack      stack;
 
     enum CompletionMode {
         COMMAND,
         FILE
     }
 
-    CompletionMode completion_mode;
+    // CompletionMode completion_mode;
 
     public CommandPalette(Window _win)
     {
@@ -74,99 +75,55 @@ public class Proton.CommandPalette : Object
                                 do_show_command);
     }
 
-    public bool add_command(string group, string command, CommandCallback cb)
+    public bool add_command(string group,
+                            string command,
+                            CommandCallback cb)
     {
-        commands.append_val(new Command(group, command, null, cb));
+        commands.append_val(new Command(group, command, null, () => { cb(); }));
         repopulate_completion();
         return (true);
     }
 
-    void reset(string? text = "")
+    void do_show()
     {
-        entry.set_text(text);
-        entry.set_position(text.length);
+        palette.show();
+        entry.grab_focus();
     }
 
     bool do_show_command()
     {
-        if (palette.get_visible())
-            palette.hide();
-        else
-        {
-            palette.show();
-            palette.grab_focus();
-            entry.grab_focus();
-            reset(">");
-        }
+        do_show();
+        entry.set_text(">");
+        entry.set_position(1);
         return (false);
-    }
-
-    void build_ui()
-    {
-        var builder = new Gtk.Builder.from_resource(
-            "/com/raggesilver/Proton/layouts/command_palette.ui");
-        palette = (builder.get_object("dialog")) as Gtk.Window;
-
-        entry   = (builder.get_object("entry")) as Gtk.Entry;
-        var completion = new Gtk.EntryCompletion();
-        store = new Gtk.ListStore(1, typeof(string));
-        entry.completion = completion;
-        entry.completion.set_text_column(0);
-
-        palette.set_events(Gdk.EventMask.FOCUS_CHANGE_MASK);
-        win.set_events(Gdk.EventMask.BUTTON_PRESS_MASK);
-
-        win.button_press_event.connect((e) => {
-            // print("Pressed\n");
-            return (false);
-        });
-
-        palette.focus_out_event.connect((e) => {
-            palette.hide();
-            return (true);
-        });
-
-        palette.set_transient_for(win);
-
-        // completion_mode = CompletionMode.COMMAND;
-        // complete_command();
-    }
-
-    void on_changed()
-    {
-        string s = entry.get_text();
-        if (s[0] == '>' && (s = s.offset(1)) != null && s.length != 0 &&
-            completion_mode != CompletionMode.COMMAND)
-            complete_command();
     }
 
     void repopulate_completion()
     {
-        complete_command();
+
     }
 
-    void complete_command()
+    void build_ui()
     {
-        store.clear();
+        var b = new Gtk.Builder.from_resource(
+            "/com/raggesilver/Proton/layouts/command_palette.ui");
+        palette = (Gtk.Box) b.get_object("box");
+        entry = (Gtk.Entry) b.get_object("entry");
+        var ev = (Gtk.EventBox) b.get_object("ev");
 
-        Gtk.TreeIter it;
-        for (var i = 0; i < commands.length; i++)
-        {
-            store.append(out it);
-            store.set_value(it, 0, ">" + commands.index(i).c);
-            print("Appended >%s\n", commands.index(i).c);
-        }
+        ev.button_press_event.connect((e) => {
+            if (e.type == Gdk.EventType.BUTTON_PRESS)
+                palette.hide();
+            return (false);
+        });
 
-        entry.completion.set_match_func(command_match);
-    }
+        ev.key_press_event.connect((e) => {
+            if (e.keyval == Gdk.Key.Escape)
+                palette.hide();
+            return (false);
+        });
 
-    bool command_match(Gtk.EntryCompletion c, string k, Gtk.TreeIter it)
-    {
-        for (var i = 0; i < commands.length; i++)
-        {
-            if (commands.index(i).c.index_of(k.offset(1)) != -1)
-                return (true);
-        }
-        return (false);
+        win.overlay.add_overlay(palette);
+        win.overlay.set_overlay_pass_through(palette, true);
     }
 }

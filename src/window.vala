@@ -268,7 +268,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         side_panel_box.set_visible(settings.left_panel_visible);
         bottom_panel_box.set_visible(settings.bottom_panel_visible);
 
-        bottom_panel_box.set_size_request(-1, settings.bottom_panel_height);
+        editor_paned.set_position(settings.bottom_panel_height);
         outer_paned.set_position(settings.left_panel_width);
     }
 
@@ -333,8 +333,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         settings.pos_x = pos_x;
         settings.pos_y = pos_y;
 
-        int bph = editor_paned.get_allocated_height()
-            - editor_paned.get_position();
+        int bph = editor_paned.get_position();
         settings.bottom_panel_height = bph;
 
         settings.left_panel_width = outer_paned.get_position();
@@ -356,3 +355,4 @@ public class Proton.Window : Gtk.ApplicationWindow {
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }
+
