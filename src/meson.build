@@ -32,6 +32,8 @@ proton_sources = [
   'widgets/Container.vala',
   'widgets/Terminal.vala',
   'widgets/CommandPalette.vala',
+  'widgets/Loadable.vala',
+  'widgets/SortableBox.vala',
 ]
 
 proton_deps = [

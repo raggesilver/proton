@@ -23,52 +23,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.SortableBox : Gtk.Box
-{
-    public delegate int PCompareFunction(void *a, void *b);
-    public delegate SortableBox? PIsSortableFunction(void *a);
-
-    public SortableBox(Gtk.Orientation orientation, int spacing)
-    {
-        Object(orientation: orientation,
-               spacing: spacing);
-    }
-
-    public void sort(PCompareFunction comp,
-                     PIsSortableFunction? is_sort,
-                     bool do_recursion = true)
-    {
-        // EventBox > Box > Image + Label
-        var lst = new Array<Gtk.Widget>();
-
-        get_children().foreach((k) => { lst.append_val(k); });
-
-        var len = lst.length;
-
-        for (uint i = 0; i < len; i++)
-        {
-            for (uint j = i; j < len; j++)
-                if (comp(lst.index(j), lst.index(i)) < 0)
-                {
-                    reorder_child(lst.index(j), (int)i);
-                    Gtk.Widget tmp = lst.index(i);
-                    lst.data[i] = lst.index(j);
-                    lst.data[j] = tmp;
-                }
-        }
-
-        if (is_sort != null && do_recursion)
-        {
-            for (uint i = 0; i < len; i++)
-            {
-                var s = is_sort(lst.index(i));
-                if (s != null)
-                    s.sort(comp, is_sort);
-            }
-        }
-    }
-}
-
 public class Proton.TreeItem : Gtk.Box
 {
     public signal bool left_click();
@@ -201,25 +155,62 @@ public class Proton.TreeItem : Gtk.Box
     }
 }
 
-public class Proton.TreeView : SortableBox
+[Compact]
+public class Proton.AArray<T>
+{
+    public Array<T>      values  = new Array<T>();
+    public Array<string> indexes = new Array<string>();
+
+    public T? get(string index)
+    {
+        for (int i = 0; i < values.length; i++)
+            if (indexes.data[i] == index)
+                return (values.data[i]);
+        return (null);
+    }
+
+    public void set(string index, T val)
+    {
+        for (int i = 0; i < values.length; i++)
+            if (indexes.data[i] == index)
+            {
+                values.data[i] = val;
+                return ;
+            }
+        values.append_val(val);
+        indexes.append_val(index);
+    }
+
+    public void remove(string index)
+    {
+        for (int i = 0; i < values.length; i++)
+            if (indexes.data[i] == index)
+            {
+                values.remove_index(i);
+                indexes.remove_index(i);
+            }
+    }
+}
+
+public class Proton.TreeView : Sortable
 {
     public signal void changed(File file);
     public signal void renamed(string old, string _new);
 
-    public File root { get; protected set; }
-    public HashTable<string, TreeItem> items { get; protected set; }
-    public TreeItem? selected { get; protected set; }
+    public File                        root     { get; protected set; }
+    public HashTable<string, TreeItem> items    { get; protected set; }
+    public TreeItem?                   selected { get; protected set; }
 
     FileMonitor[] monitors = {};
-    Gtk.Popover popover;
+    Gtk.Popover   popover;
 
     public TreeView(File root)
     {
-        Object(orientation: Gtk.Orientation.VERTICAL,
-               spacing: 0,
-               items: new HashTable<string, TreeItem>(str_hash, str_equal),
-               root: root,
-               selected: null);
+        base(Gtk.Orientation.VERTICAL, 0);
+
+        items = new HashTable<string, TreeItem>(str_hash, str_equal);
+        this.root = root;
+        selected = null;
 
         var b = new Gtk.Builder.from_resource(
             "/com/raggesilver/Proton/layouts/treeview_popover.ui");
@@ -230,11 +221,16 @@ public class Proton.TreeView : SortableBox
         //     build(this.root);
         //     return (true);
         // });
-        build(this.root);
-        show();
+
+        loading = true;
+
+        build.begin(this.root, (_, res) => {
+            build.end(res);
+            loading = false;
+        });
     }
 
-    void build(File _root)
+    void do_build(File _root)
     {
         try
         {
@@ -257,18 +253,31 @@ public class Proton.TreeView : SortableBox
 
             while ((fname = dir.read_name()) != null)
             {
-                var f = new File(@"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
+                var f = new File(
+                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
 
                 insert_file(f, false);
 
                 if (f.is_directory)
-                    build(f);
+                    do_build(f);
             }
         }
         catch (Error e) { warning(e.message); }
+    }
 
-        if (_root.path == this.root.path)
-            do_sort();
+    async void build(File _root)
+    {
+        SourceFunc callback = build.callback;
+
+        new Thread<bool>("build_tree_thread", () => {
+            do_build(_root);
+            Idle.add((owned) callback);
+            return (true);
+        });
+
+        yield;
+
+        yield sort();
     }
 
     void select(TreeItem r, bool soft = false)
@@ -285,7 +294,20 @@ public class Proton.TreeView : SortableBox
 
     void do_sort()
     {
-        sort(TreeItem.tree_sort_function, TreeItem.tree_is_sortable_function);
+        base.sort(TreeItem.tree_sort_function, TreeItem.tree_is_sortable_function);
+    }
+
+    new async void sort()
+    {
+        SourceFunc callback = sort.callback;
+
+        new Thread<bool>("sort_tree_thread", () => {
+            do_sort();
+            Idle.add((owned) callback);
+            return (true);
+        });
+
+        yield;
     }
 
     void on_monitor_changed(GLib.File _f, GLib.File? _of, FileMonitorEvent e)
@@ -304,7 +326,7 @@ public class Proton.TreeView : SortableBox
             renamed(of.path, f.path);
 
             if (f.is_directory)
-                build(f);
+                build.begin(f);
         }
         else if (e == FileMonitorEvent.MOVED_OUT)
         {
@@ -352,7 +374,7 @@ public class Proton.TreeView : SortableBox
             pack_start(r, false, true, 0);
             items.insert(f.path, r);
             if (do_sort)
-                sort(TreeItem.tree_sort_function, null);
+                base.sort(TreeItem.tree_sort_function, null);
         }
         else if (p != null)
         {
