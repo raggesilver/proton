@@ -155,50 +155,13 @@ public class Proton.TreeItem : Gtk.Box
     }
 }
 
-[Compact]
-public class Proton.AArray<T>
-{
-    public Array<T>      values  = new Array<T>();
-    public Array<string> indexes = new Array<string>();
-
-    public T? get(string index)
-    {
-        for (int i = 0; i < values.length; i++)
-            if (indexes.data[i] == index)
-                return (values.data[i]);
-        return (null);
-    }
-
-    public void set(string index, T val)
-    {
-        for (int i = 0; i < values.length; i++)
-            if (indexes.data[i] == index)
-            {
-                values.data[i] = val;
-                return ;
-            }
-        values.append_val(val);
-        indexes.append_val(index);
-    }
-
-    public void remove(string index)
-    {
-        for (int i = 0; i < values.length; i++)
-            if (indexes.data[i] == index)
-            {
-                values.remove_index(i);
-                indexes.remove_index(i);
-            }
-    }
-}
-
 public class Proton.TreeView : Sortable
 {
     public signal void changed(File file);
     public signal void renamed(string old, string _new);
 
     public File                        root     { get; protected set; }
-    public HashTable<string, TreeItem> items    { get; protected set; }
+    public HashTable<string, TreeItem> items;
     public TreeItem?                   selected { get; protected set; }
 
     FileMonitor[] monitors = {};
@@ -216,68 +179,15 @@ public class Proton.TreeView : Sortable
             "/com/raggesilver/Proton/layouts/treeview_popover.ui");
         popover = b.get_object("menu") as Gtk.Popover;
 
-        // FIXME this crashes randomly "munmap_chunk(): invalid pointer"
-        // new Thread<bool>("load_tree_view", () => {
-        //     build(this.root);
-        //     return (true);
-        // });
-
         loading = true;
 
         build.begin(this.root, (_, res) => {
             build.end(res);
-            loading = false;
+            sort.begin((__, ress) => {
+                sort.end(ress);
+                loading = false;
+            });
         });
-    }
-
-    void do_build(File _root)
-    {
-        try
-        {
-            var dir = Dir.open(_root.path);
-            string? fname = null;
-
-            // Attach monitor
-            try
-            {
-                var m = _root.file.monitor_directory(
-                            FileMonitorFlags.WATCH_MOVES);
-
-                m.changed.connect(on_monitor_changed);
-                monitors += m;
-            }
-            catch
-            {
-                warning("Could not create monitor for %s\n", _root.path);
-            }
-
-            while ((fname = dir.read_name()) != null)
-            {
-                var f = new File(
-                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
-
-                insert_file(f, false);
-
-                if (f.is_directory)
-                    do_build(f);
-            }
-        }
-        catch (Error e) { warning(e.message); }
-    }
-
-    async void build(File _root)
-    {
-        SourceFunc callback = build.callback;
-
-        new Thread<bool>("build_tree_thread", () => {
-            do_build(_root);
-            Idle.add((owned) callback);
-            return (true);
-        });
-
-        yield;
-
-        yield sort();
     }
 
     void select(TreeItem r, bool soft = false)
@@ -343,13 +253,115 @@ public class Proton.TreeView : Sortable
             remove_file(f);
     }
 
+    async void build(File _root)
+    {
+        SourceFunc callback = build.callback;
+
+        new Thread<bool>("build_tree_thread", () => {
+
+            t_do_build.begin(_root, (_, res) => {
+                Idle.add((owned) callback);
+            });
+
+            return (true);
+        });
+
+        yield;
+    }
+
+    void do_build(File _root)
+    {
+        try
+        {
+            var dir = Dir.open(_root.path);
+            string? fname = null;
+
+            // Attach monitor
+            try
+            {
+                var m = _root.file.monitor_directory(
+                            FileMonitorFlags.WATCH_MOVES);
+
+                m.changed.connect(on_monitor_changed);
+                monitors += m;
+            }
+            catch
+            {
+                warning("Could not create monitor for %s\n", _root.path);
+            }
+
+            while ((fname = dir.read_name()) != null)
+            {
+                var f = new File(
+                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
+
+                Idle.add(() => {
+                    insert_file(f, false);
+                    return (false);
+                });
+
+                if (f.is_directory)
+                    do_build(f);
+            }
+        }
+        catch (Error e) { warning(e.message); }
+    }
+
+    async void t_do_build(File _root)
+    {
+        try
+        {
+            var dir = Dir.open(_root.path);
+            string? fname = null;
+
+            // Attach monitor
+            try
+            {
+                var m = _root.file.monitor_directory(
+                            FileMonitorFlags.WATCH_MOVES);
+
+                m.changed.connect(on_monitor_changed);
+                monitors += m;
+            }
+            catch
+            {
+                warning("Could not create monitor for %s\n", _root.path);
+            }
+
+            while ((fname = dir.read_name()) != null)
+            {
+                var f = new File(
+                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
+
+                yield t_insert_file(f, false);
+
+                if (f.is_directory)
+                    yield t_do_build(f);
+            }
+        }
+        catch (Error e) { warning(e.message); }
+    }
+
+    async void t_item_insert(string key, TreeItem val)
+    {
+        SourceFunc cb = t_item_insert.callback;
+
+        Idle.add(() => {
+            items.insert(key, val);
+            cb();
+            return (false);
+        });
+
+        yield;
+    }
+
     void insert_file(File f, bool do_sort = true)
     {
         if (items.get(f.path) != null)
             return ;
 
-        var r = new TreeItem(f,
-            f.path.replace(@"$(this.root.path)/", "").split("/").length - 1);
+        var arr = f.path.replace(@"$(this.root.path)/", "").split("/");
+        var r = new TreeItem(f, arr.length - 1);
 
         r.left_click.connect(() => {
             select(r);
@@ -369,10 +381,12 @@ public class Proton.TreeView : Sortable
         });
 
         var p = f.file.get_parent();
+
         if (p != null && p.get_path() == root.path)
         {
             pack_start(r, false, true, 0);
             items.insert(f.path, r);
+
             if (do_sort)
                 base.sort(TreeItem.tree_sort_function, null);
         }
@@ -390,9 +404,69 @@ public class Proton.TreeView : Sortable
             {
                 items.insert(f.path, r);
                 parent.container.pack_start(r, false, true, 0);
-                parent.container.queue_resize();
+
                 if (do_sort)
+                {
                     parent.container.sort(TreeItem.tree_sort_function, null);
+                }
+            }
+        }
+    }
+
+    async void t_insert_file(File f, bool do_sort = true)
+    {
+        if (items.get(f.path) != null)
+            return ;
+
+        var arr = f.path.replace(@"$(this.root.path)/", "").split("/");
+        var r = new TreeItem(f, arr.length - 1);
+
+        r.left_click.connect(() => {
+            select(r);
+
+            if (r.is_directory)
+                r.toggle_expanded();
+
+            return (false);
+        });
+
+        r.right_click.connect(() => {
+            select(r, true);
+
+            popover.relative_to = r;
+            popover.popup();
+            return (false);
+        });
+
+        var p = f.file.get_parent();
+
+        if (p != null && p.get_path() == root.path)
+        {
+            pack_start(r, false, true, 0);
+            yield t_item_insert(f.path, r);
+
+            if (do_sort)
+                base.sort(TreeItem.tree_sort_function, null);
+        }
+        else if (p != null)
+        {
+            var parent = items.get(p.get_path());
+
+            if (parent == null)
+            {
+                yield t_insert_file(new File(p.get_path()), do_sort);
+                parent = items.get(p.get_path());
+            }
+
+            if (parent != null)
+            {
+                yield t_item_insert(f.path, r);
+                parent.container.pack_start(r, false, true, 0);
+
+                if (do_sort)
+                {
+                    parent.container.sort(TreeItem.tree_sort_function, null);
+                }
             }
         }
     }
