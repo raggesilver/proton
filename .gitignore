@@ -1,8 +1,10 @@
 _build/
-*.*~
-\#*#
-*test*
 _native_build/
+_proton_build/
+*.*~
+*test*
+\#*#
+
 Makefile
 
 src/widgets/LinkedToggler.vala

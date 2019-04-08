@@ -227,9 +227,14 @@ public class Proton.TreeView : Sortable
         var of = (_of == null) ? null : new File(_of.get_path());
 
         if (e == FileMonitorEvent.CREATED)
+        {
             insert_file(f);
-        else if (e == FileMonitorEvent.MOVED_OUT)
-            remove_file(f);
+
+            if (f.is_directory)
+            {
+                do_build(f);
+            }
+        }
         else if (e == FileMonitorEvent.MOVED_IN)
         {
             insert_file(f);
@@ -251,7 +256,9 @@ public class Proton.TreeView : Sortable
             renamed(f.path, of.path);
         }
         else if (e == FileMonitorEvent.DELETED)
+        {
             remove_file(f);
+        }
     }
 
     async void build(File _root)
@@ -296,14 +303,14 @@ public class Proton.TreeView : Sortable
                 var f = new File(
                     @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
 
-                Idle.add(() => {
-                    insert_file(f, false);
-                    return (false);
-                });
+                insert_file(f);
 
                 if (f.is_directory)
                     do_build(f);
             }
+
+            items.get(_root.path).container.sort(TreeItem.tree_sort_function,
+                                                 null);
         }
         catch (Error e) { warning(e.message); }
     }
@@ -469,25 +476,30 @@ public class Proton.TreeView : Sortable
                     parent.container.sort(TreeItem.tree_sort_function, null);
                 }
             }
+            // If there is no parent and do_sort is true, sort the root
+            else if (do_sort)
+                base.sort(TreeItem.tree_sort_function, null);
         }
     }
 
     void remove_file(File f)
     {
-        string target = f.file.get_path();
-        var r = items.get(target);
-        if (r == null)
+        string target = f.path;
+        TreeItem? r = null;
+
+        if ((r = (items.get(target))) == null)
             return ;
+
+        if (!items.steal(target))
+            warning("COULDN'T STEAL %s", target);
 
         if (r.container != null)
         {
             var lst = r.container.get_children();
-            lst.foreach((k) => {
+            foreach (var k in lst)
                 remove_file((k as TreeItem).file);
-            });
         }
 
-        items.remove(target);
         r.destroy();
     }
 }
