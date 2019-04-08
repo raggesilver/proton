@@ -4,6 +4,7 @@
     <file>layouts/command_palette.ui</file>
     <file>layouts/open_window.ui</file>
     <file>layouts/preferences_window.ui</file>
+    <file>layouts/status_box.ui</file>
     <file>layouts/treeview_popover.ui</file>
     <file>layouts/window.ui</file>
     <file>resources/style.css</file>

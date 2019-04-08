@@ -192,7 +192,6 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="stack">bottom_panel_stack</property>
-                            <property name="homogeneous">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -285,7 +284,7 @@
         <property name="can_focus">False</property>
         <property name="show_close_button">True</property>
         <child type="title">
-          <object class="GtkBox">
+          <object class="GtkBox" id="title_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">6</property>

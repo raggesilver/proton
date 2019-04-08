@@ -66,6 +66,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
     Gtk.Box bottom_panel_box;
 
     [GtkChild]
+    Gtk.Box title_box;
+
+    [GtkChild]
     Gtk.Box side_panel_box;
 
     [GtkChild]
@@ -99,6 +102,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
         tree_view = new TreeView(root);
         manager = new EditorManager(this);
 
+        var status_box = new StatusBox(this);
+        title_box.set_center_widget(status_box);
+
         tree_view.changed.connect((f) => {
             if (f.is_directory || !f.is_valid_textfile)
                 return ;
@@ -120,12 +126,14 @@ public class Proton.Window : Gtk.ApplicationWindow {
             if (ed != null && ed.file != null) {
                 save_button.set_sensitive(true);
                 editor_stack.set_visible_child(ed.sview);
+                status_box.set_filename(manager.current_editor.file.name +
+                    ((manager.current_editor.is_modified) ? " •" : ""));
             }
         });
 
         manager.modified.connect((mod) => {
-            // set_title("Proton - " + manager.current_editor.file.name +
-                // ((mod) ? " •" : ""));
+            status_box.set_filename(manager.current_editor.file.name +
+                ((mod) ? " •" : ""));
         });
 
         toggle_left_panel_button.set_active(settings.left_panel_visible);
@@ -349,7 +357,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         css_provider.load_from_resource(
             "/com/raggesilver/Proton/resources/style.css");
 
-        Gtk.StyleContext.add_provider_for_screen (
+        Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(),
             css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);

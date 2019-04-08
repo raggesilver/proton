@@ -7,9 +7,6 @@ _proton_build/
 
 Makefile
 
-src/widgets/LinkedToggler.vala
-src/widgets/StatusBox.vala
-
 .vscode
 .idea
 

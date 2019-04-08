@@ -51,3 +51,11 @@ button.slim-button { padding-left: 1px; padding-right: 1px; }
 
 .completionpalette,
 .loadable > spinner { background-color: alpha(darker(@theme_bg_color), .6); }
+
+.statusbox { padding: 0; padding-left: 1em; min-width: 20em; background: @theme_bg_color; border-radius: 5px; border: 1px solid @borders; }
+.statusbox > stack { margin-right: 1em; }
+.statusbox > label { margin-right: 1em; }
+.statusbox:hover { background: darker(@theme_bg_color); }
+.statusbox > * { margin: 0; border-top: 0; border-bottom: 0; }
+.statusbox > *:first-child { border-left: 0; }
+.statusbox > *:last-child { border-right: 0; }
