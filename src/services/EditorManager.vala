@@ -53,9 +53,11 @@ public class Proton.EditorManager : Object {
             update_ui();
         });
 
-        win.command_palette.add_command("File", "save", () => {
+        var save_command = new Command(_win, "File", "save", null, () => {
             save();
         });
+
+        win.command_palette.add_command(save_command);
     }
 
     private Editor new_editor(File f) {

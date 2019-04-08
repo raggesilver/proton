@@ -8,15 +8,15 @@ Proton is a simple text editor, soon-to-be IDE.
 Use `flatpak` or `meson` (ninja) to install or compile Proton.
 
 ## Features worth sharing
-- Integrated terminal (doesn't work on flatpak yet)
+- Integrated terminal
 - Editorconfig plugin
 
-## Todos <span style="font-size: 10pt">(sorted by importance)</span>
-1. Command palette
-2. File popover + file operations
+## Todos
+1. Command palette - ongoing
+2. File popover + file operations - ongoing
 3. Preferences menu
 4. Plugins: run, 42, git
-5. Finish terminal widget
+5. Finish terminal widget - ongoing
 6. Finish `OpenWindow`[^1]
 
 - ~~File modified characted on the window title (e.g "Proton - filename.c •")~~

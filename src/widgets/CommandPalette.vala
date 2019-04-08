@@ -23,25 +23,49 @@ namespace Proton
     public delegate void CommandCallback();
 }
 
-class Proton.Command
+public class Proton.Command
 {
+    public signal void show_page();
+
+    protected weak Window win;
+
     public string g;
     public string c;
     public string? icon_name;
-    public bool m;
     public CommandCallback cb;
 
-    public Command(string group,
+    public Gtk.Widget? page = null;
+
+    public Command(Window _win,
+                   string group,
                    string command,
                    string? icon,
-                   owned CommandCallback callback,
-                   bool multiple = false)
+                   owned CommandCallback callback)
     {
+        win = _win;
         g = group;
         c = command;
         icon_name = icon;
-        m = multiple;
         cb = (owned) callback;
+    }
+}
+
+public class Proton.EntryCommand : Proton.Command
+{
+    public Gtk.Entry entry { get; protected set; }
+
+    public EntryCommand(Window _win,
+                        string group,
+                        string command,
+                        string? icon)
+    {
+        entry = new Gtk.Entry();
+
+        page = entry as Gtk.Widget;
+
+        base(_win, group, command, icon, () => {
+            show_page();
+        });
     }
 }
 
@@ -52,7 +76,7 @@ public class Proton.CommandPalette : Object
     Array<Command> commands;
     // Gtk.ListStore  store;
     Gtk.Box        palette;
-    // Gtk.Stack      stack;
+    Gtk.Stack      stack;
 
     enum CompletionMode {
         COMMAND,
@@ -75,11 +99,17 @@ public class Proton.CommandPalette : Object
                                 do_show_command);
     }
 
-    public bool add_command(string group,
-                            string command,
-                            CommandCallback cb)
+    public bool add_command(Command command)
     {
-        commands.append_val(new Command(group, command, null, () => { cb(); }));
+        if (command.page != null)
+        {
+            // Add page to stack and connect signal
+            stack.add_named(command.page, @"$(command.g)$(command.c)");
+            command.show_page.connect(() => {
+                stack.set_visible_child(command.page);
+            });
+        }
+        commands.append_val(command);
         repopulate_completion();
         return (true);
     }
@@ -88,6 +118,7 @@ public class Proton.CommandPalette : Object
     {
         palette.show();
         entry.grab_focus();
+        stack.set_visible_child_name("main");
     }
 
     bool do_show_command()
@@ -109,6 +140,7 @@ public class Proton.CommandPalette : Object
             "/com/raggesilver/Proton/layouts/command_palette.ui");
         palette = (Gtk.Box) b.get_object("box");
         entry = (Gtk.Entry) b.get_object("entry");
+        stack = (Gtk.Stack) b.get_object("stack");
         var ev = (Gtk.EventBox) b.get_object("ev");
 
         ev.button_press_event.connect((e) => {
@@ -119,6 +151,8 @@ public class Proton.CommandPalette : Object
 
         ev.key_press_event.connect((e) => {
             if (e.keyval == Gdk.Key.Escape)
+                palette.hide();
+            if (e.keyval == Gdk.Key.Alt_L)
                 palette.hide();
             return (false);
         });

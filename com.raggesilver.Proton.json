@@ -41,9 +41,9 @@
     	    "name": "gtksourceview",
     	    "sources": [
     	    	{
-    	    	    "type": "archive",
-    	    	    "url": "https://gitlab.gnome.org/GNOME/gtksourceview/-/archive/3.24.9/gtksourceview-3.24.9.tar.bz2",
-    	    	    "sha256": "a370c5039fe5e8a6f461bd9a9d7cf38223549946fb7c6e85760199243ec8949a"
+    	    	    "type": "git",
+    	    	    "url": "https://gitlab.gnome.org/GNOME/gtksourceview",
+                    "tag": "4.2.0"
     	    	}
     	    ]
     	},
@@ -82,7 +82,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "file:///home/pqueiroz/Projects/proton"
+                    "url": "https://gitlab.com/raggesilver-proton/proton"
                 }
             ]
         }

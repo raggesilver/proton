@@ -179,6 +179,7 @@
                 </child>
                 <child>
                   <object class="GtkBox" id="bottom_panel_box">
+                    <property name="name">bottom_panel</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -191,9 +192,10 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="stack">bottom_panel_stack</property>
+                            <property name="homogeneous">True</property>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
@@ -235,17 +237,17 @@
                       <object class="GtkStack" id="bottom_panel_stack">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="vhomogeneous">False</property>
                         <property name="transition_type">slide-up-down</property>
                         <child>
                           <object class="GtkLabel">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Batata</property>
+                            <property name="label" translatable="yes">INITIAL</property>
                           </object>
                           <packing>
                             <property name="name">initial</property>
-                            <property name="title" translatable="yes">Initial</property>
+                            <property name="title" translatable="yes">INITIAL</property>
                           </packing>
                         </child>
                       </object>

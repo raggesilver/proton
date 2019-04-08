@@ -204,7 +204,8 @@ public class Proton.TreeView : Sortable
 
     void do_sort()
     {
-        base.sort(TreeItem.tree_sort_function, TreeItem.tree_is_sortable_function);
+        base.sort(TreeItem.tree_sort_function,
+                  TreeItem.tree_is_sortable_function);
     }
 
     new async void sort()
