@@ -40,28 +40,21 @@ private class Runner : Object, Proton.PluginIface {
         loader.left_hb_box.pack_start(btn);
         loader.left_hb_box.reorder_child(btn, 0);
 
+        uint _pd = 0;
+
         btn.clicked.connect(() => {
-            Proton.Subprocess sp = null;
             if (!working)
             {
                 on_start();
-                // var sp = new Proton.FlatpakSubprocess(null,
-                //                                       {"sleep", "5"},
-                //                                       {},
-                //                                       SubprocessFlags.NONE,
-                //                                       -1, -1, -1);
-                // sp.finished.connect(() => {
-                //     on_finish();
-                // });
 
-                sp = new Proton.Subprocess({"sleep", "5"}, SubprocessFlags.NONE);
-                sp.start();
-                sp.finished.connect((ret) => {
-                   on_finish();
-                   print("Exited with code %d\n", ret);
+                _pd = Timeout.add(1000, () => {
+                    on_finish();
+                    return (false);
                 });
+
             } else {
-                sp.kill();
+                Source.remove(_pd);
+                on_finish(); // Or on_abort
             }
         });
     }

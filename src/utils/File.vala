@@ -63,9 +63,9 @@ public class Proton.File : Object {
     public GLib.Icon icon {
         get {
             if (_icon != null)
-                return _icon;
+                return (_icon);
             _icon = GLib.ContentType.get_icon(info.get_content_type());
-            return _icon;
+            return (_icon);
         }
     }
 
@@ -110,7 +110,7 @@ public class Proton.File : Object {
 
     private void load_file_for_path(string path) {
         file = GLib.File.new_for_path(path);
-        info = new FileInfo();
+        info = null;
 
         try {
             var query = GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," +
@@ -121,8 +121,6 @@ public class Proton.File : Object {
 
             info = file.query_info(query, FileQueryInfoFlags.NONE);
         } catch (GLib.Error error) {
-            info = null;
-
             // Supress error for inexistent file
             if (error.message.index_of("No such file or directory") == -1)
                 warning(error.message);
@@ -147,27 +145,31 @@ public class Proton.File : Object {
 
     public async string? read_async() {
 
-        if (!exists) {
+        if (!exists)
+        {
             warning(@"File does not exist $(name)");
-            return null;
+            return (null);
         }
 
-        try {
-            var s = new StringBuilder();
-            DataInputStream d = new DataInputStream(file.read());
-            string line = null;
+        /*
+         * This may seem odd, but it is still faster than reading the file
+         * line by line
+         */
 
-            while ((line = yield d.read_line_async(Priority.DEFAULT)) != null) {
-                if (s.len != 0)
-                    s.append_c('\n');
+        var f = FileStream.open(path, "r");
+        f.seek(0, FileSeek.END);
+        long size = f.tell();
+        f.rewind();
 
-                s.append(line);
-            }
-            return s.str;
-        } catch (Error e) {
-            warning(e.message);
-            return null;
-        }
+        var buf = new uint8[size];
+        var sz = f.read(buf, 1);
+
+        assert(sz == size);
+
+        var s = (sz == 0) ? "" : (string)buf;
+        s = s.make_valid((ssize_t)sz);
+
+        return (s);
     }
 
     public async bool write_async(string text) {

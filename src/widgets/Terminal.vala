@@ -23,189 +23,72 @@
  * SPDX-License-Identifier: MIT
  */
 
-using Posix;
-
-[Compact]
-static inline int pty_fd_steal(int *fd)
-{
-    int ret = *fd;
-    *fd = -1;
-    return ret;
-}
-
-[Compact]
-int pty_intercept_create_slave(int master_fd, bool blocking)
-{
-    int ret = -1;
-    int extra = (blocking) ? 0 : O_NONBLOCK;
-
-    GLib.assert(master_fd != -1);
-
-    if (grantpt(master_fd) != 0)
-    {
-        warning("grantpt");
-        return -1;
-    }
-
-    if (unlockpt(master_fd) != 0)
-    {
-        warning("unlockpt");
-        return -1;
-    }
-
-    var name = new char[4096];
-    if (Linux.Termios.ptsname_r(master_fd, name) != 0)
-    {
-        warning("Linux thing failed: %s", (Posix.errno == EINVAL) ? "Buf null" : (Posix.errno == ERANGE) ? "buf too small" : "no tty");
-        return -1;
-    }
-
-    ret = open((string)name, O_RDWR | FD_CLOEXEC | extra);
-    if (ret == -1 && Posix.errno == EINVAL)
-    {
-        int flags;
-
-        ret = open((string)name, O_RDWR | FD_CLOEXEC);
-        if (ret == -1 && Posix.errno == EINVAL)
-            ret = open((string)name, O_RDWR);
-
-        if (ret == -1)
-        {
-            warning("Couldn't help it");
-            return -1;
-        }
-
-        flags = fcntl(ret, F_GETFD, 0);
-        if ((flags & FD_CLOEXEC) == 0)
-        {
-            if (fcntl(ret, F_SETFD, flags | FD_CLOEXEC) < 0)
-            {
-                warning("fcntl fail");
-                return -1;
-            }
-
-            if (!blocking)
-            {
-                try {
-                    if (!Unix.set_fd_nonblocking(ret, true))
-                    {
-                        warning("Blocking failed");
-                        return -1;
-                    }
-                } catch {
-                    warning("Explode");
-                    return -1;
-                }
-            }
-        }
-    }
-
-    return pty_fd_steal(&ret);
-}
-
-[Compact]
-int pty_create_slave(Vte.Pty pty)
-{
-    int master_fd;
-
-    master_fd = pty.get_fd();
-    if (master_fd < 0)
-    {
-        warning("Invalid master_fd");
-        return -1;
-    }
-
-    return pty_intercept_create_slave(master_fd, true);
-}
+const Gdk.RGBA solarized_palette[] = {
+  /*
+   * Solarized palette (1.0.0beta2):
+   * http://ethanschoonover.com/solarized
+   */
+  { 0.02745,  0.211764, 0.258823, 1 },
+  { 0.862745, 0.196078, 0.184313, 1 },
+  { 0.521568, 0.6,      0,        1 },
+  { 0.709803, 0.537254, 0,        1 },
+  { 0.149019, 0.545098, 0.823529, 1 },
+  { 0.82745,  0.211764, 0.509803, 1 },
+  { 0.164705, 0.631372, 0.596078, 1 },
+  { 0.933333, 0.909803, 0.835294, 1 },
+  { 0,        0.168627, 0.211764, 1 },
+  { 0.796078, 0.294117, 0.086274, 1 },
+  { 0.345098, 0.431372, 0.458823, 1 },
+  { 0.396078, 0.482352, 0.513725, 1 },
+  { 0.513725, 0.580392, 0.588235, 1 },
+  { 0.423529, 0.443137, 0.768627, 1 },
+  { 0.57647,  0.631372, 0.631372, 1 },
+  { 0.992156, 0.964705, 0.890196, 1 },
+};
 
 public class Proton.Terminal : Vte.Terminal {
 
     public weak Proton.Window window { get; construct; }
 
-    int tty_fd = -1;
-    int out_fd = -1;
-    int err_fd = -1;
+    Gdk.RGBA bg;
+    Gdk.RGBA fg;
 
     public Terminal(Proton.Window _window) {
         Object (window: _window,
                 allow_bold: true,
                 allow_hyperlink: true);
 
-        if (is_flatpak())
+        try
         {
-            if (!_init())
-                warning("Couldn't initialize terminal");
-        }
-        else
-        {
-            try {
-                spawn_sync(Vte.PtyFlags.DEFAULT,
-                       root.path,
-                       {Environ.get_variable(GLib.Environ.get(), "SHELL")},
-                       {},
-                       GLib.SpawnFlags.DO_NOT_REAP_CHILD,
-                       null,
-                       null);
-            } catch {}
-        }
+            spawn_sync(Vte.PtyFlags.DEFAULT,
+                       window.root.path,
+                       {Environ.get_variable(Environ.get(), "SHELL")},
+                       {"TERM=xterm-256color"},
+                       SpawnFlags.DO_NOT_REAP_CHILD,
+                       null, null, null);
 
-        window.style_updated.connect(set_bg);
-        set_bg();
+
+            if (is_flatpak())
+            {
+                feed_child((char[]) ("flatpak-spawn --env=\"TERM=xterm-256color"
+                    + "\" --host bash\n$(getent passwd $LOGNAME | cut -d: -f7)"
+                    + "\nreset\n"));
+            }
+        }
+        catch (Error e) { warning(e.message); }
+
+        window.style_updated.connect(update_ui);
+
+        update_ui();
+
         show();
     }
 
-    private bool _init() {
+    private void update_ui() {
+        window.get_style_context().lookup_color("theme_base_color", out bg);
+        window.get_style_context().lookup_color("theme_fg_color", out fg);
 
-        try {
-            var pty = pty_new_sync(Vte.PtyFlags.DEFAULT |
-                                   Vte.PtyFlags.NO_LASTLOG |
-                                   Vte.PtyFlags.NO_UTMP |
-                                   Vte.PtyFlags.NO_WTMP,
-                                   null);
-            set_pty(pty);
-
-            if ((tty_fd = pty_create_slave(pty)) == -1)
-            {
-                warning("#1");
-                return false;
-            }
-
-            if (tty_fd == GLib.stdin.fileno())
-                warning("WHATTHEFUCK");
-
-            if ((out_fd = dup(tty_fd)) == -1 || (err_fd = dup(tty_fd)) == -1)
-            {
-                warning("#2");
-                return false;
-            }
-
-            var s = new FlatpakSubprocess(root.path,
-                                          {"/bin/bash"},
-                                          {"TERM=xterm-256color", "SHELL=/bin/bash"},
-                                          SubprocessFlags.NONE,
-                                          tty_fd,
-                                          out_fd,
-                                          err_fd);
-
-            s.finished.connect(() => {
-                // TODO connect this to a "destroy terminal tab" function
-                print("terminal exited");
-            });
-
-            pty.child_setup();
-
-        } catch (GLib.Error error) {
-            warning(error.message);
-            return false;
-        }
-
-        return true;
-    }
-
-    private void set_bg() {
-        Gdk.RGBA c;
-        window.get_style_context().lookup_color("theme_base_color", out c);
-        set_color_background(c);
+        set_colors(fg, bg, solarized_palette);
     }
 }
 

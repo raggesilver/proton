@@ -57,7 +57,13 @@ public class Proton.Window : Gtk.ApplicationWindow {
     Gtk.Button save_button;
 
     [GtkChild]
-    Gtk.Box bottom_box;
+    Gtk.ToggleButton toggle_left_panel_button;
+
+    [GtkChild]
+    Gtk.ToggleButton toggle_bottom_panel_button;
+
+    [GtkChild]
+    Gtk.Box bottom_panel_box;
 
     [GtkChild]
     Gtk.Box side_panel_box;
@@ -68,29 +74,36 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild]
     Gtk.Paned outer_paned;
 
-    private Proton.EditorManager manager;
-    private TreeView tree_view;
-    public Gtk.AccelGroup accel_group { get; private set; }
-    private PreferencesWindow preferences_window = null;
-    // private PluginManager pm;
+    [GtkChild]
+    public Gtk.Overlay overlay;
 
-    public Window (Gtk.Application app) {
+    EditorManager     manager;
+    TreeView          tree_view;
+    PreferencesWindow preferences_window = null;
 
-        Object (application: app);
+    public Gtk.AccelGroup accel_group      { get; private set; }
+    public CommandPalette command_palette  { get; private set; }
+    public File           root             { get; protected set; }
+
+    public Window(Gtk.Application app, File root) {
+
+        Object(application: app,
+               root: root);
 
         Gtk.IconTheme.get_default().append_search_path(
             @"$(Constants.DATADIR)/proton/icons");
 
         // Initialize stuff
         accel_group = new Gtk.AccelGroup();
+        command_palette = new CommandPalette(this);
         tree_view = new TreeView(root);
-        manager = EditorManager.get_instance();
+        manager = new EditorManager(this);
 
         tree_view.changed.connect((f) => {
             if (f.is_directory || !f.is_valid_textfile)
                 return ;
 
-            Proton.EditorManager.get_instance().open(f);
+            manager.open(f);
         });
 
         tree_view.renamed.connect((o, n) => {
@@ -113,6 +126,44 @@ public class Proton.Window : Gtk.ApplicationWindow {
         manager.modified.connect((mod) => {
             // set_title("Proton - " + manager.current_editor.file.name +
                 // ((mod) ? " •" : ""));
+        });
+
+        toggle_left_panel_button.set_active(settings.left_panel_visible);
+        toggle_left_panel_button.clicked.connect(() => {
+            if (toggle_left_panel_button.active != settings.left_panel_visible)
+            {
+                settings.left_panel_visible = !settings.left_panel_visible;
+            }
+        });
+
+        settings.notify["left-panel-visible"].connect(() => {
+            side_panel_box.set_visible(settings.left_panel_visible);
+
+            if (toggle_left_panel_button.active != settings.left_panel_visible)
+            {
+                toggle_left_panel_button
+                    .set_active(settings.left_panel_visible);
+            }
+        });
+
+        toggle_bottom_panel_button.set_active(settings.bottom_panel_visible);
+        toggle_bottom_panel_button.clicked.connect(() => {
+            if (toggle_bottom_panel_button.active
+                    != settings.bottom_panel_visible)
+            {
+                settings.bottom_panel_visible = !settings.bottom_panel_visible;
+            }
+        });
+
+        settings.notify["bottom-panel-visible"].connect(() => {
+            bottom_panel_box.set_visible(settings.bottom_panel_visible);
+
+            if (toggle_bottom_panel_button.active
+                    != settings.bottom_panel_visible)
+            {
+                toggle_bottom_panel_button
+                    .set_active(settings.bottom_panel_visible);
+            }
         });
 
         add_accel_group(accel_group);
@@ -176,13 +227,11 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
     public bool toggle_left_panel() {
         settings.left_panel_visible = !settings.left_panel_visible;
-        side_panel_box.set_visible(settings.left_panel_visible);
         return false;
     }
 
     public bool toggle_bottom_panel() {
         settings.bottom_panel_visible = !settings.bottom_panel_visible;
-        bottom_box.set_visible(settings.bottom_panel_visible);
         return false;
     }
 
@@ -197,9 +246,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         side_panel_stack.set_visible_child_name("treeview");
 
-        // bottom_panel_stack.add_titled(wrap_scroller(new Terminal(this)),
-        //                               "terminal",
-        //                               "Terminal");
+        bottom_panel_stack.add_titled(wrap_scroller(new Terminal(this)),
+                                      "terminal",
+                                      "TERMINAL");
 
         bottom_panel_stack.notify.connect((spec) => {
             if (spec.name != "visible-child-name")
@@ -214,12 +263,12 @@ public class Proton.Window : Gtk.ApplicationWindow {
                 bottom_panel_aux_stack.set_visible_child_name("empty");
         });
 
-        bottom_panel_stack.set_visible_child_name("initial");
+        bottom_panel_stack.set_visible_child_name("terminal");
 
         side_panel_box.set_visible(settings.left_panel_visible);
-        bottom_box.set_visible(settings.bottom_panel_visible);
+        bottom_panel_box.set_visible(settings.bottom_panel_visible);
 
-        bottom_box.set_size_request(-1, settings.bottom_panel_height);
+        editor_paned.set_position(settings.bottom_panel_height);
         outer_paned.set_position(settings.left_panel_width);
     }
 
@@ -284,8 +333,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         settings.pos_x = pos_x;
         settings.pos_y = pos_y;
 
-        int bph = editor_paned.get_allocated_height()
-            - editor_paned.get_position();
+        int bph = editor_paned.get_position();
         settings.bottom_panel_height = bph;
 
         settings.left_panel_width = outer_paned.get_position();
@@ -307,3 +355,4 @@ public class Proton.Window : Gtk.ApplicationWindow {
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 }
+

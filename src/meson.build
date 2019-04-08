@@ -31,6 +31,9 @@ proton_sources = [
   'widgets/Editor.vala',
   'widgets/Container.vala',
   'widgets/Terminal.vala',
+  'widgets/CommandPalette.vala',
+  'widgets/Loadable.vala',
+  'widgets/SortableBox.vala',
 ]
 
 proton_deps = [
@@ -38,7 +41,7 @@ proton_deps = [
   dependency('gmodule-2.0', version: '>= 2.50'),
   dependency('vte-2.91', version: '>= 0.54.1'),
   dependency('gtk+-3.0', version: '>= 3.22'),
-  dependency('gtksourceview-3.0', version: '>= 3.22'),
+  dependency('gtksourceview-4', version: '>= 4.2.0'),
   dependency('granite'), # this ain't no elementary app ok babydora?
   meson.get_compiler('vala').find_library('posix'),
   meson.get_compiler('vala').find_library('linux'),

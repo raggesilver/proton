@@ -62,7 +62,7 @@ public class Proton.PluginLoader : Object {
     public PluginLoader(Window w) {
         left_hb_box = w.left_hb_box;
         right_hb_box = w.right_hb_box;
-        root_path = root.path;
+        root_path = w.root.path;
     }
 
     public PluginIface load(string path) throws PluginError {
