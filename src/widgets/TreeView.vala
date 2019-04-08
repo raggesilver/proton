@@ -101,6 +101,20 @@ public class Proton.TreeItem : Gtk.Box
         return (strcmp(a.file.name, b.file.name));
     }
 
+    public void set_modified(bool modified)
+    {
+        if (modified)
+        {
+            label.set_label(file.name + " •");
+            // get_style_context().add_class("modified");
+        }
+        else
+        {
+            label.set_label(file.name);
+            // get_style_context().remove_class("modified");
+        }
+    }
+
     public void do_sort()
     {
         container.sort(tree_sort_function, tree_is_sortable_function);

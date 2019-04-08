@@ -134,6 +134,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
         manager.modified.connect((mod) => {
             status_box.set_filename(manager.current_editor.file.name +
                 ((mod) ? " •" : ""));
+            tree_view.items.get(manager.current_editor.file.path)
+                .set_modified(mod);
         });
 
         toggle_left_panel_button.set_active(settings.left_panel_visible);
