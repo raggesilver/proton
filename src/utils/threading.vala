@@ -20,7 +20,7 @@
 
 [Compact]
 static void
-maybe_create_output_stream(OutputStream **ret,
+maybe_create_output_stream(UnixOutputStream **ret,
                            int *fdptr,
                            bool needed)
 {
@@ -42,7 +42,7 @@ maybe_create_output_stream(OutputStream **ret,
 
 [Compact]
 static void
-maybe_create_input_stream(InputStream **ret,
+maybe_create_input_stream(UnixInputStream **ret,
                           int *fdptr,
                           bool needed)
 {
@@ -77,11 +77,13 @@ public class Proton.FlatpakSubprocess : Object {
     uint exited_subscription;
     ulong closed_connection_handler;
 
-    uint32 client_pid = 0;
+    public Pid pid { get; protected set; }
 
-    OutputStream stdin_pipe;
-    InputStream stdout_pipe;
-    InputStream stderr_pipe;
+    public uint32 client_pid = 0;
+
+    public UnixOutputStream stdin_pipe;
+    public UnixInputStream stdout_pipe;
+    public UnixInputStream stderr_pipe;
 
     public FlatpakSubprocess(string? cwd = null,
                              string[] argv,
@@ -308,7 +310,7 @@ public class Proton.FlatpakSubprocess : Object {
             1
         );
 
-        print("Calling HostCommand with %s", _params.print(true));
+        print("Calling HostCommand with %s\n", _params.print(true));
 
         reply = connection.call_with_unix_fd_list_sync(
             "org.freedesktop.Flatpak",
@@ -323,6 +325,8 @@ public class Proton.FlatpakSubprocess : Object {
             null,
             null
         );
+
+        pid = *((Pid *) reply.get_data());
 
         return true;
     }
@@ -341,7 +345,8 @@ public class Proton.FlatpakSubprocess : Object {
             error("Invalid variant type");
 
         parameters.get("(uu)", ref _pid, ref _res);
-        print("Host process %u exited with %u", client_pid, _res);
+        print("Host process %" + uint32.FORMAT + " exited with %"
+            + uint32.FORMAT + "\n", client_pid, _res);
 
         if (exited_subscription != 0)
         {
@@ -353,7 +358,7 @@ public class Proton.FlatpakSubprocess : Object {
     }
 
     private bool sigterm_handler() {
-
+        warning("Got here");
         try {
             connection.call_sync(
                 "org.freedesktop.Flatpak",
@@ -370,6 +375,27 @@ public class Proton.FlatpakSubprocess : Object {
         Posix.kill(Posix.getpid(), Posix.Signal.TERM);
 
         return false;
+    }
+
+    public bool kill()
+    {
+        try {
+            connection.call_sync(
+                "org.freedesktop.Flatpak",
+                "/org/freedesktop/Flatpak/Development",
+                "org.freedesktop.Flatpak.Development",
+                "HostCommandSignal",
+                new Variant("(uub)", pid, Posix.Signal.TERM, true),
+                null,
+                DBusCallFlags.NONE, -1,
+                null);
+            return (true);
+        }
+        catch (Error e)
+        {
+            warning(e.message);
+            return (false);
+        }
     }
 
     private bool sigint_handler() {
@@ -428,3 +454,5 @@ public class Proton.Subprocess : Object {
         sub.send_signal(Posix.Signal.KILL);
     }
 }
+
+// public class Proton.Process

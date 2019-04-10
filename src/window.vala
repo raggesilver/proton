@@ -79,6 +79,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
     public CommandPalette command_palette  { get; private set; }
     public File           root             { get; protected set; }
     public BottomPanel    bottom_panel     { get; protected set; }
+    public TerminalTab    terminal_tab     { get; protected set; }
 
     public Window(Gtk.Application app, File root) {
 
@@ -250,7 +251,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
         side_panel_stack.set_visible_child_name("treeview");
 
         editor_paned.pack2(bottom_panel, false, true);
-        bottom_panel.add_tab(new TerminalTab(this));
+
+        terminal_tab = new TerminalTab(this);
+        bottom_panel.add_tab(terminal_tab);
 
         side_panel_box.set_visible(settings.left_panel_visible);
         bottom_panel.set_visible(settings.bottom_panel_visible);

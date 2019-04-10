@@ -18,13 +18,35 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+internal class RunnerTab : Proton.BottomPanelTab
+{
+    public Proton.IdleTerminal terminal = null;
+
+    internal RunnerTab(Proton.Window win)
+    {
+        terminal = new Proton.IdleTerminal(win);
+        // terminal.input_enabled = false;
+
+        content = terminal;
+        aux_content = null;
+
+        name = "runner-tab";
+        title = "BUILD";
+    }
+}
+
 private class Runner : Object, Proton.PluginIface {
 
     Gtk.Button btn;
     Gtk.Image play_image;
     Gtk.Image stop_image;
 
-    bool working = false;
+    RunnerTab tab;
+
+    bool                     working = false;
+    Proton.FlatpakSubprocess fsp;
+
+    unowned Proton.Window window;
 
     construct {
         play_image = new Gtk.Image.from_icon_name(
@@ -35,26 +57,29 @@ private class Runner : Object, Proton.PluginIface {
     }
 
     public void do_register(Proton.PluginLoader loader) {
+
+        window = loader.window;
+        tab = new RunnerTab(window);
+        tab.terminal.pty = new Vte.Pty.sync(Vte.PtyFlags.DEFAULT);
+
+        loader.window.bottom_panel.add_tab(tab);
+
         btn.set_image(play_image);
         btn.show();
         loader.left_hb_box.pack_start(btn);
         loader.left_hb_box.reorder_child(btn, 0);
 
-        uint _pd = 0;
+        // uint _pd = 0;
 
         btn.clicked.connect(() => {
             if (!working)
             {
                 on_start();
 
-                _pd = Timeout.add(1000, () => {
-                    on_finish();
-                    return (false);
-                });
+                do_start();
 
             } else {
-                Source.remove(_pd);
-                on_finish(); // Or on_abort
+                fsp.kill();
             }
         });
     }
@@ -67,6 +92,26 @@ private class Runner : Object, Proton.PluginIface {
     void on_finish() {
         btn.set_image(play_image);
         working = false;
+    }
+
+    void do_start()
+    {
+        tab.terminal.reset(true, true);
+        tab.focus_tab();
+
+        fsp = new Proton.FlatpakSubprocess(window.root.path,
+                                    {"make"},
+                                    {},
+                                    SubprocessFlags.NONE,
+                                    tab.terminal.pty.fd,
+                                    tab.terminal.pty.fd,
+                                    tab.terminal.pty.fd);
+
+        fsp.finished.connect((res) => {
+            tab.terminal.feed_child((char[])
+                (@"Build finished with code: $(res.to_string())"));
+            on_finish();
+        });
     }
 
     public void activate() {

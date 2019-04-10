@@ -53,7 +53,9 @@ public class Proton.Terminal : Vte.Terminal
     Gdk.RGBA bg;
     Gdk.RGBA fg;
 
-    public Terminal(Window _win, string? command = null)
+    public Terminal(Window _win,
+                    string? command = null,
+                    bool self_destroy = false)
     {
         Object (allow_bold: true,
                 allow_hyperlink: true);
@@ -66,7 +68,7 @@ public class Proton.Terminal : Vte.Terminal
                        win.root.path,
                        { Environ.get_variable(Environ.get(), "SHELL") },
                        {"TERM=xterm-256color"},
-                       SpawnFlags.DO_NOT_REAP_CHILD,
+                       self_destroy ? 0 : SpawnFlags.DO_NOT_REAP_CHILD,
                        null, null, null);
 
 
@@ -81,6 +83,36 @@ public class Proton.Terminal : Vte.Terminal
                 feed_child((char[]) command);
         }
         catch (Error e) { warning(e.message); }
+
+        win.style_updated.connect(update_ui);
+
+        update_ui();
+
+        show();
+    }
+
+    private void update_ui()
+    {
+        win.get_style_context().lookup_color("theme_base_color", out bg);
+        win.get_style_context().lookup_color("theme_fg_color", out fg);
+
+        set_colors(fg, bg, solarized_palette);
+    }
+}
+
+public class Proton.IdleTerminal : Vte.Terminal
+{
+    unowned Window win;
+
+    Gdk.RGBA bg;
+    Gdk.RGBA fg;
+
+    public IdleTerminal(Window _win)
+    {
+        Object (allow_bold: true,
+                allow_hyperlink: true);
+
+        win = _win;
 
         win.style_updated.connect(update_ui);
 
@@ -159,9 +191,10 @@ public class Proton.TerminalTab : Proton.BottomPanelTab
         add_terminal();
     }
 
-    public void add_terminal(string? command = null)
+    public Terminal add_terminal(string? command = null,
+                                 bool self_destroy = false)
     {
-        var term = new Terminal(win, command);
+        var term = new Terminal(win, command, self_destroy);
         terminals.append_val(term);
 
         uint id = terminals.length;
@@ -185,6 +218,7 @@ public class Proton.TerminalTab : Proton.BottomPanelTab
         });
 
         combo.set_active_id(sid);
+        return (term);
     }
 
     void on_changed()

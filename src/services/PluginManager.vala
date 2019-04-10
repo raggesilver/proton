@@ -59,10 +59,13 @@ public class Proton.PluginLoader : Object {
     public Gtk.Box right_hb_box { get; private set; }
     public string root_path { get; private set; }
 
+    public Window window { get; protected set; }
+
     public PluginLoader(Window w) {
         left_hb_box = w.left_hb_box;
         right_hb_box = w.right_hb_box;
         root_path = w.root.path;
+        window = w;
     }
 
     public PluginIface load(string path) throws PluginError {

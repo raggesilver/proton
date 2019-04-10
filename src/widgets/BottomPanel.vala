@@ -20,6 +20,8 @@
 
 public class Proton.BottomPanelTab : Object
 {
+    public signal void focus_tab();
+
     public Gtk.Widget content;
     public Gtk.Widget? aux_content;
 
@@ -51,6 +53,10 @@ public class Proton.BottomPanel : Gtk.Box
         if (stack.get_child_by_name(tab.name) == null)
         {
             stack.add_titled(tab.content, tab.name, tab.title);
+
+            tab.focus_tab.connect(() => {
+                stack.set_visible_child(tab.content);
+            });
 
             if (tab.aux_content != null)
                 aux_stack.add_titled(tab.aux_content, tab.name, tab.title);
