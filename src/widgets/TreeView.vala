@@ -23,6 +23,21 @@
  * SPDX-License-Identifier: MIT
  */
 
+const string[] folder_icons = {
+    "\\.git", "text-x-git-symbolic"
+};
+
+const string[] file_icons = {
+    "(.)+\\~$", "text-x-temp-symbolic",
+    "(.)+\\.(cpp|hpp)(\\.in)?$", "text-x-cpp-symbolic",
+    "(.)+\\.(c|h)(\\.in)?$", "text-x-c-symbolic",
+    "(.)+\\.(css)$", "text-x-css-symbolic",
+    "(.)+\\.(vala)(\\.in)?$", "text-x-vala-symbolic",
+    "(.)+\\.(js)$", "text-x-js-symbolic",
+    "meson\\.build$", "text-x-meson-symbolic",
+    "(.)+\\.(xml|ui|glade)(\\.in)?$", "text-x-xml-symbolic"
+};
+
 public class Proton.TreeItem : Gtk.Box
 {
     public signal bool left_click();
@@ -158,14 +173,36 @@ public class Proton.TreeItem : Gtk.Box
 
     string get_icon_name()
     {
-        Icon ic = file.icon;
-
-        if (ic == null)
-            return ("text-x-generic");
-
-        string[] arr = ic.to_string().split(" ");
-
-        return (arr[arr.length - 1]);
+        if (file.is_directory)
+        {
+            try
+            {
+                for (int i = 0; i < folder_icons.length; i += 2)
+                {
+                    var r = new Regex(folder_icons[i],
+                                      GLib.RegexCompileFlags.JAVASCRIPT_COMPAT);
+                    if (r.match(file.name))
+                        return (folder_icons[i + 1]);
+                }
+            }
+            catch {}
+            return ("folder-symbolic");
+        }
+        else
+        {
+            try
+            {
+                for (int i = 0; i < file_icons.length; i += 2)
+                {
+                    var r = new Regex(file_icons[i],
+                                      GLib.RegexCompileFlags.JAVASCRIPT_COMPAT);
+                    if (r.match(file.name))
+                        return (file_icons[i + 1]);
+                }
+            }
+            catch {}
+            return ("text-x-generic-symbolic");
+        }
     }
 }
 

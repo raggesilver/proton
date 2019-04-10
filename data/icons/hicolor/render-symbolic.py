@@ -34,7 +34,7 @@ def sort(l):
 
 # These need to be scaled as symbolic icons into
 # 16 and their 2x and 3x counterparts
-for dirname in ('actions',):
+for dirname in ('actions', 'mimetypes'):
     for name in sort(os.listdir(os.path.join('scalable', dirname))):
         for size in (16, 32, 48, 64):
             outdir = '%dx%d/%s' % (size, size, dirname)

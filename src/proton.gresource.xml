@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/raggesilver/Proton">
+    <file>layouts/bottom_panel.ui</file>
     <file>layouts/command_palette.ui</file>
     <file>layouts/open_window.ui</file>
     <file>layouts/preferences_window.ui</file>

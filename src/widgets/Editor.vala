@@ -57,21 +57,33 @@ public class Proton.Editor : Object {
             if (sview.parent == null || _ != null)
                 return ;
 
-            Gtk.TextIter it;
-            int lh;
+            container = sview.parent.parent;
 
-            sview.buffer.get_start_iter(out it);
-            sview.get_line_yrange(it, null, out lh);
-
-            var scroller = this.sview.parent.parent;
-            this.sview.bottom_margin = scroller.get_allocated_height() - lh;
-
-            scroller.size_allocate.connect((a) => {
-                sview.buffer.get_start_iter(out it);
-                sview.get_line_yrange(it, null, out lh);
-                sview.bottom_margin = a.height - lh;
+            container.size_allocate.connect(() => { adjust_margin(); });
+            sview.size_allocate.connect((a) => {
+                adjust_margin();
+            });
+            sview.event.connect((e) => {
+                if (e.type == Gdk.EventType.VISIBILITY_NOTIFY)
+                    adjust_margin();
+                return (false);
             });
         });
+    }
+
+    void adjust_margin()
+    {
+        Gtk.TextIter it;
+        int lh;
+
+        sview.buffer.get_start_iter(out it);
+        sview.get_line_yrange(it, null, out lh);
+
+        if (lh == 0)
+            return ;
+
+        var ch = container.get_allocated_height();
+        sview.set_bottom_margin(ch - lh);
     }
 
     public void update_ui() {
@@ -127,6 +139,8 @@ public class Proton.Editor : Object {
             }
             else
                 last_saved_content = text;
+
+            adjust_margin();
         });
     }
 

@@ -42,12 +42,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
     Gtk.Stack side_panel_stack;
 
     [GtkChild]
-    Gtk.Stack bottom_panel_stack;
-
-    [GtkChild]
-    Gtk.Stack bottom_panel_aux_stack;
-
-    [GtkChild]
     Gtk.Stack editor_stack;
 
     [GtkChild]
@@ -61,9 +55,6 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
     [GtkChild]
     Gtk.ToggleButton toggle_bottom_panel_button;
-
-    [GtkChild]
-    Gtk.Box bottom_panel_box;
 
     [GtkChild]
     Gtk.Box title_box;
@@ -87,6 +78,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
     public Gtk.AccelGroup accel_group      { get; private set; }
     public CommandPalette command_palette  { get; private set; }
     public File           root             { get; protected set; }
+    public BottomPanel    bottom_panel     { get; protected set; }
 
     public Window(Gtk.Application app, File root) {
 
@@ -101,6 +93,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         command_palette = new CommandPalette(this);
         tree_view = new TreeView(root);
         manager = new EditorManager(this);
+        bottom_panel = new BottomPanel(this);
 
         var status_box = new StatusBox(this);
         title_box.set_center_widget(status_box);
@@ -166,7 +159,7 @@ public class Proton.Window : Gtk.ApplicationWindow {
         });
 
         settings.notify["bottom-panel-visible"].connect(() => {
-            bottom_panel_box.set_visible(settings.bottom_panel_visible);
+            bottom_panel.set_visible(settings.bottom_panel_visible);
 
             if (toggle_bottom_panel_button.active
                     != settings.bottom_panel_visible)
@@ -256,27 +249,11 @@ public class Proton.Window : Gtk.ApplicationWindow {
 
         side_panel_stack.set_visible_child_name("treeview");
 
-        bottom_panel_stack.add_titled(wrap_scroller(new Terminal(this)),
-                                      "terminal",
-                                      "TERMINAL");
-
-        bottom_panel_stack.notify.connect((spec) => {
-            if (spec.name != "visible-child-name")
-                return ;
-
-            Gtk.Widget? child = bottom_panel_aux_stack.get_child_by_name(
-                bottom_panel_stack.visible_child_name);
-
-            if (child != null)
-                bottom_panel_aux_stack.set_visible_child(child);
-            else
-                bottom_panel_aux_stack.set_visible_child_name("empty");
-        });
-
-        bottom_panel_stack.set_visible_child_name("terminal");
+        editor_paned.pack2(bottom_panel, false, true);
+        bottom_panel.add_tab(new TerminalTab(this));
 
         side_panel_box.set_visible(settings.left_panel_visible);
-        bottom_panel_box.set_visible(settings.bottom_panel_visible);
+        bottom_panel.set_visible(settings.bottom_panel_visible);
 
         editor_paned.set_position(settings.bottom_panel_height);
         outer_paned.set_position(settings.left_panel_width);

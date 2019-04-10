@@ -27,14 +27,15 @@ proton_sources = [
   'services/PluginManager.vala',
   'services/Core.vala',
   'services/EditorManager.vala',
-  'widgets/TreeView.vala',
-  'widgets/Editor.vala',
-  'widgets/Container.vala',
-  'widgets/Terminal.vala',
+  'widgets/BottomPanel.vala',
   'widgets/CommandPalette.vala',
+  'widgets/Container.vala',
+  'widgets/Editor.vala',
   'widgets/Loadable.vala',
   'widgets/SortableBox.vala',
   'widgets/StatusBox.vala',
+  'widgets/Terminal.vala',
+  'widgets/TreeView.vala',
 ]
 
 proton_deps = [
