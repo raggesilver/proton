@@ -164,7 +164,7 @@ public class Proton.TerminalTab : Proton.BottomPanelTab
         combo.pack_start(renderer, true);
         combo.add_attribute(renderer, "text", 1);
 
-        box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+        box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 2);
         new_terminal_button = new Gtk.Button.from_icon_name("list-add-symbolic",
                                                             Gtk.IconSize.MENU);
 

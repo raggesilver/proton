@@ -31,6 +31,7 @@ proton_sources = [
   'widgets/CommandPalette.vala',
   'widgets/Container.vala',
   'widgets/Editor.vala',
+  'widgets/EditorPage.vala',
   'widgets/Loadable.vala',
   'widgets/SortableBox.vala',
   'widgets/StatusBox.vala',

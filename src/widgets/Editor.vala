@@ -26,6 +26,9 @@
 public class Proton.Editor : Object {
 
     public signal void modified(bool is_modified);
+    public signal void ui_modified();
+    public signal void destroy();
+    public signal bool before_save();
 
     private uint id;
     private string? last_saved_content = null;
@@ -57,7 +60,7 @@ public class Proton.Editor : Object {
             if (sview.parent == null || _ != null)
                 return ;
 
-            container = sview.parent.parent;
+            container = sview.parent;
 
             container.size_allocate.connect(() => { adjust_margin(); });
             sview.size_allocate.connect((a) => {
@@ -90,6 +93,7 @@ public class Proton.Editor : Object {
         (sview.buffer as Gtk.SourceBuffer).style_scheme =
             Gtk.SourceStyleSchemeManager.get_default()
                 .get_scheme(settings.style_id);
+        ui_modified();
     }
 
     // TODO use some actual settings
@@ -153,7 +157,14 @@ public class Proton.Editor : Object {
         }
     }
 
-    public async bool save() {
+    public async bool save()
+    {
+        if (!is_modified)
+            return (true);
+
+        if (before_save())
+            return (true);
+
         string content = get_text();
         bool _saved = yield file.write_async(content);
         if (_saved) {
@@ -163,7 +174,7 @@ public class Proton.Editor : Object {
         return (_saved);
     }
 
-    private string get_text() {
+    public string get_text() {
         Gtk.TextIter s, e;
         sview.buffer.get_start_iter(out s);
         sview.buffer.get_end_iter(out e);

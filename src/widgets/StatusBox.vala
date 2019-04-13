@@ -24,9 +24,6 @@ public class Proton.StatusBox : Gtk.Box
     [GtkChild]
     Gtk.Stack stack;
 
-    [GtkChild]
-    Gtk.Label filename;
-
     public Gtk.Label project_name { get; protected set; }
     public Gtk.Label status { get; protected set; }
 
@@ -41,7 +38,6 @@ public class Proton.StatusBox : Gtk.Box
         status = new Gtk.Label("Status: Ok");
 
         project_name.xalign = status.xalign = 0;
-        filename.xalign = 1;
 
         stack.add_named(project_name, "project_name");
         stack.add_named(status, "status");
@@ -49,11 +45,6 @@ public class Proton.StatusBox : Gtk.Box
         show_all();
 
         start_cycle();
-    }
-
-    public void set_filename(string name)
-    {
-        filename.set_text(name);
     }
 
     void start_cycle()

@@ -18,28 +18,33 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-private class Editorconfig : Object, Proton.PluginIface {
-    public void do_register(Proton.PluginLoader loader) {
-
-        loader.editor_changed.connect((ed) => {
+private class Editorconfig : Object, Proton.PluginIface
+{
+    public void do_register(Proton.PluginLoader loader)
+    {
+        loader.window.manager.created.connect((ed) => {
 
             if (ed == null || ed.file == null)
                 return ;
 
             var handler = new EditorConfig.Handle();
-            if (handler.parse(ed.file.path) != 0) {
+            if (handler.parse(ed.file.path) != 0)
+            {
                 warning("Could not parse file %s\n", ed.file.name);
                 return ;
             }
 
             int j = handler.get_name_value_count();
-            for (int i = 0; i < j; i++) {
+            for (int i = 0; i < j; i++)
+            {
                 string name, val;
                 handler.get_name_value(i, out name, out val);
 
-                switch (name) {
+                switch (name)
+                {
                     case "indent_style":
-                        ed.sview.set_insert_spaces_instead_of_tabs(val == "space");
+                        ed.sview.set_insert_spaces_instead_of_tabs(
+                            val == "space");
                         break;
 
                     case "tab_width":
@@ -54,6 +59,24 @@ private class Editorconfig : Object, Proton.PluginIface {
                         ed.sview.right_margin_position = int.parse(val);
                         break;
 
+                    case "trim_trailing_whitespace":
+                        ed.before_save.connect(() => {
+
+                            ed.sview.buffer.begin_user_action();
+
+                            string[] arr = ed.get_text().split("\n");
+                            string new_text = arr[0]._chomp();
+
+                            for (ulong k = 1; k < arr.length; k++)
+                                new_text += ("\n" + arr[k]._chomp());
+
+                            ed.sview.buffer.set_text(new_text);
+                            ed.sview.buffer.end_user_action();
+
+                            return (false);
+                        });
+                        break;
+
                     default:
                         break;
                 }
@@ -62,13 +85,16 @@ private class Editorconfig : Object, Proton.PluginIface {
         });
     }
 
-    public void activate() {
+    public void activate()
+    {
     }
 
-    public void deactivate() {
+    public void deactivate()
+    {
     }
 }
 
-public Type register_plugin (Module module) {
+public Type register_plugin (Module module)
+{
     return typeof(Editorconfig);
 }

@@ -3,6 +3,8 @@
   <gresource prefix="/com/raggesilver/Proton">
     <file>layouts/bottom_panel.ui</file>
     <file>layouts/command_palette.ui</file>
+    <!--<file>layouts/editor_grid.ui</file>-->
+    <file>layouts/editor_page.ui</file>
     <file>layouts/open_window.ui</file>
     <file>layouts/preferences_window.ui</file>
     <file>layouts/status_box.ui</file>

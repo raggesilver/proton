@@ -118,6 +118,9 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
         version_label.set_text(@"Version $(Constants.VERSION)");
+
+        var s = Gtk.Settings.get_default();
+        s.gtk_application_prefer_dark_theme = settings.dark_mode;
     }
 
     private Gtk.Button new_recent_row(File f) {

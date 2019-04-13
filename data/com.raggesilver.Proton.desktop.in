@@ -4,5 +4,6 @@ Exec=proton
 Terminal=false
 Icon=com.raggesilver.Proton
 Type=Application
-Categories=GTK;
+Categories=GNOME;GTK;Development;IDE;
+Keywords=Build;Develop;
 StartupNotify=true

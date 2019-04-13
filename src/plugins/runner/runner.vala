@@ -75,10 +75,10 @@ private class Runner : Object, Proton.PluginIface {
             if (!working)
             {
                 on_start();
-
                 do_start();
-
-            } else {
+            }
+            else
+            {
                 fsp.kill();
             }
         });
@@ -96,12 +96,12 @@ private class Runner : Object, Proton.PluginIface {
 
     void do_start()
     {
-        tab.terminal.reset(true, true);
+        // tab.terminal.reset(true, true);
         tab.focus_tab();
 
         fsp = new Proton.FlatpakSubprocess(window.root.path,
-                                    {"make"},
-                                    {},
+                                    {"make", "re", "run"},
+                                    {"PATH=" + Environ.get_variable(Environ.get(), "PATH")},
                                     SubprocessFlags.NONE,
                                     tab.terminal.pty.fd,
                                     tab.terminal.pty.fd,
@@ -109,7 +109,7 @@ private class Runner : Object, Proton.PluginIface {
 
         fsp.finished.connect((res) => {
             tab.terminal.feed_child((char[])
-                (@"Build finished with code: $(res.to_string())"));
+                (@"Build finished with code: $(res.to_string())\n"));
             on_finish();
         });
     }
@@ -124,3 +124,4 @@ private class Runner : Object, Proton.PluginIface {
 public Type register_plugin (Module module) {
     return typeof(Runner);
 }
+

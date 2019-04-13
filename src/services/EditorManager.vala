@@ -78,6 +78,10 @@ public class Proton.EditorManager : Object {
             return false;
         });
 
+        e.destroy.connect(() => {
+            _editors.remove(e.file.path);
+        });
+
         return e;
     }
 

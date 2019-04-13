@@ -16,7 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w) {
+Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w)
+{
     var s = new Gtk.ScrolledWindow (null, null);
     s.add (w);
     w.show ();
@@ -27,8 +28,8 @@ Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w) {
 //  static TypeModule module = null;
 
 [GtkTemplate (ui = "/com/raggesilver/Proton/layouts/window.ui")]
-public class Proton.Window : Gtk.ApplicationWindow {
-
+public class Proton.Window : Gtk.ApplicationWindow
+{
     [GtkChild]
     public Gtk.HeaderBar header_bar;
 
@@ -71,18 +72,18 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild]
     public Gtk.Overlay overlay;
 
-    EditorManager     manager;
     TreeView          tree_view;
     PreferencesWindow preferences_window = null;
 
+    public EditorManager  manager          { get; private set; }
     public Gtk.AccelGroup accel_group      { get; private set; }
     public CommandPalette command_palette  { get; private set; }
     public File           root             { get; protected set; }
     public BottomPanel    bottom_panel     { get; protected set; }
     public TerminalTab    terminal_tab     { get; protected set; }
 
-    public Window(Gtk.Application app, File root) {
-
+    public Window(Gtk.Application app, File root)
+    {
         Object(application: app,
                root: root);
 
@@ -111,23 +112,21 @@ public class Proton.Window : Gtk.ApplicationWindow {
         });
 
         manager.created.connect((ed) => {
-            editor_stack.add_named(ed.sview, ed.file.path);
+            var ep = new EditorPage(ed);
+            editor_stack.add_named(ep, ed.file.path);
         });
 
         manager.changed.connect((ed) => {
             save_button.set_sensitive(false);
 
-            if (ed != null && ed.file != null) {
+            if (ed != null && ed.file != null)
+            {
                 save_button.set_sensitive(true);
-                editor_stack.set_visible_child(ed.sview);
-                status_box.set_filename(manager.current_editor.file.name +
-                    ((manager.current_editor.is_modified) ? " •" : ""));
+                editor_stack.set_visible_child(ed.sview.get_parent().get_parent());
             }
         });
 
         manager.modified.connect((mod) => {
-            status_box.set_filename(manager.current_editor.file.name +
-                ((mod) ? " •" : ""));
             tree_view.items.get(manager.current_editor.file.path)
                 .set_modified(mod);
         });
@@ -188,13 +187,17 @@ public class Proton.Window : Gtk.ApplicationWindow {
             loader.editor_changed(e);
         });
 
-        foreach (var p in _plugins) {
-            try {
+        foreach (var p in _plugins)
+        {
+            try
+            {
                 PluginIface plugin = loader.load(
                     @"$(Constants.PLUGINDIR)/$p/lib$p");
                 plugin.activate();
                 _iplugins += plugin;
-            } catch (PluginError e) {
+            }
+            catch (PluginError e)
+            {
                 warning("Error: %s\n", e.message);
             }
         }
@@ -202,7 +205,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
         save_button.clicked.connect(save_button_clicked);
 
         preferences_button.clicked.connect(() => {
-            if (preferences_window == null) {
+            if (preferences_window == null)
+            {
                 preferences_window = new PreferencesWindow(this.application);
                 preferences_window.delete_event.connect(() => {
                     preferences_window = null;
@@ -217,7 +221,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
         bind_accels();
     }
 
-    private void bind_accels() {
+    private void bind_accels()
+    {
         accel_group.connect(Gdk.Key.grave,
                             Gdk.ModifierType.CONTROL_MASK,
                             0,
@@ -229,21 +234,25 @@ public class Proton.Window : Gtk.ApplicationWindow {
                             toggle_left_panel);
     }
 
-    public bool toggle_left_panel() {
+    public bool toggle_left_panel()
+    {
         settings.left_panel_visible = !settings.left_panel_visible;
         return false;
     }
 
-    public bool toggle_bottom_panel() {
+    public bool toggle_bottom_panel()
+    {
         settings.bottom_panel_visible = !settings.bottom_panel_visible;
         return false;
     }
 
-    private void save_button_clicked () {
+    private void save_button_clicked ()
+    {
         manager.save();
     }
 
-    private void build_ui() {
+    private void build_ui()
+    {
         side_panel_stack.add_titled(wrap_scroller(tree_view),
                                     "treeview",
                                     "Project");
@@ -262,16 +271,18 @@ public class Proton.Window : Gtk.ApplicationWindow {
         outer_paned.set_position(settings.left_panel_width);
     }
 
-    private bool can_close() {
+    private bool can_close()
+    {
         int ct = 0;
 
-        foreach (var ed in manager.editors.get_values()) {
+        foreach (var ed in manager.editors.get_values())
+        {
             if (ed.is_modified)
                 ct++;
         }
 
-        if (ct > 0) {
-
+        if (ct > 0)
+        {
             var md = new Gtk.MessageDialog(
                 this,
                 Gtk.DialogFlags.MODAL,
@@ -291,7 +302,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
                 return false;
             else if (res == Gtk.ResponseType.YES)
                 return true;
-            else {
+            else
+            {
                 save_all_and_close.begin();
                 return false;
             }
@@ -299,20 +311,21 @@ public class Proton.Window : Gtk.ApplicationWindow {
         return true;
     }
 
-    private async void save_all_and_close() {
-        foreach (var ed in manager.editors.get_values()) {
-            if (ed.is_modified) {
-                if (!(yield ed.save())) {
-                    warning("File %s was not saved\n", ed.file.name);
-                    return ;
-                }
+    private async void save_all_and_close()
+    {
+        foreach (var ed in manager.editors.get_values())
+        {
+            if (ed.is_modified && !(yield ed.save()))
+            {
+                warning("File %s was not saved\n", ed.file.name);
+                return ;
             }
         }
         this.destroy();
     }
 
-    private bool on_delete() {
-
+    private bool on_delete()
+    {
         int width, height;
         this.get_size(out width, out height);
         settings.width = width;
@@ -334,7 +347,8 @@ public class Proton.Window : Gtk.ApplicationWindow {
         return false;
     }
 
-    public void apply_settings() {
+    public void apply_settings()
+    {
         var css_provider = new Gtk.CssProvider();
         css_provider.load_from_resource(
             "/com/raggesilver/Proton/resources/style.css");
@@ -343,6 +357,9 @@ public class Proton.Window : Gtk.ApplicationWindow {
             Gdk.Screen.get_default(),
             css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+        var s = Gtk.Settings.get_default();
+        s.gtk_application_prefer_dark_theme = settings.dark_mode;
     }
 }
 

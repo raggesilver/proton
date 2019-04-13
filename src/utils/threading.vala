@@ -454,5 +454,3 @@ public class Proton.Subprocess : Object {
         sub.send_signal(Posix.Signal.KILL);
     }
 }
-
-// public class Proton.Process

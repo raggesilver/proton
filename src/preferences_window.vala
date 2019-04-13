@@ -18,14 +18,54 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-[GtkTemplate (ui="/com/raggesilver/Proton/layouts/preferences_window.ui")]
-public class Proton.PreferencesWindow : Gtk.ApplicationWindow {
+class Row : Gtk.ListBoxRow
+{
+    public string page_name;
 
+    public Row(string s)
+    {
+        var lbl = new Gtk.Label(s);
+        lbl.margin = 5;
+        lbl.margin_start = lbl.margin_end = 10;
+        lbl.xalign = 0;
+
+        page_name = s.down();
+
+        add(lbl);
+        show_all();
+    }
+}
+
+[GtkTemplate (ui="/com/raggesilver/Proton/layouts/preferences_window.ui")]
+public class Proton.PreferencesWindow : Gtk.ApplicationWindow
+{
     [GtkChild]
     Gtk.Box layout_box;
 
-    public PreferencesWindow(Gtk.Application app) {
+    [GtkChild]
+    Gtk.ListBox side_list_box;
+
+    [GtkChild]
+    Gtk.Stack stack;
+
+    public Array<string> menus { get; private set; }
+
+    public PreferencesWindow(Gtk.Application app)
+    {
         Object(application: app);
+
+        string[] ss = { "Appearence", "Editor" };
+
+        foreach (string s in ss)
+        {
+            var l = new Row(s);
+            side_list_box.insert(l, -1);
+        }
+
+        side_list_box.row_activated.connect((_r) => {
+            var r = _r as Row;
+            stack.set_visible_child_name(r.page_name);
+        });
 
         var c = new Gtk.SourceStyleSchemeChooserWidget();
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
