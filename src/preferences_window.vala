@@ -72,7 +72,8 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
             .get_scheme(settings.style_id));
 
         c.notify.connect((p) => {
-            if (p.get_name() == "style-scheme") {
+            if (p.get_name() == "style-scheme")
+            {
                 settings.style_id = c.style_scheme.id;
             }
         });

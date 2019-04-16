@@ -43,9 +43,6 @@ public class Proton.Window : Gtk.ApplicationWindow
     Gtk.Stack side_panel_stack;
 
     [GtkChild]
-    Gtk.Stack editor_stack;
-
-    [GtkChild]
     Gtk.Button preferences_button;
 
     [GtkChild]
@@ -72,15 +69,16 @@ public class Proton.Window : Gtk.ApplicationWindow
     [GtkChild]
     public Gtk.Overlay overlay;
 
-    TreeView          tree_view;
     PreferencesWindow preferences_window = null;
 
+    public TreeView       tree_view        { get; private set; }
     public EditorManager  manager          { get; private set; }
     public Gtk.AccelGroup accel_group      { get; private set; }
     public CommandPalette command_palette  { get; private set; }
     public File           root             { get; protected set; }
     public BottomPanel    bottom_panel     { get; protected set; }
     public TerminalTab    terminal_tab     { get; protected set; }
+    public EditorGrid     grid             { get; protected set; }
 
     public Window(Gtk.Application app, File root)
     {
@@ -96,6 +94,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         tree_view = new TreeView(root);
         manager = new EditorManager(this);
         bottom_panel = new BottomPanel(this);
+        grid = new EditorGrid(this);
 
         var status_box = new StatusBox(this);
         title_box.set_center_widget(status_box);
@@ -104,17 +103,18 @@ public class Proton.Window : Gtk.ApplicationWindow
             if (f.is_directory || !f.is_valid_textfile)
                 return ;
 
-            manager.open(f);
+            // manager.open(f);
+            grid.open_file(f);
         });
 
         tree_view.renamed.connect((o, n) => {
             manager.renamed(o, n);
         });
 
-        manager.created.connect((ed) => {
-            var ep = new EditorPage(ed);
-            editor_stack.add_named(ep, ed.file.path);
-        });
+        // manager.created.connect((ed) => {
+        //     var ep = new EditorPage(ed);
+        //     editor_stack.add_named(ep, ed.file.path);
+        // });
 
         manager.changed.connect((ed) => {
             save_button.set_sensitive(false);
@@ -122,7 +122,7 @@ public class Proton.Window : Gtk.ApplicationWindow
             if (ed != null && ed.file != null)
             {
                 save_button.set_sensitive(true);
-                editor_stack.set_visible_child(ed.sview.get_parent().get_parent());
+                // editor_stack.set_visible_child(ed.sview.get_parent().get_parent());
             }
         });
 
@@ -258,6 +258,9 @@ public class Proton.Window : Gtk.ApplicationWindow
                                     "Project");
 
         side_panel_stack.set_visible_child_name("treeview");
+
+        // var grid = new EditorGrid(this, manager);
+        editor_paned.pack1(grid, true, true);
 
         editor_paned.pack2(bottom_panel, false, true);
 

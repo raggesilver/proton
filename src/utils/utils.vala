@@ -18,8 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Proton {
-    public bool is_flatpak() {
+namespace Proton
+{
+    public bool is_flatpak()
+    {
         return (new File("/.flatpak-info").exists);
     }
 

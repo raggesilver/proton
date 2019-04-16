@@ -9,6 +9,7 @@
         "--share=ipc",
         "--socket=x11",
         "--socket=wayland",
+        "--filesystem=home",
         "--filesystem=host",
         "--filesystem=xdg-run/dconf",
         "--filesystem=~/.config/dconf:ro",
@@ -73,6 +74,16 @@
                 {
                     "type": "git",
                     "url": "https://github.com/editorconfig/editorconfig-core-c"
+                }
+            ]
+        },
+        {
+            "name": "libdazzle",
+            "buildsystem": "meson",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/libdazzle"
                 }
             ]
         },

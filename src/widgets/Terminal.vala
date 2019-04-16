@@ -50,6 +50,9 @@ public class Proton.Terminal : Vte.Terminal
 {
     unowned Proton.Window win;
 
+    public uint id;
+    static uint _id;
+
     Gdk.RGBA bg;
     Gdk.RGBA fg;
 
@@ -61,6 +64,8 @@ public class Proton.Terminal : Vte.Terminal
                 allow_hyperlink: true);
 
         win = _win;
+
+        id = _id++;
 
         try
         {

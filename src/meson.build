@@ -31,6 +31,7 @@ proton_sources = [
   'widgets/CommandPalette.vala',
   'widgets/Container.vala',
   'widgets/Editor.vala',
+  'widgets/EditorGrid.vala',
   'widgets/EditorPage.vala',
   'widgets/Loadable.vala',
   'widgets/SortableBox.vala',
@@ -46,6 +47,7 @@ proton_deps = [
   dependency('gtk+-3.0', version: '>= 3.22'),
   dependency('gtksourceview-4', version: '>= 4.2.0'),
   dependency('granite'), # this ain't no elementary app ok babydora?
+  dependency('libdazzle-1.0'),
   meson.get_compiler('vala').find_library('posix'),
   meson.get_compiler('vala').find_library('linux'),
 ]
@@ -55,11 +57,6 @@ gnome = import('gnome')
 proton_sources += gnome.compile_resources('proton-resources',
   'proton.gresource.xml',
   c_name: 'proton'
-)
-
-executable('proton', proton_sources, config_header,
-  vala_args: '--target-glib=2.50',  dependencies: proton_deps,
-  install: true,
 )
 
 proton_core = library(
@@ -91,4 +88,9 @@ proton_core_dep = declare_dependency(
     include_directories: [include_directories('.')])
 
 subdir('plugins')
+
+executable('proton', link_with: proton_core,
+  vala_args: '--target-glib=2.50',  dependencies: proton_core_dep,
+  install: true,
+)
 

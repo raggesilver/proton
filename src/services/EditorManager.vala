@@ -23,8 +23,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.EditorManager : Object {
-
+public class Proton.EditorManager : Object
+{
     public signal void changed(Editor? editor);
     public signal void modified(bool is_modified);
     public signal void created(Editor editor);
@@ -39,7 +39,8 @@ public class Proton.EditorManager : Object {
         }
     }
 
-    public EditorManager(Window _win) {
+    public EditorManager(Window _win)
+    {
         win = _win;
         _editors = new HashTable<string, Editor> (str_hash, str_equal);
 
@@ -60,7 +61,8 @@ public class Proton.EditorManager : Object {
         win.command_palette.add_command(save_command);
     }
 
-    private Editor new_editor(File f) {
+    private Editor new_editor(File f)
+    {
         var e = new Editor(f.path, _editors.size() + 1);
 
         e.modified.connect((is_modified) => {
@@ -85,17 +87,12 @@ public class Proton.EditorManager : Object {
         return e;
     }
 
-    public Editor open(File f) {
-        Editor? ed = null;
+    public Editor open(File f)
+    {
+        Editor? ed = get_editor(f);
 
-        _editors.foreach((key, val) => {
-            if (val.file != null && File.equ(f, val.file)) {
-                ed = val;
-                return ;
-            }
-        });
-
-        if (ed == null) {
+        if (ed == null)
+        {
             ed = new_editor(f);
             _editors.insert(f.path, ed);
             created(ed);
@@ -108,34 +105,50 @@ public class Proton.EditorManager : Object {
         return ed;
     }
 
-    public void connect_accels(Gtk.AccelGroup ac) {
+    public Editor? get_editor(File f)
+    {
+        Editor? ed = null;
+
+        _editors.foreach((key, val) => {
+            if (val.file != null && File.equ(f, val.file)) {
+                ed = val;
+                return ;
+            }
+        });
+
+        return (ed);
+    }
+
+    public void connect_accels(Gtk.AccelGroup ac)
+    {
         ac.connect (Gdk.keyval_from_name ("s"),
                     Gdk.ModifierType.CONTROL_MASK,
                     0,
                     save);
     }
 
-    public bool save() {
-        if (current_editor != null && current_editor.file != null) {
+    public bool save()
+    {
+        if (current_editor != null && current_editor.file != null)
             current_editor.save.begin();
-        }
         return false;
     }
 
-    public void update_ui() {
+    public void update_ui()
+    {
         _editors.foreach((_, val) => {
             val.update_ui();
         });
     }
 
-    public void renamed(string old, string _new) {
-
+    public void renamed(string old, string _new)
+    {
         bool is_cur = false;
 
         Editor? ed = _editors.get(old);
 
-        if (ed != null) {
-
+        if (ed != null)
+        {
             is_cur = (current_editor != null
                         && File.equ(current_editor.file, ed.file));
 
