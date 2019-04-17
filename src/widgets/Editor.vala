@@ -53,6 +53,18 @@ public class Proton.Editor : Object {
             open();
         }
 
+        // FIXME this is a terrible temporary solution to gutter padding
+        var gt = sview.get_gutter(Gtk.TextWindowType.LEFT);
+        var rend = gt.get_renderer_at_pos(5, 5);
+        if (rend != null)
+        {
+            var ic_rend = new Gtk.SourceGutterRendererPixbuf();
+            ic_rend.set_padding(5, -1);
+            gt.insert(ic_rend, 0);
+            gt.reorder(rend, 1);
+            rend.set_padding(10, -1);
+        }
+
         // TODO make this optional
         sview.parent_set.connect((_) => {
 
@@ -99,7 +111,7 @@ public class Proton.Editor : Object {
     // TODO use some actual settings
     private void editor_apply_settings() {
         sview.set_tab_width(4);
-        sview.set_left_margin(15);
+        sview.set_left_margin(5);
         sview.set_right_margin(5);
         sview.set_indent_width(4);
         sview.set_monospace(true);
