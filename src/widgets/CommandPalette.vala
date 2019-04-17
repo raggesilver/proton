@@ -305,10 +305,39 @@ public class Proton.CommandPalette : Object
                 palette.hide();
             if (e.keyval == Gdk.Key.Return)
                 on_activate();
+            if (e.keyval == Gdk.Key.Down)
+                return (on_move_cursor(true));
+            if (e.keyval == Gdk.Key.Up)
+                return (on_move_cursor(false));
             return (false);
         });
 
         win.overlay.add_overlay(palette);
         win.overlay.set_overlay_pass_through(palette, true);
+    }
+
+    bool on_move_cursor(bool down)
+    {
+        var actives = completion_list.get_selected_rows();
+        var _children = completion_list.get_children();
+
+        if (actives.length() > 0)
+        {
+            var r = (Gtk.ListBoxRow) actives.first().data;
+            if (down && r.get_index() + 1 < _children.length())
+            {
+                completion_list.select_row(completion_list
+                    .get_row_at_index(r.get_index() + 1));
+            }
+            else if (!down && r.get_index() > 0)
+            {
+                completion_list.select_row(completion_list
+                    .get_row_at_index(r.get_index() - 1));
+            }
+        }
+        else if (down && _children.length() > 0)
+            completion_list.select_row(completion_list.get_row_at_index(0));
+
+        return (true);
     }
 }

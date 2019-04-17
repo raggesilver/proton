@@ -21,6 +21,8 @@
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/grid_page.ui")]
 public class Proton.GridPage : Gtk.Box
 {
+    public signal void page_focused();
+
     [GtkChild]
     public Gtk.MenuButton title_button { get; protected set; }
 
@@ -79,15 +81,20 @@ public class Proton.EditorPage : Proton.GridPage
         pop_title_label.label = title;
 
         editor.ui_modified.connect(update_ui);
-        
+
         editor.modified.connect((m) => {
             title_button.label = editor.file.name + ((m) ? " •" : "");
         });
-        
+
+        editor.sview.focus_in_event.connect((e) => {
+            page_focused();
+            return (false);
+        });
+
         update_ui();
         show_all();
     }
-    
+
     public override void destroy()
     {
         editor.destroy();
@@ -162,6 +169,11 @@ public class Proton.TerminalPage : Proton.GridPage
 
         terminal.window_title_changed.connect(() => {
             title_button.label = terminal.window_title;
+        });
+
+        terminal.focus_in_event.connect((e) => {
+            page_focused();
+            return (false);
         });
     }
 }

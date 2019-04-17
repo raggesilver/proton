@@ -21,6 +21,8 @@
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/editor_stack.ui")]
 public class Proton.EditorStack : Gtk.Stack
 {
+    public signal void stack_focused();
+
     List<string> history;
 
     [GtkChild]
@@ -35,12 +37,30 @@ public class Proton.EditorStack : Gtk.Stack
     [GtkChild]
     Gtk.Box pop_pages_box;
 
+    [GtkChild]
+    Gtk.EventBox background_event_box;
+
+    [GtkChild]
+    Gtk.Button new_terminal_button;
+
     internal EditorStack()
     {
         // add_events(Gdk.EventMask.BUTTON_PRESS_MASK);
         history = new List<string>();
         
         notify["visible-child-name"].connect(on_switched);
+
+        new_terminal_button.button_press_event.connect((e) => {
+            message("Call focus");
+            stack_focused();
+            return (false);
+        });
+
+        background_event_box.button_press_event.connect((e) => {
+            message("Call focus");
+            stack_focused();
+            return (false);
+        });
     }
 
     public new void add_named(GridPage w, string name)
@@ -52,6 +72,10 @@ public class Proton.EditorStack : Gtk.Stack
             history.remove_link(history.find_custom(name, strcmp));
             if (history.length() > 0)
                 set_visible_child_name(history.nth(0).data);
+        });
+
+        w.page_focused.connect(() => {
+            stack_focused();
         });
 
         // w.renamed.connect(() => {});
@@ -71,10 +95,48 @@ public class Proton.EditorStack : Gtk.Stack
     }
 }
 
+public class Proton.MultiPaned : Dazzle.MultiPaned
+{
+    public MultiPaned(Gtk.Orientation orientation)
+    {
+        Object(orientation: orientation);
+    }
+
+    public override void add(Gtk.Widget widget)
+    {
+        base.add(widget);
+        // var sizes = new Array<float>();
+        var _children = new Array<Gtk.Widget>();
+
+        // var total_size = 0;
+
+        forall((w) => {
+            _children.append_val(w);
+            // float sz = (orientation == Gtk.Orientation.HORIZONTAL) ?
+            //     w.get_allocated_width() :
+            //     w.get_allocated_height();
+            // sizes.append_val(sz);
+            // total_size += sz;
+        });
+
+        int sz = (orientation == Gtk.Orientation.HORIZONTAL) ?
+            get_allocated_width() : get_allocated_height();
+
+        int ns = (int) (sz / _children.length);
+        foreach (var c in _children.data)
+        {
+            if (orientation == Gtk.Orientation.HORIZONTAL)
+                c.set_hexpand(true);
+            else
+                c.set_vexpand(true);
+        }
+    }
+}
+
 public class Proton.EditorGrid : Gtk.EventBox
 {
     EditorStack[]     stacks = {};
-    Dazzle.MultiPaned paned;
+    MultiPaned        paned;
 
     EditorStack       current_stack;
 
@@ -98,9 +160,18 @@ public class Proton.EditorGrid : Gtk.EventBox
 
         win.add_action(a);
 
-        paned = new Dazzle.MultiPaned();
+        a = new SimpleAction("split_vertical", null);
+        a.activate.connect(split_vertical);
+
+        win.add_action(a);
+
+        paned = new MultiPaned(Gtk.Orientation.HORIZONTAL);
         paned.show();
-        add(new_stack());
+
+        add(paned);
+
+        current_stack = new_stack();
+        paned.add(current_stack);
 
         show();
     }
@@ -108,7 +179,7 @@ public class Proton.EditorGrid : Gtk.EventBox
     public void on_new_terminal()
     {
         if (current_stack == null)
-            new_stack();
+            current_stack = new_stack();
 
         var p = new TerminalPage(win);
         current_stack.add_named(p, p.title);
@@ -116,24 +187,30 @@ public class Proton.EditorGrid : Gtk.EventBox
     }
 
     // Add a column
-    // public void split_vertically()
-    // {
-    //     if (first_direction == null)
-    //     {
-    //         first_direction = Gtk.Orientation.HORIZONTAL;
-    //         set_orientation(first_direction);
-    //     }
+    public void split_vertical()
+    {
+        // if (first_direction == null)
+        // {
+        //     first_direction = Gtk.Orientation.HORIZONTAL;
+        //     set_orientation(first_direction);
+        // }
 
-    //     new_stack();
-    //     pack_start(current_stack, true, true, 0);
-    // }
+        var s = new_stack();
+
+        current_stack.get_parent().add(s);
+        current_stack = s;
+    }
 
     EditorStack new_stack()
     {
         var s = new EditorStack();
         stacks += s;
 
-        current_stack = s;
+        s.stack_focused.connect(() => {
+            message("Did focus");
+            current_stack = s;
+        });
+
         return (s);
     }
 
