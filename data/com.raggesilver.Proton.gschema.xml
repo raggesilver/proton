@@ -52,7 +52,7 @@
 	    <description>Left panel visible</description>
 	  </key>
       <key name="style-id" type="s">
-	    <default>'classic'</default>
+	    <default>'proton_dark'</default>
 	    <summary>Style scheme id</summary>
 	    <description>Style scheme id</description>
 	  </key>

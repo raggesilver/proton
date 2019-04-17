@@ -57,19 +57,23 @@
     <path
        inkscape:connector-curvature="0"
        id="path815"
-       d="m 30.420732,280.06665 a 13.4874,13.4874 0 0 1 -13.4874,13.4874 13.4874,13.4874 0 0 1 -13.4873996,-13.4874 13.4874,13.4874 0 0 1 13.4873996,-13.4874 13.4874,13.4874 0 0 1 13.4874,13.4874 z"
-       style="fill:none;fill-opacity:1;stroke:#333333;stroke-width:1.60019994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-    <path
-       inkscape:connector-curvature="0"
-       id="rect836"
-       d="m 17.214908,279.79946 7.051137,7.16712 -0.943045,0.92778 -7.051137,-7.16712 z"
-       inkscape:transform-center-y="4.7326055"
-       inkscape:transform-center-x="-4.7222891"
-       style="fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.93544334;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-    <path
-       inkscape:connector-curvature="0"
-       id="rect836-3"
-       d="m 16.271875,280.72812 v -8.48175 h 1.322917 v 8.48175 z"
-       style="fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.7882421;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       d="M 32.572385,280.06666 A 15.639053,15.639053 0 0 1 16.933333,295.70572 15.639053,15.639053 0 0 1 1.2942807,280.06666 15.639053,15.639053 0 0 1 16.933333,264.42761 15.639053,15.639053 0 0 1 32.572385,280.06666 Z"
+       style="fill:none;fill-opacity:1;stroke:#333333;stroke-width:2.58868328;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <g
+       id="g974"
+       transform="translate(-0.7839604)">
+      <path
+         style="fill:#333333;fill-opacity:1;stroke:none;stroke-width:1.10865939;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:transform-center-x="-4.7222891"
+         inkscape:transform-center-y="4.7326055"
+         d="m 18.051001,279.74571 8.356796,8.49426 -1.117668,1.09958 -8.356796,-8.49426 z"
+         id="rect836"
+         inkscape:connector-curvature="0" />
+      <path
+         style="fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.93422461;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 16.933347,280.84634 v -10.05258 h 1.567921 v 10.05258 z"
+         id="rect836-3"
+         inkscape:connector-curvature="0" />
+    </g>
   </g>
 </svg>

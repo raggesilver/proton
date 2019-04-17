@@ -44,11 +44,13 @@ public class Proton.EditorManager : Object
         win = _win;
         _editors = new HashTable<string, Editor> (str_hash, str_equal);
 
-        Gtk.SourceStyleSchemeManager.get_default()
-            .append_search_path(
-                Environment.get_home_dir() +
-                "/.local/share/gtksourceview-4/styles"
-            );
+        var mgr = Gtk.SourceStyleSchemeManager.get_default();
+
+        mgr.append_search_path(Environment.get_home_dir() +
+            "/.local/share/gtksourceview-4/styles"
+        );
+
+        mgr.append_search_path(Constants.DATADIR + "/proton/themes");
 
         settings.notify["style-id"].connect((p) => {
             update_ui();

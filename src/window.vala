@@ -365,4 +365,3 @@ public class Proton.Window : Gtk.ApplicationWindow
         s.gtk_application_prefer_dark_theme = settings.dark_mode;
     }
 }
-

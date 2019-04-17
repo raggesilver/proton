@@ -1,4 +1,6 @@
 subdir('icons')
+install_subdir('themes', install_dir: join_paths(get_option('datadir'),
+                                                 'proton'))
 
 desktop_file = i18n.merge_file(
   input: 'com.raggesilver.Proton.desktop.in',

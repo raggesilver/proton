@@ -54,6 +54,7 @@ private class Runner : Object, Proton.PluginIface {
         stop_image = new Gtk.Image.from_icon_name(
             "media-playback-stop-symbolic", Gtk.IconSize.MENU);
         btn = new Gtk.Button();
+        btn.get_style_context().add_class("wide-button");
     }
 
     public void do_register(Proton.PluginLoader loader) {

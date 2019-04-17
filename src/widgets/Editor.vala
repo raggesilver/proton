@@ -99,7 +99,7 @@ public class Proton.Editor : Object {
     // TODO use some actual settings
     private void editor_apply_settings() {
         sview.set_tab_width(4);
-        sview.set_left_margin(5);
+        sview.set_left_margin(15);
         sview.set_right_margin(5);
         sview.set_indent_width(4);
         sview.set_monospace(true);
