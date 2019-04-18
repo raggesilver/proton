@@ -1,9 +1,0 @@
-[Plugin]
-Module=runner
-Loader=C
-IAge=1
-Name=Runner
-Description=Build and run projects in Proton
-Icon=system-run
-Authors=raggesilver
-Copyright=Copyright © 2019 raggesilver
