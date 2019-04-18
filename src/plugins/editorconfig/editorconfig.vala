@@ -75,16 +75,15 @@ private class Editorconfig : Object, Proton.PluginIface
 
     bool on_before_save(Proton.Editor ed)
     {
-        Gtk.TextIter it;
-
         var buff = ed.sview.buffer;
+        var vadjust = (ed.sview.parent as Gtk.ScrolledWindow).get_vadjustment();
 
+        Gtk.TextIter it;
         buff.get_iter_at_offset(out it, buff.cursor_position);
 
         int line = it.get_line();
         int offset = it.get_line_offset();
-
-        buff.begin_user_action();
+        double scroll_position = vadjust.value;
 
         string[] arr = ed.get_text().split("\n");
         string new_text = arr[0]._chomp();
@@ -92,6 +91,7 @@ private class Editorconfig : Object, Proton.PluginIface
         for (ulong k = 1; k < arr.length; k++)
             new_text += ("\n" + arr[k]._chomp());
 
+        buff.begin_user_action();
         buff.set_text(new_text);
 
         // Restore cursor location
@@ -101,11 +101,28 @@ private class Editorconfig : Object, Proton.PluginIface
         if (in_line < offset) // If current cursor line was modified
             offset = in_line - 1;
 
+        if (offset < 0)
+            offset = 0;
+
         it.set_line(line);
         it.set_line_offset(offset);
         buff.place_cursor(it);
 
         buff.end_user_action();
+
+        /*
+         * For whatever reason after buff.set_text is called the vadjustment
+         * is modified TWICE, and that messes up the scrolling position. This
+         * is the way I found to "prevent" the position from changing
+         */
+        ulong h = 0;
+        uint times = 0;
+        h = vadjust.value_changed.connect(() => {
+            vadjust.set_value(scroll_position);
+            times++;
+            if (times == 2)
+                vadjust.disconnect(h);
+        });
 
         return (false);
     }

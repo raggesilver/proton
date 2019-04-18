@@ -23,24 +23,24 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.Editor : Object {
-
+public class Proton.Editor : Object
+{
     public signal void modified(bool is_modified);
     public signal void ui_modified();
     public signal void destroy();
     public signal bool before_save();
 
-    private uint id;
+    private uint    id;
     private string? last_saved_content = null;
-    public File? file { get; set; }
-    public bool is_modified { get; private set; default = false; }
+    public File?    file               { get; set; }
+    public bool     is_modified        { get; private set; default = false; }
 
-    public Gtk.SourceView sview { get; private set; }
+    public Gtk.SourceView     sview    { get; private set; }
     public Gtk.SourceLanguage language { get; private set; }
+    public Gtk.Widget         container;
 
-    public Gtk.Widget container;
-
-    public Editor(string? path, uint id) {
+    public Editor(string? path, uint id)
+    {
         sview = new Gtk.SourceView();
         sview.show();
         this.id = id;
@@ -74,10 +74,10 @@ public class Proton.Editor : Object {
 
             container = sview.parent;
 
-            container.size_allocate.connect(() => { adjust_margin(); });
-            sview.size_allocate.connect((a) => {
-                adjust_margin();
-            });
+            container.size_allocate.connect(adjust_margin);
+
+            sview.size_allocate.connect(adjust_margin);
+
             sview.event.connect((e) => {
                 if (e.type == Gdk.EventType.VISIBILITY_NOTIFY)
                     adjust_margin();
@@ -101,7 +101,8 @@ public class Proton.Editor : Object {
         sview.set_bottom_margin(ch - lh);
     }
 
-    public void update_ui() {
+    public void update_ui()
+    {
         (sview.buffer as Gtk.SourceBuffer).style_scheme =
             Gtk.SourceStyleSchemeManager.get_default()
                 .get_scheme(settings.style_id);
@@ -109,27 +110,31 @@ public class Proton.Editor : Object {
     }
 
     // TODO use some actual settings
-    private void editor_apply_settings() {
+    private void editor_apply_settings()
+    {
         sview.set_tab_width(4);
         sview.set_left_margin(5);
         sview.set_right_margin(5);
         sview.set_indent_width(4);
         sview.set_monospace(true);
         sview.set_auto_indent(true);
+        sview.set_indent_on_tab(true);
         sview.set_smart_backspace(true);
+        sview.right_margin_position = 80;
         sview.set_show_line_numbers(true);
         sview.set_show_right_margin(true);
-        sview.set_indent_on_tab(true);
-        sview.right_margin_position = 80;
+        sview.set_highlight_current_line(true);
         sview.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
         sview.set_insert_spaces_instead_of_tabs(true);
         sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
     }
 
-    public void _set_language(Gtk.SourceLanguage? _lang = null) {
+    public void _set_language(Gtk.SourceLanguage? _lang = null)
+    {
         this.language = _lang;
 
-        if (this.language == null) {
+        if (this.language == null)
+        {
             var lm = Gtk.SourceLanguageManager.get_default();
             this.language = lm.guess_language(file.name,
                                               file.content_type);
@@ -141,7 +146,8 @@ public class Proton.Editor : Object {
         (sview.buffer as Gtk.SourceBuffer).set_language(this.language);
     }
 
-    private void open() {
+    private void open()
+    {
         file.read_async.begin((obj, res) => {
             string text = file.read_async.end(res);
             (sview.buffer as Gtk.SourceBuffer).begin_not_undoable_action();
@@ -149,7 +155,8 @@ public class Proton.Editor : Object {
             (sview.buffer as Gtk.SourceBuffer).end_not_undoable_action();
             _set_language();
 
-            if (last_saved_content == null) {
+            if (last_saved_content == null)
+            {
                 last_saved_content = text;
                 sview.buffer.changed.connect(update_modified);
             }
@@ -160,10 +167,12 @@ public class Proton.Editor : Object {
         });
     }
 
-    private void update_modified() {
+    private void update_modified()
+    {
         var im = (bool) (get_text() != last_saved_content);
 
-        if (im != is_modified) {
+        if (im != is_modified)
+        {
             is_modified = im;
             modified(is_modified);
         }
@@ -179,14 +188,18 @@ public class Proton.Editor : Object {
 
         string content = get_text();
         bool _saved = yield file.write_async(content);
-        if (_saved) {
+
+        if (_saved)
+        {
             last_saved_content = content;
             update_modified();
         }
+
         return (_saved);
     }
 
-    public string get_text() {
+    public string get_text()
+    {
         Gtk.TextIter s, e;
         sview.buffer.get_start_iter(out s);
         sview.buffer.get_end_iter(out e);
