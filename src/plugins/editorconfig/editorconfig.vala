@@ -61,19 +61,7 @@ private class Editorconfig : Object, Proton.PluginIface
 
                     case "trim_trailing_whitespace":
                         ed.before_save.connect(() => {
-
-                            ed.sview.buffer.begin_user_action();
-
-                            string[] arr = ed.get_text().split("\n");
-                            string new_text = arr[0]._chomp();
-
-                            for (ulong k = 1; k < arr.length; k++)
-                                new_text += ("\n" + arr[k]._chomp());
-
-                            ed.sview.buffer.set_text(new_text);
-                            ed.sview.buffer.end_user_action();
-
-                            return (false);
+                            return (on_before_save(ed));
                         });
                         break;
 
@@ -83,6 +71,43 @@ private class Editorconfig : Object, Proton.PluginIface
             }
 
         });
+    }
+
+    bool on_before_save(Proton.Editor ed)
+    {
+        Gtk.TextIter it;
+
+        var buff = ed.sview.buffer;
+
+        buff.get_iter_at_offset(out it, buff.cursor_position);
+
+        int line = it.get_line();
+        int offset = it.get_line_offset();
+
+        buff.begin_user_action();
+
+        string[] arr = ed.get_text().split("\n");
+        string new_text = arr[0]._chomp();
+
+        for (ulong k = 1; k < arr.length; k++)
+            new_text += ("\n" + arr[k]._chomp());
+
+        buff.set_text(new_text);
+
+        // Restore cursor location
+        buff.get_iter_at_line(out it, line);
+
+        int in_line = it.get_chars_in_line();
+        if (in_line < offset) // If current cursor line was modified
+            offset = in_line - 1;
+
+        it.set_line(line);
+        it.set_line_offset(offset);
+        buff.place_cursor(it);
+
+        buff.end_user_action();
+
+        return (false);
     }
 
     public void activate()
