@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/raggesilver/Proton/plugins/runner">
+    <file alias="runner_setup.ui">layouts/runner_setup.ui</file>
+  </gresource>
+</gresources>

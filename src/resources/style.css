@@ -57,7 +57,7 @@ button.slim-button { padding: 0; }
 .completionpalette,
 .loadable > spinner { background-color: alpha(darker(@theme_bg_color), .6); }
 
-.statusbox { padding: 0; padding-left: 1em; min-width: 20em; background: @theme_bg_color; border-radius: 5px; border: 1px solid @borders; }
+.statusbox { min-height: 32px; padding-left: 1em; min-width: 20em; background: @theme_bg_color; border-radius: 5px; border: 1px solid @borders; }
 .statusbox > stack { margin-right: 1em; }
 .statusbox > label { margin-right: 1em; }
 .statusbox:hover { background: darker(@theme_bg_color); }

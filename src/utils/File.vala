@@ -46,8 +46,6 @@ public class Proton.File : Object {
         get {
             if (_name != null)
                 return _name;
-            if (info == null)
-                return "";
             _name = info.get_display_name();
             return _name;
         }
@@ -110,7 +108,6 @@ public class Proton.File : Object {
 
     private void load_file_for_path(string path) {
         file = GLib.File.new_for_path(path);
-        info = null;
 
         try {
             var query = GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," +

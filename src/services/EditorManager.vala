@@ -133,7 +133,7 @@ public class Proton.EditorManager : Object
     {
         if (current_editor != null && current_editor.file != null)
             current_editor.save.begin();
-        return false;
+        return (false);
     }
 
     public void update_ui()

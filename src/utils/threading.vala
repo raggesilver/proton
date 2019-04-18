@@ -91,7 +91,7 @@ public class Proton.FlatpakSubprocess : Object {
                              SubprocessFlags _flags,
                              int sin = -1,
                              int sout = -1,
-                             int serr = -1)
+                             int serr = -1) throws Error
     {
         flags |= _flags;
 
@@ -99,11 +99,7 @@ public class Proton.FlatpakSubprocess : Object {
         _stdout = sout;
         _stderr = serr;
 
-        try {
-            _init(env, argv, cwd);
-        } catch (Error e) {
-            warning(e.message);
-        }
+        _init(env, argv, cwd);
     }
 
     private bool _init(string[] env, string[] argv, string? cwd) throws Error {

@@ -237,7 +237,7 @@ public class Proton.TerminalTab : Proton.BottomPanelTab
         delete_terminal(sid);
     }
 
-    public void delete_terminal(string sid)
+    public void delete_terminal(string sid, bool no_create = false)
     {
         var id = int.parse(sid) - 1;
         var term = terminals.index(id);
@@ -253,7 +253,7 @@ public class Proton.TerminalTab : Proton.BottomPanelTab
         term.destroy();
         terminals.data[id] = null;
 
-        if (stack.get_children().length() == 0)
+        if (stack.get_children().length() == 0 && !no_create)
             add_terminal();
         else
             combo.set_active_id(stack.get_visible_child_name());
