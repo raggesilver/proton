@@ -76,17 +76,9 @@ private class Editorconfig : Object, Proton.PluginIface
     bool on_before_save(Proton.Editor ed)
     {
         var buff = ed.sview.buffer;
-        var vadjust = (ed.sview.parent as Gtk.ScrolledWindow).get_vadjustment();
-
-        Gtk.TextIter it;
-        buff.get_iter_at_offset(out it, buff.cursor_position);
-
-        int line = it.get_line();
-        int offset = it.get_line_offset();
-        double scroll_position = vadjust.value;
 
         Gtk.TextIter lit, lit_end;
-        int lines = ed.sview.buffer.get_line_count();
+        int lines = buff.get_line_count();
         int chars = 0;
         int to_remove;
         string line_text = "";
@@ -96,11 +88,11 @@ private class Editorconfig : Object, Proton.PluginIface
         for (int i = 0; i < lines; i++)
         {
             to_remove = 0;
-            ed.sview.buffer.get_iter_at_line(out lit, i);
+            buff.get_iter_at_line(out lit, i);
             chars = lit.get_chars_in_line();
-            ed.sview.buffer.get_iter_at_line_offset(out lit_end, i, chars);
+            buff.get_iter_at_line_offset(out lit_end, i, chars);
 
-            line_text = ed.sview.buffer.get_text(lit, lit_end, true);
+            line_text = buff.get_text(lit, lit_end, true);
             to_remove = line_text.length;
 
             line_text._chomp();
@@ -110,7 +102,7 @@ private class Editorconfig : Object, Proton.PluginIface
             {
                 lit.assign(lit_end);
                 lit.backward_chars(to_remove);
-                ed.sview.buffer.delete(ref lit, ref lit_end);
+                buff.delete(ref lit, ref lit_end);
             }
         }
 
