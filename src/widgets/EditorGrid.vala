@@ -47,17 +47,15 @@ public class Proton.EditorStack : Gtk.Stack
     {
         // add_events(Gdk.EventMask.BUTTON_PRESS_MASK);
         history = new List<string>();
-        
+
         notify["visible-child-name"].connect(on_switched);
 
         new_terminal_button.button_press_event.connect((e) => {
-            message("Call focus");
             stack_focused();
             return (false);
         });
 
         background_event_box.button_press_event.connect((e) => {
-            message("Call focus");
             stack_focused();
             return (false);
         });
@@ -146,6 +144,18 @@ public class Proton.EditorGrid : Gtk.EventBox
     {
         win = _win;
 
+        key_press_event.connect((e) => {
+            if (e.keyval == Gdk.Key.w &&
+                e.state == Gdk.ModifierType.CONTROL_MASK)
+            {
+                uint len = current_stack.get_children().length();
+                if (len > 1)
+                    (current_stack.get_visible_child() as GridPage).destroy();
+                return (true);
+            }
+            return (false);
+        });
+
         var a = new SimpleAction("new_terminal", null);
         a.activate.connect(on_new_terminal);
 
@@ -207,7 +217,6 @@ public class Proton.EditorGrid : Gtk.EventBox
         stacks += s;
 
         s.stack_focused.connect(() => {
-            message("Did focus");
             current_stack = s;
         });
 

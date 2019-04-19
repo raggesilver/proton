@@ -28,10 +28,10 @@ public class Proton.GridPage : Gtk.Box
 
     [GtkChild]
     public Gtk.ScrolledWindow scrolled { get; protected set; }
-    
+
     [GtkChild]
     public Gtk.Box header { get; protected set; }
-    
+
     [GtkChild]
     public Gtk.Button close_button { get; protected set; }
 
@@ -40,7 +40,7 @@ public class Proton.GridPage : Gtk.Box
 
     [GtkChild]
     public Gtk.Button pop_close_button { get; protected set; }
-    
+
     [GtkChild]
     public Gtk.Box pop_pages_box_item { get; protected set; }
 
@@ -108,26 +108,26 @@ public class Proton.EditorPage : Proton.GridPage
                 Gdk.Screen.get_default(), provider);
 
         // bg = editor.sview.get_style().bg[2];
-        
+
         var buff = editor.sview.buffer as Gtk.SourceBuffer;
-        
+
         Gtk.SourceStyleScheme? scheme = null;
         Gtk.SourceStyle? __style = null;
-        
+
         if ((scheme = buff.get_style_scheme()) == null ||
             (__style = scheme.get_style("text")) == null)
         {
             return ;
         }
-        
+
         string bg;
         string fg;
         __style.get("background", out bg, "foreground", out fg);
-        
+
         try
         {
             provider = new Gtk.CssProvider();
-        
+
             provider.load_from_data("""
                 .editor-panel .panel-header,
                 .editor-panel .panel-header > * {
