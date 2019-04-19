@@ -50,9 +50,10 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 
     public Array<string> menus { get; private set; }
 
-    public PreferencesWindow(Gtk.Application app)
+    public PreferencesWindow(Window _win)
     {
-        Object(application: app);
+        Object(application: _win.application);
+        set_transient_for(_win);
 
         string[] ss = { "Appearence", "Editor" };
 
@@ -71,11 +72,8 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
             .get_scheme(settings.style_id));
 
-        c.notify.connect((p) => {
-            if (p.get_name() == "style-scheme")
-            {
-                settings.style_id = c.style_scheme.id;
-            }
+        c.notify["style-scheme"].connect(() => {
+            settings.style_id = c.style_scheme.id;
         });
 
         layout_box.pack_start(c, false, true, 0);

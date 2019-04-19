@@ -207,7 +207,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         preferences_button.clicked.connect(() => {
             if (preferences_window == null)
             {
-                preferences_window = new PreferencesWindow(this.application);
+                preferences_window = new PreferencesWindow(this);
                 preferences_window.delete_event.connect(() => {
                     preferences_window = null;
                     return false;
