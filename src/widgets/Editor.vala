@@ -48,6 +48,8 @@ public class Proton.Editor : Object
         editor_apply_settings();
         update_ui();
 
+        add_completion_words();
+
         if (path != null) {
             file = new Proton.File(path);
             open();
@@ -84,6 +86,23 @@ public class Proton.Editor : Object
                 return (false);
             });
         });
+    }
+
+    // TODO make this optional
+    void add_completion_words()
+    {
+        var comp = new Gtk.SourceCompletionWords("Completion", null);
+        comp.register(sview.buffer);
+
+        try
+        {
+            if (!sview.completion.add_provider(comp))
+                warning("Could not add completion provider.");
+        }
+        catch (Error e)
+        {
+            warning(e.message);
+        }
     }
 
     void adjust_margin()
