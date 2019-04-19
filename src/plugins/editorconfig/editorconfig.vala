@@ -85,44 +85,36 @@ private class Editorconfig : Object, Proton.PluginIface
         int offset = it.get_line_offset();
         double scroll_position = vadjust.value;
 
-        string[] arr = ed.get_text().split("\n");
-        string new_text = arr[0]._chomp();
-
-        for (ulong k = 1; k < arr.length; k++)
-            new_text += ("\n" + arr[k]._chomp());
+        Gtk.TextIter lit, lit_end;
+        int lines = ed.sview.buffer.get_line_count();
+        int chars = 0;
+        int to_remove;
+        string line_text = "";
 
         buff.begin_user_action();
-        buff.set_text(new_text);
 
-        // Restore cursor location
-        buff.get_iter_at_line(out it, line);
+        for (int i = 0; i < lines; i++)
+        {
+            to_remove = 0;
+            ed.sview.buffer.get_iter_at_line(out lit, i);
+            chars = lit.get_chars_in_line();
+            ed.sview.buffer.get_iter_at_line_offset(out lit_end, i, chars);
 
-        int in_line = it.get_chars_in_line();
-        if (in_line < offset) // If current cursor line was modified
-            offset = in_line - 1;
+            line_text = ed.sview.buffer.get_text(lit, lit_end, true);
+            to_remove = line_text.length;
 
-        if (offset < 0)
-            offset = 0;
+            line_text._chomp();
+            to_remove -= line_text.length;
 
-        it.set_line(line);
-        it.set_line_offset(offset);
-        buff.place_cursor(it);
+            if (to_remove > 0)
+            {
+                lit.assign(lit_end);
+                lit.backward_chars(to_remove);
+                ed.sview.buffer.delete(ref lit, ref lit_end);
+            }
+        }
 
         buff.end_user_action();
-
-        /*
-         * For whatever reason after buff.set_text is called the vadjustment
-         * is modified TWICE, and that messes up the scrolling position. This
-         * is the way I found to "prevent" the position from changing
-         */
-        ulong h = 0;
-        uint times = 0;
-        h = vadjust.value_changed.connect(() => {
-            vadjust.set_value(scroll_position);
-            times++;
-            if (times == 2)
-                vadjust.disconnect(h);
-        });
 
         return (false);
     }
