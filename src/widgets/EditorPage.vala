@@ -24,7 +24,7 @@ public class Proton.GridPage : Gtk.Box
     public signal void page_focused();
 
     [GtkChild]
-    public Gtk.MenuButton title_button { get; protected set; }
+    public Gtk.Button title_button { get; protected set; }
 
     [GtkChild]
     public Gtk.ScrolledWindow scrolled { get; protected set; }

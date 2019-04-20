@@ -78,7 +78,10 @@ public class Proton.EditorStack : Gtk.Stack
 
         // w.renamed.connect(() => {});
 
-        w.title_button.set_popover(pop);
+        w.title_button.clicked.connect(() => {
+            pop.set_relative_to(w.title_button);
+            pop.popup();
+        });
 
         base.add_named(w, name);
     }

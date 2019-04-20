@@ -23,39 +23,50 @@
  * SPDX-License-Identifier: MIT
  */
 
-public class Proton.Settings : Granite.Services.Settings {
-
+public class Proton.Settings : Granite.Services.Settings
+{
     private static Proton.Settings? instance = null;
 
-    public bool dark_mode { get; set; }
-    public int width { get; set; }
-    public int height { get; set; }
-    public int pos_x { get; set; }
-    public int pos_y { get; set; }
-    public string[] recent_projects { get; set; }
-    public int bottom_panel_height { get; set; }
-    public int left_panel_width { get; set; }
-    public bool bottom_panel_visible { get; set; }
-    public bool left_panel_visible { get; set; }
-    public string style_id { get; set; }
+    public bool     dark_mode            { get; set; }
+    public int      width                { get; set; }
+    public int      height               { get; set; }
+    public int      pos_x                { get; set; }
+    public int      pos_y                { get; set; }
+    public string[] recent_projects      { get; set; }
+    public int      bottom_panel_height  { get; set; }
+    public int      left_panel_width     { get; set; }
+    public bool     bottom_panel_visible { get; set; }
+    public bool     left_panel_visible   { get; set; }
+    public string   style_id             { get; set; }
 
-    private Settings() {
-        base ("com.raggesilver.Proton");
+    private Settings()
+    {
+        base("com.raggesilver.Proton");
     }
 
-    public static Proton.Settings get_instance() {
+    /*
+     * I decided it is better to only have one instance of the settings class
+     * because all project related settings should be stored in .proton/ and IDE
+     * customizations such as theme and panels visibility (things that shouldn't
+     * change on multiple windows at the same time) should only be saved on exit
+     */
+
+    public static Proton.Settings get_instance()
+    {
         if (instance == null)
-            instance = new Proton.Settings ();
+            instance = new Proton.Settings();
         return instance;
     }
 
-    public void add_recent(string s) {
+    public void add_recent(string s)
+    {
         string[] _recent = {};
         _recent += s;
-        foreach (var item in recent_projects) {
+        foreach (var item in recent_projects)
+        {
             if (!(item in _recent))
                 _recent += item;
-            if (_recent.length >= 5)
+            if (_recent.length > 4)
                 break ;
         }
         recent_projects = _recent;

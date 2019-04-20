@@ -120,7 +120,7 @@ private class Editorconfig : Object, Proton.PluginIface
     }
 }
 
-public Type register_plugin (Module module)
+public Type register_plugin(Module module)
 {
     return typeof(Editorconfig);
 }

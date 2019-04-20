@@ -146,6 +146,22 @@ public class Proton.Editor : Object
         sview.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
         sview.set_insert_spaces_instead_of_tabs(true);
         sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
+
+        sview.space_drawer.set_types_for_locations(
+            Gtk.SourceSpaceLocationFlags.ALL, Gtk.SourceSpaceTypeFlags.NONE);
+
+        var type_flags = Gtk.SourceSpaceTypeFlags.NONE;
+        var location_flags = Gtk.SourceSpaceLocationFlags.NONE;
+
+        type_flags |= Gtk.SourceSpaceTypeFlags.SPACE;
+        type_flags |= Gtk.SourceSpaceTypeFlags.TAB;
+
+        location_flags |= Gtk.SourceSpaceLocationFlags.TRAILING;
+
+        sview.space_drawer.set_types_for_locations(
+            location_flags, type_flags);
+
+        sview.space_drawer.set_enable_matrix(true);
     }
 
     public void _set_language(Gtk.SourceLanguage? _lang = null)

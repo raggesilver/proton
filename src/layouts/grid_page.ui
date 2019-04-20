@@ -32,13 +32,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkMenuButton" id="title_button">
+          <object class="GtkButton" id="title_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">True</property>
