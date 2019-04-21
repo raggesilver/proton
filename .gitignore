@@ -1,4 +1,5 @@
 _build/
+_native/
 _native_build/
 _proton_build/
 *.*~
@@ -11,3 +12,6 @@ Makefile
 .idea
 
 data/icons/hicolor/icons.gresource.xml
+
+.proton/
+.flatpak-builder/

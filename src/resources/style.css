@@ -65,6 +65,7 @@ button.slim-button { padding: 0; }
 .statusbox > *:first-child { border-left: 0; }
 .statusbox > *:last-child { border-right: 0; }
 
+.panel-header { border-bottom: 1px solid darker(@theme_base_color); }
 .panel-header > button {
     padding-top: 1px;
     padding-bottom: 1px;

@@ -2,7 +2,7 @@
 
 Proton is a simple text editor, soon-to-be IDE.
 
-![Preview](https://imgur.com/l7DOX9H.png)
+![Preview](https://imgur.com/D6Va4wi.png)
 
 ## Compile / Install
 Use `flatpak` or `meson` (ninja) to install or compile Proton.

@@ -129,6 +129,9 @@ public class Proton.EditorPage : Proton.GridPage
             provider = new Gtk.CssProvider();
 
             provider.load_from_data("""
+                .editor-panel .panel-header {
+                    border-bottom: 1px solid darker(%s);
+                }
                 .editor-panel .panel-header,
                 .editor-panel .panel-header > * {
                     background: %s;
@@ -139,7 +142,7 @@ public class Proton.EditorPage : Proton.GridPage
                 .editor-panel .panel-header > button:checked {
                     background: shade(%s, .9);
                 }
-            """.printf(bg, fg, bg));
+            """.printf(bg, bg, fg, bg));
 
             Gtk.StyleContext.add_provider_for_screen(
                 Gdk.Screen.get_default(),

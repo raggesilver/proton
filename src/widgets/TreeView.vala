@@ -42,6 +42,7 @@ public class Proton.TreeItem : Gtk.Box
 {
     public signal bool left_click();
     public signal bool right_click();
+    public signal void populate(SourceFunc f);
 
     public File file { get; protected set; }
     public SortableBox container = null;
@@ -50,6 +51,7 @@ public class Proton.TreeItem : Gtk.Box
             return (file.is_directory);
         }
     }
+    public bool populated = false;
 
     Gtk.Label label;
     Gtk.Image icon;
@@ -142,7 +144,19 @@ public class Proton.TreeItem : Gtk.Box
         box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         eb.button_release_event.connect((e) => {
             if (e.button == 1)
-                return (left_click());
+            {
+                if (!is_directory || populated)
+                    return (left_click());
+                else
+                {
+                    populate(() => {
+                        populated = true;
+                        left_click();
+                        return (false);
+                    });
+                    return (false);
+                }
+            }
             else if (e.button == 3)
                 return (right_click());
             return (false);
@@ -226,6 +240,8 @@ public class Proton.TreeView : Sortable
         this.root = root;
         selected = null;
 
+        margin_top = 5;
+
         var b = new Gtk.Builder.from_resource(
             "/com/raggesilver/Proton/layouts/treeview_popover.ui");
         popover = b.get_object("menu") as Gtk.Popover;
@@ -279,16 +295,16 @@ public class Proton.TreeView : Sortable
 
         if (e == FileMonitorEvent.CREATED)
         {
-            insert_file(f);
+            t_insert_file.begin(f);
 
             if (f.is_directory)
             {
-                do_build(f);
+                build.begin(f);
             }
         }
         else if (e == FileMonitorEvent.MOVED_IN)
         {
-            insert_file(f);
+            t_insert_file.begin(f);
 
             renamed(of.path, f.path);
 
@@ -303,7 +319,7 @@ public class Proton.TreeView : Sortable
         else if (e == FileMonitorEvent.RENAMED)
         {
             remove_file(f);
-            insert_file(of);
+            t_insert_file.begin(of);
             renamed(f.path, of.path);
         }
         else if (e == FileMonitorEvent.DELETED)
@@ -326,44 +342,6 @@ public class Proton.TreeView : Sortable
         });
 
         yield;
-    }
-
-    void do_build(File _root)
-    {
-        try
-        {
-            var dir = Dir.open(_root.path);
-            string? fname = null;
-
-            // Attach monitor
-            try
-            {
-                var m = _root.file.monitor_directory(
-                            FileMonitorFlags.WATCH_MOVES);
-
-                m.changed.connect(on_monitor_changed);
-                monitors += m;
-            }
-            catch
-            {
-                warning("Could not create monitor for %s\n", _root.path);
-            }
-
-            while ((fname = dir.read_name()) != null)
-            {
-                var f = new File(
-                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
-
-                insert_file(f);
-
-                if (f.is_directory)
-                    do_build(f);
-            }
-
-            items.get(_root.path).container.sort(TreeItem.tree_sort_function,
-                                                 null);
-        }
-        catch (Error e) { warning(e.message); }
     }
 
     async void t_do_build(File _root)
@@ -394,8 +372,8 @@ public class Proton.TreeView : Sortable
 
                 yield t_insert_file(f, false);
 
-                if (f.is_directory)
-                    yield t_do_build(f);
+                // if (f.is_directory)
+                //     yield t_do_build(f);
             }
         }
         catch (Error e) { warning(e.message); }
@@ -412,64 +390,6 @@ public class Proton.TreeView : Sortable
         });
 
         yield;
-    }
-
-    void insert_file(File f, bool do_sort = true)
-    {
-        if (items.get(f.path) != null)
-            return ;
-
-        var arr = f.path.replace(@"$(this.root.path)/", "").split("/");
-        var r = new TreeItem(f, arr.length - 1);
-
-        r.left_click.connect(() => {
-            select(r);
-
-            if (r.is_directory)
-                r.toggle_expanded();
-
-            return (false);
-        });
-
-        r.right_click.connect(() => {
-            select(r, true);
-
-            popover.relative_to = r;
-            popover.popup();
-            return (false);
-        });
-
-        var p = f.file.get_parent();
-
-        if (p != null && p.get_path() == root.path)
-        {
-            pack_start(r, false, true, 0);
-            items.insert(f.path, r);
-
-            if (do_sort)
-                base.sort(TreeItem.tree_sort_function, null);
-        }
-        else if (p != null)
-        {
-            var parent = items.get(p.get_path());
-
-            if (parent == null)
-            {
-                insert_file(new File(p.get_path()), do_sort);
-                parent = items.get(p.get_path());
-            }
-
-            if (parent != null)
-            {
-                items.insert(f.path, r);
-                parent.container.pack_start(r, false, true, 0);
-
-                if (do_sort)
-                {
-                    parent.container.sort(TreeItem.tree_sort_function, null);
-                }
-            }
-        }
     }
 
     async void t_insert_file(File f, bool do_sort = true)
@@ -495,6 +415,13 @@ public class Proton.TreeView : Sortable
             popover.relative_to = r;
             popover.popup();
             return (false);
+        });
+
+        r.populate.connect((f) => {
+            t_do_build.begin(r.file, (_, res) => {
+                t_do_build.end(res);
+                f();
+            });
         });
 
         var p = f.file.get_parent();
