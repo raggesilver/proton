@@ -22,34 +22,27 @@ proton_sources = [
   'preferences_window.vala',
   'utils/File.vala',
   'utils/utils.vala',
+  'utils/subprocess.vala',
   'utils/threading.vala',
   'services/Settings.vala',
   'services/PluginManager.vala',
   'services/Core.vala',
   'services/EditorManager.vala',
-  'widgets/BottomPanel.vala',
-  'widgets/CommandPalette.vala',
-  'widgets/Container.vala',
-  'widgets/Editor.vala',
-  'widgets/EditorGrid.vala',
-  'widgets/EditorPage.vala',
-  'widgets/Loadable.vala',
-  'widgets/SortableBox.vala',
-  'widgets/StatusBox.vala',
-  'widgets/Terminal.vala',
-  'widgets/TreeView.vala',
 ]
+
+subdir('widgets')
 
 proton_deps = [
   dependency('gio-2.0', version: '>= 2.50'),
   dependency('gmodule-2.0', version: '>= 2.50'),
-  dependency('vte-2.91', version: '>= 0.54.1'),
-  dependency('gtk+-3.0', version: '>= 3.22'),
-  dependency('gtksourceview-4', version: '>= 4.2.0'),
   dependency('granite'), # this ain't no elementary app ok babydora?
+  dependency('gtksourceview-4', version: '>= 4.2.0'),
+  dependency('gtk+-3.0', version: '>= 3.22'),
+  dependency('json-glib-1.0', version: '>= 1.4.4'),
   dependency('libdazzle-1.0'),
-  meson.get_compiler('vala').find_library('posix'),
+  dependency('vte-2.91', version: '>= 0.54.1'),
   meson.get_compiler('vala').find_library('linux'),
+  meson.get_compiler('vala').find_library('posix'),
 ]
 
 gnome = import('gnome')

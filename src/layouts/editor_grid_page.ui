@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.0 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
-  <template class="ProtonGridPage" parent="GtkBox">
+  <template class="ProtonEditorGridPage" parent="GtkBox">
     <property name="name">ProtonEditorPage</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -89,31 +89,17 @@
       </packing>
     </child>
   </template>
+  <object class="GThemedIcon" id="themedicon1">
+    <property name="names">window-close-symbolic</property>
+  </object>
   <object class="GtkBox" id="pop_pages_box_item">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkButton">
+      <object class="GtkModelButton" id="pop_title_button">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="relief">none</property>
-        <child>
-          <object class="GtkLabel" id="pop_title_label">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="valign">center</property>
-            <property name="label" translatable="yes">label</property>
-            <property name="xalign">0</property>
-            <style>
-              <class name="slim-button"/>
-            </style>
-          </object>
-        </child>
-        <style>
-          <class name="slim-button"/>
-          <class name="square"/>
-        </style>
       </object>
       <packing>
         <property name="expand">True</property>
@@ -122,24 +108,11 @@
       </packing>
     </child>
     <child>
-      <object class="GtkButton" id="pop_close_button">
+      <object class="GtkModelButton" id="pop_close_button">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="halign">end</property>
-        <property name="valign">center</property>
-        <property name="relief">none</property>
-        <child>
-          <object class="GtkImage">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="icon_name">window-close-symbolic</property>
-          </object>
-        </child>
-        <style>
-          <class name="slim-button"/>
-          <class name="square"/>
-        </style>
+        <property name="icon">themedicon1</property>
       </object>
       <packing>
         <property name="expand">False</property>

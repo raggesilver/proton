@@ -61,7 +61,7 @@ public class Proton.EditorStack : Gtk.Stack
         });
     }
 
-    public new void add_named(GridPage w, string name)
+    public new void add_named(EditorGridPage w, string name)
     {
         history.prepend(name);
         pop_pages_box.pack_start(w.pop_pages_box_item, false, true, 0);
@@ -73,6 +73,8 @@ public class Proton.EditorStack : Gtk.Stack
         });
 
         w.page_focused.connect(() => {
+            if (get_visible_child_name() != name)
+                set_visible_child(w);
             stack_focused();
         });
 
@@ -91,7 +93,7 @@ public class Proton.EditorStack : Gtk.Stack
     {
         if (get_visible_child_name() != "background")
         {
-            var page = (GridPage) get_visible_child();
+            var page = (EditorGridPage) get_visible_child();
             pop_specific_label.label = page.title;
         }
     }
@@ -154,7 +156,7 @@ public class Proton.EditorGrid : Gtk.EventBox
             {
                 uint len = current_stack.get_children().length();
                 if (len > 1)
-                    (current_stack.get_visible_child() as GridPage).destroy();
+                    (current_stack.get_visible_child() as EditorGridPage).destroy();
                 return (true);
             }
             return (false);

@@ -18,53 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-[GtkTemplate (ui="/com/raggesilver/Proton/layouts/grid_page.ui")]
-public class Proton.GridPage : Gtk.Box
-{
-    public signal void page_focused();
-
-    [GtkChild]
-    public Gtk.Button title_button { get; protected set; }
-
-    [GtkChild]
-    public Gtk.ScrolledWindow scrolled { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Box header { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Button close_button { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Label pop_title_label { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Button pop_close_button { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Box pop_pages_box_item { get; protected set; }
-
-    public string title { get; protected set; }
-
-    public GridPage()
-    {
-        close_button.clicked.connect(() => {
-            destroy();
-        });
-
-        pop_close_button.clicked.connect(() => {
-            destroy();
-        });
-    }
-
-    public override void destroy()
-    {
-        pop_pages_box_item.destroy();
-        base.destroy();
-    }
-}
-
-public class Proton.EditorPage : Proton.GridPage
+public class Proton.EditorPage : Proton.EditorGridPage
 {
     Gtk.CssProvider? provider = null;
     public Editor    editor { get; protected set; }
@@ -78,7 +32,7 @@ public class Proton.EditorPage : Proton.GridPage
         scrolled.add(editor.sview);
         title = editor.file.name;
         title_button.label = title;
-        pop_title_label.label = title;
+        pop_title_button.label = title;
 
         editor.ui_modified.connect(update_ui);
 
@@ -150,33 +104,5 @@ public class Proton.EditorPage : Proton.GridPage
                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         }
         catch {}
-    }
-}
-
-public class Proton.TerminalPage : Proton.GridPage
-{
-    public Terminal terminal { get; protected set; }
-
-    unowned Window win;
-    public TerminalPage(Window _win)
-    {
-        win = _win;
-
-        terminal = new Terminal(win);
-        scrolled.add(terminal);
-
-        title = "terminal-%u".printf(terminal.id);
-        title_button.label = title;
-
-        pop_title_label.label = title;
-
-        terminal.window_title_changed.connect(() => {
-            title_button.label = terminal.window_title;
-        });
-
-        terminal.focus_in_event.connect((e) => {
-            page_focused();
-            return (false);
-        });
     }
 }

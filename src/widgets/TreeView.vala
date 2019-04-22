@@ -461,13 +461,26 @@ public class Proton.TreeView : Sortable
         }
     }
 
-    void remove_file(File f)
+    void remove_file(File f, uint _retrial = 0)
     {
         string target = f.path;
         TreeItem? r = null;
 
         if ((r = (items.get(target))) == null)
+        {
+            if (_retrial < 4)
+            {
+                /*
+                 * Try deleting the file after 5ms (should be enough time for a
+                 * possible file to be asyn-added to the treeview
+                 */
+                Timeout.add(5, () => {
+                    remove_file(f, _retrial + 1);
+                    return (false);
+                });
+            }
             return ;
+        }
 
         if (!items.steal(target))
             warning("COULDN'T STEAL %s", target);

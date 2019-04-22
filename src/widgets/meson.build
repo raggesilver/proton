@@ -1,0 +1,17 @@
+proton_sources += [
+    'widgets/editor/Editor.vala',
+    'widgets/editor/EditorGrid.vala',
+    'widgets/editor/EditorGridPage.vala',
+    'widgets/editor/EditorPage.vala',
+    'widgets/editor/EditorSearchBox.vala',
+    'widgets/terminal/Terminal.vala',
+    'widgets/terminal/TerminalPage.vala',
+    'widgets/terminal/TerminalTab.vala',
+    'widgets/BottomPanel.vala',
+    'widgets/CommandPalette.vala',
+    'widgets/Container.vala',
+    'widgets/Loadable.vala',
+    'widgets/SortableBox.vala',
+    'widgets/StatusBox.vala',
+    'widgets/TreeView.vala',
+]

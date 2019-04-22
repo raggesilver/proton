@@ -64,7 +64,8 @@ maybe_create_input_stream(UnixInputStream **ret,
 
 public class Proton.FlatpakSubprocess : Object {
 
-    public signal void finished(uint32 _res);
+    public signal void finished(int _res);
+    public signal void the_potato_master();
 
     DBusConnection connection;
     SubprocessFlags flags;
@@ -85,21 +86,31 @@ public class Proton.FlatpakSubprocess : Object {
     public UnixInputStream stdout_pipe;
     public UnixInputStream stderr_pipe;
 
-    public FlatpakSubprocess(string? cwd = null,
+    string[] _env;
+    string[] _argv;
+    string?  _cwd;
+
+    public FlatpakSubprocess(string? cwd,
                              string[] argv,
                              string[] env,
                              SubprocessFlags _flags,
-                             int sin = -1,
-                             int sout = -1,
-                             int serr = -1) throws Error
+                             int sin,
+                             int sout,
+                             int serr)
     {
         flags |= _flags;
 
         _stdin = sin;
         _stdout = sout;
         _stderr = serr;
+        _env = env;
+        _argv = argv;
+        _cwd = cwd;
+    }
 
-        _init(env, argv, cwd);
+    public bool init() throws Error
+    {
+        return (_init(_env, _argv, _cwd));
     }
 
     private bool _init(string[] env, string[] argv, string? cwd) throws Error {
@@ -343,14 +354,19 @@ public class Proton.FlatpakSubprocess : Object {
         parameters.get("(uu)", ref _pid, ref _res);
         print("Host process %" + uint32.FORMAT + " exited with %"
             + uint32.FORMAT + "\n", client_pid, _res);
+        the_potato_master();
+
+        Idle.add(() => {
+            finished((int) _res);
+            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+            return (false);
+        });
 
         if (exited_subscription != 0)
         {
             connection.signal_unsubscribe(exited_subscription);
             exited_subscription = 0;
         }
-
-        finished(_res);
     }
 
     private bool sigterm_handler() {
@@ -415,38 +431,80 @@ public class Proton.FlatpakSubprocess : Object {
     }
 }
 
-public class Proton.Subprocess : Object {
+public class Proton.RegularSubprocess : Proton.Subprocess
+{
+    public Pid pid { get; protected set; }
 
-    public signal void finished(int status);
+    private GLib.Subprocess? sub = null;
 
-    public string[] _argv { get; protected set; }
-    public SubprocessFlags flags { get; set; default = SubprocessFlags.NONE; }
+    public SubprocessFlags flags;
+    public int             _stdin = 0;
+    public int             _stdout = 1;
+    public int             _stderr = 2;
 
-    public GLib.Subprocess sub { get; protected set; default = null; }
+    public string[]        argv;
+    public string[]        envv;
+    public string?         cwd;
 
-    public Subprocess(string[] _argv, SubprocessFlags _flags)
+    public RegularSubprocess(string? cwd,
+                             string[] argv,
+                             string[] envv,
+                             SubprocessFlags flags,
+                             int _stdin,
+                             int _stdout,
+                             int _stderr)
     {
-        flags |= _flags;
-        this._argv = _argv;
+        this._stdin = _stdin;
+        this._stdout = _stdout;
+        this._stderr = _stderr;
+        this.argv = argv;
+        this.envv = envv;
+        this.cwd = cwd;
+        this.flags = flags;
     }
 
-    public void start() throws Error {
-        sub = new GLib.Subprocess.newv(_argv, flags);
-        _wait.begin();
-    }
+    public void start() throws Error
+    {
+        var sp = new GLib.SubprocessLauncher(flags);
 
-    private async void _wait() {
-        try {
-            yield sub.wait_async();
-            finished(sub.get_exit_status());
-        } catch (Error e) {
-            warning(e.message);
+        // Validate and set env variables one by one
+        foreach (var s in envv)
+        {
+            var ss = s.index_of("=");
+            if (ss != -1)
+                sp.setenv(s.substring(0, ss - 1), s.offset(ss), true);
         }
+
+        if (cwd != null)
+            sp.set_cwd(cwd);
+
+        if (_stdin != -1)
+            sp.take_stdin_fd(_stdin);
+
+        if (_stderr != -1)
+            sp.take_stderr_fd(_stderr);
+
+        if (_stdout != -1)
+            sp.take_stdout_fd(_stdout);
+
+        sub = sp.spawnv(argv);
+        sub.wait_async.begin(null, (_, res) => {
+            sub.wait_async.end(res);
+            finished(sub.get_exit_status());
+        });
     }
 
-    public void kill() {
-        assert(sub != null);
+    public override bool kill() {
+        // sub.send_signal(Posix.Signal.KILL);
+        sub.force_exit();
 
-        sub.send_signal(Posix.Signal.KILL);
+        return (true);
+    }
+
+    public override int? get_pid()
+    {
+        if (sub == null)
+            return (null);
+        return (int.parse(sub.get_identifier()));
     }
 }

@@ -236,8 +236,7 @@ public class Proton.Editor : Object
     public string get_text()
     {
         Gtk.TextIter s, e;
-        sview.buffer.get_start_iter(out s);
-        sview.buffer.get_end_iter(out e);
+        sview.buffer.get_bounds(out s, out e);
 
         return (sview.buffer.get_text(s, e, true));
     }
