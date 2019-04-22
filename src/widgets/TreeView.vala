@@ -420,6 +420,7 @@ public class Proton.TreeView : Sortable
         r.populate.connect((f) => {
             t_do_build.begin(r.file, (_, res) => {
                 t_do_build.end(res);
+                r.do_sort();
                 f();
             });
         });
