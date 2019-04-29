@@ -38,26 +38,37 @@
         "*.a"
     ],
     "modules": [
-    	{
-    	    "name": "gtksourceview",
-    	    "sources": [
-    	    	{
-    	    	    "type": "git",
-    	    	    "url": "https://gitlab.gnome.org/GNOME/gtksourceview",
+        {
+            "name": "gtksourceview",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/gtksourceview",
                     "tag": "4.2.0"
-    	    	}
-    	    ]
-    	},
-    	{
-    	    "name": "vte",
-    	    "sources": [
-    	    	{
-    	    	    "type": "git",
-    	    	    "url": "https://gitlab.gnome.org/GNOME/vte"
-    	    	}
-    	    ]
-    	},
-    	{
+                }
+            ]
+        },
+        {
+            "name": "vte",
+            "buildsystem": "meson",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/vte"
+                }
+            ]
+        },
+        {
+            "name" : "json-glib",
+            "buildsystem" : "meson",
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/json-glib"
+                }
+            ]
+        },
+        {
             "name": "libgranite",
             "buildsystem": "meson",
             "sources": [
@@ -66,7 +77,7 @@
                     "url": "https://github.com/elementary/granite"
                 }
             ]
-    	},
+        },
         {
             "name": "libeditorconfig",
             "buildsystem": "cmake",

@@ -69,23 +69,19 @@ public class Proton.Terminal : Vte.Terminal
 
         try
         {
-            var shell = get_shell() ??
-                        Environ.get_variable(Environ.get(), "SHELL");
+            spawn_sync(Vte.PtyFlags.DEFAULT,
+                       win.root.path,
+                       { Environ.get_variable(Environ.get(), "SHELL") },
+                       {"TERM=xterm-256color"},
+                       self_destroy ? 0 : SpawnFlags.DO_NOT_REAP_CHILD,
+                       null, null, null);
+
 
             if (is_flatpak())
             {
-                pty = new Vte.Pty.sync(Vte.PtyFlags.DEFAULT, null);
-                fp_vte_pty_spawn_async.begin(
-                    pty, _win.root.path, { shell }, {}, -1);
-            }
-            else
-            {
-                spawn_sync(Vte.PtyFlags.DEFAULT,
-                           win.root.path,
-                           { shell },
-                           {"TERM=xterm-256color"},
-                           self_destroy ? 0 : SpawnFlags.DO_NOT_REAP_CHILD,
-                           null, null, null);
+                feed_child((char[]) ("flatpak-spawn --env=\"TERM=xterm-256color"
+                    + "\" --host bash\n$(getent passwd $LOGNAME | cut -d: -f7)"
+                    + "\nreset\n"));
             }
 
             if (command != null)
@@ -106,110 +102,6 @@ public class Proton.Terminal : Vte.Terminal
         win.get_style_context().lookup_color("theme_fg_color", out fg);
 
         set_colors(fg, bg, solarized_palette);
-    }
-
-    public static string? get_shell()
-    {
-        if (!is_flatpak())
-            return (Environ.get_variable(Environ.get(), "SHELL"));
-
-        string[] argv = { "flatpak-spawn", "--host", "getent", "passwd",
-            Environment.get_user_name() };
-
-        var launcher = new GLib.SubprocessLauncher(SubprocessFlags.STDOUT_PIPE |
-                                              SubprocessFlags.STDERR_SILENCE);
-        launcher.unsetenv("G_MESSAGES_DEBUG");
-
-        try
-        {
-            var subprocess = launcher.spawnv(argv);
-            string? sout = null;
-            if (subprocess.communicate_utf8(null, null, out sout, null))
-            {
-                var arr = sout.split(":");
-                if (arr.length < 7)
-                    return (null);
-                return (arr[6]);
-            }
-            return (null);
-        }
-        catch { return (null); }
-    }
-
-    public static int create_inferior_pty(int superior)
-    {
-        int fd = -1;
-
-        if (superior == -1)
-            return (-1);
-
-        if (Posix.grantpt(superior) != 0)
-            return (-1);
-
-        if (Posix.unlockpt(superior) != 0)
-            return (-1);
-
-        char name[256];
-        if (Linux.Termios.ptsname_r(superior, name) != 0)
-            return (-1);
-
-        fd = Posix.open((string) name, Posix.O_RDWR | Posix.FD_CLOEXEC);
-
-        return (fd);
-    }
-
-    public static void fp_vte_pty_setup(Vte.Pty? pty)
-    {
-        if (pty != null && pty is Vte.Pty)
-            pty.child_setup();
-    }
-
-    public static async void fp_vte_pty_spawn_async(
-        Vte.Pty pty, string cwd, string[]? args, string[]? env, int timeout)
-        throws Error
-    {
-        if (timeout < 0)
-            timeout = -1;
-
-        if (env == null)
-        {
-            string[] _env = {};
-            foreach (string s in Environ.get())
-                _env += s;
-            env = _env;
-        }
-
-        int child_fd = -1;
-        if ((child_fd = create_inferior_pty(pty.get_fd())) == -1)
-            throw IOError.from_errno(Posix.errno);
-
-        // var task = new Task(pty, null, fp_vte_pty_spawn_async.callback);
-        // task.set_source_tag(fp_vte_pty_spawn_async);
-
-        var launcher = new GLib.SubprocessLauncher(0);
-        launcher.set_environ(env);
-        launcher.set_cwd(cwd);
-        launcher.take_stdout_fd(Posix.dup(child_fd));
-        launcher.take_stderr_fd(Posix.dup(child_fd));
-        launcher.take_stdin_fd(child_fd);
-        launcher.set_child_setup(() => {
-            fp_vte_pty_setup(is_flatpak() ? pty : null);
-        });
-
-        string[] argv = {};
-        if (is_flatpak())
-        {
-            argv += "flatpak-spawn";
-            argv += "--host";
-            argv += "--watch-bus";
-            for (int i = 0; i < env.length; i++)
-                argv += "--env=%s".printf(env[i]);
-        }
-
-        for (int i = 0; i < args.length; i++)
-            argv += args[i];
-
-        launcher.spawnv(argv);
     }
 }
 
