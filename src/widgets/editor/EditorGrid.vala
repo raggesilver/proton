@@ -70,6 +70,8 @@ public class Proton.EditorStack : Gtk.Stack
             history.remove_link(history.find_custom(name, strcmp));
             if (history.length() > 0)
                 set_visible_child_name(history.nth(0).data);
+            else if (get_parent().get_children().length() > 1)
+                destroy();
         });
 
         w.page_focused.connect(() => {
