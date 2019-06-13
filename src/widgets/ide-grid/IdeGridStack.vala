@@ -123,6 +123,13 @@ public class Proton.IdeGridStack : Gtk.Box
         stack.set_visible_child(page);
     }
 
+    public void close_page()
+    {
+        var c = stack.get_visible_child();
+        if (c != background_event_box)
+            c.destroy();
+    }
+
     void reset_titlebar_style()
     {
         if (provider != null)

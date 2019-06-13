@@ -59,6 +59,13 @@ public class Proton.IdeGrid : Gtk.EventBox
         window.add_action(a);
         window.application.set_accels_for_action(
             "win.new_terminal", {"<Control><Shift>T"});
+
+        a = new SimpleAction("close_page", null);
+        a.activate.connect(close_page);
+
+        window.add_action(a);
+        window.application.set_accels_for_action(
+            "win.close_page", {"<Control>W"});
     }
 
     IdeGridStack new_stack()
@@ -114,5 +121,10 @@ public class Proton.IdeGrid : Gtk.EventBox
     {
         var t = new TerminalGridPage(window);
         current_stack.add_page(t);
+    }
+
+    public void close_page()
+    {
+        current_stack.close_page();
     }
 }
