@@ -1,4 +1,4 @@
-/* TerminalPage.vala
+/* TerminalGridPage.vala
  *
  * Copyright 2019 Paulo Queiroz <pvaqueiroz@gmail.com>
  *
@@ -18,29 +18,34 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-public class Proton.TerminalPage : Proton.EditorGridPage
+public class Proton.TerminalGridPage : IdeGridPage
 {
-    public Terminal terminal { get; protected set; }
+    public  Terminal    terminal { get; protected set; }
+    unowned Window      win;
 
-    unowned Window win;
-    public TerminalPage(Window _win)
+    public TerminalGridPage(Window _win)
     {
         win = _win;
 
         terminal = new Terminal(win);
+        var scrolled = new Gtk.ScrolledWindow(null, null);
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
         scrolled.add(terminal);
 
+        pack_start(scrolled, true, true, 0);
+        show_all();
+
         title = "terminal-%u".printf(terminal.id);
-        title_button.label = title;
 
-        pop_title_button.label = title;
+        // FIXME: create a way to change the title only on IdeGridStack.titlebar
+        // and keep the initial on IdeGridStack.popover
 
-        terminal.window_title_changed.connect(() => {
-            title_button.label = terminal.window_title;
-        });
+        // terminal.window_title_changed.connect(() => {
+        //     title = terminal.window_title;
+        // });
 
         terminal.focus_in_event.connect((e) => {
-            page_focused();
+            focused();
             return (false);
         });
     }

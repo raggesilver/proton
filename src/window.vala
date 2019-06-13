@@ -78,7 +78,7 @@ public class Proton.Window : Gtk.ApplicationWindow
     public File           root             { get; protected set; }
     public BottomPanel    bottom_panel     { get; protected set; }
     public TerminalTab    terminal_tab     { get; protected set; }
-    public EditorGrid     grid             { get; protected set; }
+    public IdeGrid        grid             { get; protected set; }
 
     public Window(Gtk.Application app, File root)
     {
@@ -94,7 +94,9 @@ public class Proton.Window : Gtk.ApplicationWindow
         tree_view = new TreeView(root);
         manager = new EditorManager(this);
         bottom_panel = new BottomPanel(this);
-        grid = new EditorGrid(this);
+        // grid = new EditorGrid(this);
+        grid = new IdeGrid(this);
+        grid.show();
 
         var status_box = new StatusBox(this);
         title_box.set_center_widget(status_box);

@@ -23,71 +23,85 @@
  * SPDX-License-Identifier: MIT
  */
 
-public errordomain Proton.PluginError {
+public errordomain Proton.PluginError
+{
 	NOT_SUPPORTED,
 	UNEXPECTED_TYPE,
 	NO_REGISTRATION_FUNCTION,
 	FAILED
 }
 
-public interface Proton.PluginIface : Object {
+public interface Proton.PluginIface : Object
+{
     public abstract void do_register(PluginLoader loader);
     public abstract void activate();
     public abstract void deactivate();
 }
 
-private class Proton.PluginInfo : Object {
+private class Proton.PluginInfo : Object
+{
     public Module module;
     public Type gtype;
 
-    public PluginInfo(Type type, owned Module module) {
+    public PluginInfo(Type type, owned Module module)
+    {
         this.module = (owned) module;
         this.gtype = type;
     }
 }
 
-public class Proton.PluginLoader : Object {
+public class Proton.PluginLoader : Object
+{
     [CCode (has_target = false)]
     private delegate Type RegisterPluginFunction(Module module);
 
-    private PluginIface[] plugins = {};
-    private PluginInfo[] infos = {};
-
     public signal void editor_changed(Editor? ed);
 
-    public Gtk.Box left_hb_box { get; private set; }
-    public Gtk.Box right_hb_box { get; private set; }
-    public string root_path { get; private set; }
+    private PluginIface[]   plugins = {};
+    private PluginInfo[]    infos = {};
 
-    public Window window { get; protected set; }
+    public Gtk.Box  left_hb_box     { get; private set; }
+    public Gtk.Box  right_hb_box    { get; private set; }
+    public string   root_path       { get; private set; }
+    public Window   window          { get; private set; }
 
-    public PluginLoader(Window w) {
+    public PluginLoader(Window w)
+    {
+        window = w;
+        /*
+        ** TODO: These fields should be deprecated, window now is accessible to
+        ** plugins.
+        */
         left_hb_box = w.left_hb_box;
         right_hb_box = w.right_hb_box;
         root_path = w.root.path;
-        window = w;
     }
 
-    public PluginIface load(string path) throws PluginError {
-        if (!Module.supported()) {
+    public PluginIface load(string path) throws PluginError
+    {
+        if (!Module.supported())
+        {
             throw new PluginError.NOT_SUPPORTED("Plugins are not supported");
         }
 
         Module module = Module.open(path, ModuleFlags.BIND_LAZY);
-        if (module == null) {
+        if (module == null)
+        {
             throw new PluginError.FAILED(Module.error());
         }
 
         void *function;
         module.symbol("register_plugin", out function);
-        if (function == null) {
+        if (function == null)
+        {
             throw new PluginError.NO_REGISTRATION_FUNCTION(
                 "register_plugin not found");
         }
 
-        RegisterPluginFunction register_plugin = (RegisterPluginFunction) function;
+        var register_plugin = (RegisterPluginFunction) function;
         Type type = register_plugin(module);
-        if (type.is_a(typeof(PluginIface)) == false) {
+        if (type.is_a(typeof(PluginIface)) == false)
+        {
             throw new PluginError.UNEXPECTED_TYPE("Unexpected type");
         }
 

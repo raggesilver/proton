@@ -18,52 +18,64 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-[GtkTemplate (ui="/com/raggesilver/Proton/layouts/editor_grid_page.ui")]
-public class Proton.EditorGridPage : Gtk.Box
+public class Proton.EditorGridPage : Proton.IdeGridPage
 {
-    public signal void page_focused();
+    public Editor    editor { get; protected set; }
+    Gtk.CssProvider? provider = null;
 
-    [GtkChild]
-    public Gtk.Button title_button { get; protected set; }
+    Gtk.ScrolledWindow  scrolled;
 
-    [GtkChild]
-    public Gtk.ScrolledWindow scrolled { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Box header { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Button close_button { get; protected set; }
-
-    [GtkChild]
-    public Gtk.ModelButton pop_title_button { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Button pop_close_button { get; protected set; }
-
-    [GtkChild]
-    public Gtk.Box pop_pages_box_item { get; protected set; }
-
-    public string title { get; protected set; }
-
-    public EditorGridPage()
+    public EditorGridPage(Editor _editor)
     {
-        close_button.clicked.connect(() => {
-            destroy();
+        editor = _editor;
+
+        scrolled = new Gtk.ScrolledWindow(null, null);
+        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+
+        title = editor.file.name;
+
+        /*
+         * Connecting signals
+         */
+        update_ui();
+        editor.ui_modified.connect(update_ui);
+
+        editor.modified.connect((m) => {
+            title = editor.file.name + ((m) ? " •" : "");
         });
 
-        pop_close_button.clicked.connect(() => {
-            destroy();
+        editor.sview.focus_in_event.connect((e) => {
+            focused();
+            return (false);
         });
 
-        pop_title_button.clicked.connect(() => {
-            page_focused();
-        });
+        scrolled.add(editor.sview);
+        pack_start(scrolled, true, true, 0);
+        show_all();
+    }
+
+    void update_ui()
+    {
+        var buff = editor.sview.buffer as Gtk.SourceBuffer;
+
+        Gtk.SourceStyleScheme? scheme = null;
+        Gtk.SourceStyle? __style = null;
+
+        if (null == (scheme = buff.get_style_scheme()) ||
+            null == (__style = scheme.get_style("text")))
+        {
+            return ;
+        }
+
+        string _bg, _fg;
+        __style.get("background", out _bg, "foreground", out _fg);
+        bg = _bg;
+        fg = _fg;
     }
 
     public override void destroy()
     {
-        pop_pages_box_item.destroy();
+        editor.destroy();
         base.destroy();
     }
 }

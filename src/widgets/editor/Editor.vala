@@ -32,7 +32,7 @@ public class Proton.Editor : Object
 
     private uint    id;
     private string? last_saved_content = null;
-    public File?    file               { get; set; }
+    public File?    file               { get; set; default = null; }
     public bool     is_modified        { get; private set; default = false; }
 
     public Gtk.SourceView     sview    { get; private set; }
