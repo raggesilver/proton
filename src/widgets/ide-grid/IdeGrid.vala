@@ -75,7 +75,8 @@ public class Proton.IdeGrid : Gtk.EventBox
 
         s.destroy.connect(() => {
             stacks.remove(s);
-            current_stack = stacks.last().data;
+            if (stacks.length() > 0)
+                current_stack = stacks.last().data;
         });
 
         stacks.append(s);
