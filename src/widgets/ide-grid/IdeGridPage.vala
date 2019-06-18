@@ -54,7 +54,7 @@ public class Proton.IdeGridPagePopEntry : Gtk.ListBoxRow
 public abstract class Proton.IdeGridPage : Gtk.Box
 {
     public signal void focused();
-    public signal void style_changed(string bg, string fg);
+    public signal void style_changed(string? bg, string? fg);
 
     public string? bg { get; set; default = null; }
     public string? fg { get; set; default = null; }
@@ -69,12 +69,10 @@ public abstract class Proton.IdeGridPage : Gtk.Box
             destroy();
         });
         notify["bg"].connect(() => {
-            if (bg != null && fg != null)
-                style_changed(bg, fg);
+            style_changed(bg, fg);
         });
         notify["fg"].connect(() => {
-            if (bg != null && fg != null)
-                style_changed(bg, fg);
+            style_changed(bg, fg);
         });
     }
 

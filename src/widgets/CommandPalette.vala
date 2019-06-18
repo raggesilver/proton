@@ -223,11 +223,11 @@ public class Proton.CommandPalette : Object
         string sout = "";
         string f = find_command.printf(win.root.path, text);
 
-        if (Process.spawn_command_line_sync(
-            f, out sout))
+        try
         {
-            matches = sout.split("\n");
-        }
+            if (Process.spawn_command_line_sync(f, out sout))
+                matches = sout.split("\n");
+        } catch {}
 
         int max = (matches.length > 10) ? 10 : matches.length;
         for (int i = 0; i < max; i++)

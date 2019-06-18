@@ -70,11 +70,14 @@ public class Proton.IdeGridStack : Gtk.Box
                 }
 
                 style_changed_handler = p.style_changed.connect(() => {
-                    set_titlebar_style(p.bg, p.fg);
+                    if (p.bg != null && p.fg != null)
+                        set_titlebar_style(p);
+                    else
+                        reset_titlebar_style();
                 });
 
                 if (p.bg != null && p.fg != null)
-                    set_titlebar_style(p.bg, p.fg);
+                    set_titlebar_style(p);
                 else
                     reset_titlebar_style();
             }
@@ -98,7 +101,6 @@ public class Proton.IdeGridStack : Gtk.Box
         pages.append(page);
 
         page.show_all();
-        debug("Add page called, title: '%s'", page.title);
 
         pop_entry_box.insert(page.pop_entry, -1);
 
@@ -141,8 +143,11 @@ public class Proton.IdeGridStack : Gtk.Box
         provider = null;
     }
 
-    void set_titlebar_style(string bg, string fg)
+    void set_titlebar_style(IdeGridPage page)
     {
+        if (page != stack.get_visible_child())
+            return;
+
         if (provider != null)
         {
             foreach (var c in titlebar.get_children())
@@ -165,7 +170,7 @@ public class Proton.IdeGridStack : Gtk.Box
         .panel-header > button:checked {
             background: shade(%s, .9);
         }
-        """.printf(bg, bg, fg, bg));
+        """.printf(page.bg, page.bg, page.fg, page.bg));
 
         titlebar.get_style_context().add_provider(
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);

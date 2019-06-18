@@ -21,7 +21,6 @@
 public class Proton.EditorGridPage : Proton.IdeGridPage
 {
     public Editor    editor { get; protected set; }
-    Gtk.CssProvider? provider = null;
 
     Gtk.ScrolledWindow  scrolled;
 
@@ -64,6 +63,7 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
         if (null == (scheme = buff.get_style_scheme()) ||
             null == (__style = scheme.get_style("text")))
         {
+            bg = fg = null;
             return ;
         }
 
