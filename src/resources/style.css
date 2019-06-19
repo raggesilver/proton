@@ -37,7 +37,7 @@ button.slim-button { padding: 0; }
     background-color: @theme_selected_bg_color;
 }
 
-.treeitem.selected > widget:first-child > box.horizontal {
+.treeitem.selected:not(:barckdrop) > widget:first-child > box.horizontal {
     color: @theme_selected_fg_color;
 }
 

@@ -52,7 +52,7 @@
   <style name="def:special-char"            foreground="violet"/>
 
   <!-- Identifiers -->
-  <style name="def:identifier"              foreground="red"/>
+  <style name="def:identifier"              foreground="pink"/>
 
   <!-- Statements -->
   <style name="def:statement"               foreground="#CB357E" bold="true"/>
