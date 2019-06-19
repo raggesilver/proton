@@ -148,6 +148,12 @@ public class Proton.File : Object {
             return (null);
         }
 
+        if (is_directory)
+        {
+            warning(@"Tried to read a directory $(name)");
+            return (null);
+        }
+
         /*
          * This may seem odd, but it is still faster than reading the file
          * line by line

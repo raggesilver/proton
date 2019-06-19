@@ -224,6 +224,7 @@ public class Proton.TreeView : Sortable
 {
     public signal void changed(File file);
     public signal void renamed(string old, string _new);
+    public signal void monitor_changed(File f, File? of, FileMonitorEvent e);
 
     public File                        root     { get; protected set; }
     public HashTable<string, TreeItem> items;
@@ -326,6 +327,7 @@ public class Proton.TreeView : Sortable
         {
             remove_file(f);
         }
+        monitor_changed(f, of, e);
     }
 
     async void build(File _root)
