@@ -41,6 +41,7 @@ proton_deps = [
   dependency('json-glib-1.0', version: '>= 1.4.4'),
   dependency('libdazzle-1.0'),
   dependency('vte-2.91', version: '>= 0.54.1'),
+  dependency('libgit2-glib-1.0', version: '>= 0.28.0.1'),
   meson.get_compiler('vala').find_library('linux'),
   meson.get_compiler('vala').find_library('posix'),
 ]

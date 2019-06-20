@@ -99,6 +99,56 @@
             ]
         },
         {
+            "name" : "libssh2",
+            "buildsystem" : "cmake-ninja",
+            "config-opts" : [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_INSTALL_LIBDIR:PATH=/app/lib",
+                "-DBUILD_SHARED_LIBS:BOOL=ON"
+            ],
+            "cleanup" : [
+                "/share/doc"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/libssh2/libssh2.git",
+                    "branch" : "libssh2-1.8.0"
+                }
+            ]
+        },
+        {
+            "name" : "libgit2",
+            "buildsystem" : "cmake-ninja",
+            "config-opts" : [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DBUILD_SHARED_LIBS:BOOL=ON",
+                "-DTHREADSAFE=ON"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/libgit2/libgit2.git",
+                    "branch" : "maint/v0.27"
+                }
+            ]
+        },
+        {
+            "name" : "libgit2-glib",
+            "config-opts" : [
+                "--libdir=/app/lib",
+                "--buildtype=debugoptimized"
+            ],
+            "buildsystem" : "meson",
+            "builddir" : true,
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/libgit2-glib.git"
+                }
+            ]
+        },
+        {
             "name": "proton",
             "buildsystem": "meson",
             "sources": [

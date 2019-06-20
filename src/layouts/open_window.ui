@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkListStore" id="build_systems_list_store">
     <columns>
       <!-- column-name name -->
@@ -47,6 +52,26 @@
     <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="has_resize_grip">True</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header_bar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkButton" id="back_button">
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">go-previous-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
     <child>
       <object class="GtkStack" id="stack">
         <property name="visible">True</property>
@@ -404,7 +429,6 @@
         <child>
           <object class="GtkBox" id="clone_page">
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="halign">center</property>
             <property name="valign">center</property>
@@ -436,6 +460,7 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="valign">center</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkLabel">
@@ -450,22 +475,6 @@
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Soon...</property>
-                        <property name="xalign">1</property>
-                        <attributes>
-                          <attribute name="style" value="italic"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
@@ -487,11 +496,13 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkEntry">
+                  <object class="GtkEntry" id="clone_repo_entry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">30</property>
                     <property name="placeholder_text" translatable="yes">Repository URL</property>
+                    <property name="input_purpose">url</property>
+                    <signal name="changed" handler="on_repo_url_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -500,7 +511,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="clone_button">
                     <property name="label" translatable="yes">Clone</property>
                     <property name="width_request">100</property>
                     <property name="visible">True</property>
@@ -528,14 +539,14 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="spacing">12</property>
                 <child>
-                  <object class="GtkEntry">
+                  <object class="GtkFileChooserButton" id="clone_location_chooser">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="width_chars">30</property>
-                    <property name="text" translatable="yes">~/Projects/</property>
-                    <property name="shadow_type">none</property>
-                    <property name="placeholder_text" translatable="yes">Project path</property>
+                    <property name="can_focus">False</property>
+                    <property name="action">select-folder</property>
+                    <property name="title" translatable="yes">Project location</property>
+                    <signal name="file-set" handler="on_repo_url_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -544,12 +555,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
-                    <property name="label" translatable="yes">Browse</property>
-                    <property name="width_request">100</property>
+                  <object class="GtkLabel" id="repo_label">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">/repo_name</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -565,6 +575,32 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="scroll">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="vadjustment">adjustment1</property>
+                <property name="hscrollbar_policy">never</property>
+                <property name="min_content_height">20</property>
+                <property name="max_content_height">150</property>
+                <property name="propagate_natural_height">True</property>
+                <child>
+                  <object class="GtkTextView" id="git_text_view">
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="editable">False</property>
+                    <property name="wrap_mode">word-char</property>
+                    <property name="cursor_visible">False</property>
+                    <property name="monospace">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -880,26 +916,6 @@
             <property name="title" translatable="yes">New project</property>
             <property name="position">2</property>
           </packing>
-        </child>
-      </object>
-    </child>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="header_bar">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkButton" id="back_button">
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">go-previous-symbolic</property>
-              </object>
-            </child>
-          </object>
         </child>
       </object>
     </child>

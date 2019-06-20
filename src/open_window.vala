@@ -18,11 +18,29 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+ internal class Proton.RC : Ggit.RemoteCallbacks
+ {}
+
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/open_window.ui")]
 public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
-    // [GtkChild]
-    // Gtk.HeaderBar header_bar;
+    [GtkChild]
+    Gtk.FileChooserButton clone_location_chooser;
+
+    [GtkChild]
+    Gtk.ScrolledWindow scroll;
+
+    [GtkChild]
+    Gtk.Button clone_button;
+
+    [GtkChild]
+    Gtk.Entry clone_repo_entry;
+
+    [GtkChild]
+    Gtk.TextView git_text_view;
+
+    [GtkChild]
+    Gtk.Label repo_label;
 
     [GtkChild]
     Gtk.Button clone_project_button;
@@ -53,6 +71,10 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
     [GtkChild]
     Gtk.Stack stack;
+
+    string  clone_url = "";
+    string? repo_name = null;
+    File?   repo_file = null;
 
     public OpenWindow(Gtk.Application app) {
         Object(application: app);
@@ -101,6 +123,8 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
             d.destroy();
         });
+
+        clone_button.clicked.connect(on_clone_button_pressed);
 
         update_ui();
 
@@ -179,5 +203,123 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
             no_recent_label.hide();
             recent_box.show();
         }
+    }
+
+    void on_clone_button_pressed()
+    {
+        Ggit.init();
+        do_clone.begin((obj, res) => {
+            if (do_clone.end(res))
+            {
+                var w = new Window(this.application, new File(repo_file.path));
+                w.show();
+                destroy();
+            }
+        });
+    }
+
+    async bool do_clone()
+    {
+        SourceFunc callback = do_clone.callback;
+
+        bool res = false;
+
+        new Thread<bool>("git_clone", () => {
+
+            try
+            {
+                var co = new Ggit.CloneOptions();
+                co.set_checkout_branch("master");
+                var fo = new Ggit.FetchOptions();
+                var rc = new RC();
+
+                assert(rc != null);
+
+                var buf = git_text_view.get_buffer();
+                buf.set_text("", -1);
+
+                git_text_view.show();
+
+                rc.completion.connect((t) => {
+                    print("Remote completed %s", t.to_string());
+                    warning("COMPLETE");
+                });
+
+                rc.progress.connect((s) => {
+                    Idle.add(() => {
+                        buf.insert_at_cursor(s, s.length);
+                        scroll.get_vadjustment().value =
+                            scroll.get_vadjustment().upper;
+                        return (false);
+                    });
+                });
+
+                fo.set_remote_callbacks(rc);
+                co.set_fetch_options(fo);
+
+                var r = Ggit.Repository.clone(clone_repo_entry.text,
+                                              repo_file.file,
+                                              co);
+                assert(r != null);
+
+                Idle.add((owned) callback);
+                res = true;
+            }
+            catch(Error e)
+            {
+                warning(e.message);
+                Idle.add((owned) callback);
+                res = false;
+            }
+            return (true);
+        });
+
+        yield;
+
+        return (res);
+    }
+
+    [GtkCallback]
+    void on_repo_url_changed()
+    {
+        clone_url = clone_repo_entry.get_text();
+
+        clone_repo_entry.get_style_context().remove_class("error");
+
+        var r = new Regex("((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\."
+            + "@\\:/\\-~]+)(\\.git)(/)?", RegexCompileFlags.JAVASCRIPT_COMPAT);
+
+        if (!r.match(clone_url))
+        {
+            clone_repo_entry.get_style_context().add_class("error");
+            clone_button.set_sensitive(false);
+            return ;
+        }
+
+        var i = clone_url.last_index_of("/");
+        var s = @"/$(clone_url.offset(i+1))";
+        s = s.substring(0, s.length - 4);
+        repo_name = repo_label.label = s;
+
+        clone_button.set_sensitive(get_valid_repo());
+    }
+
+    bool get_valid_repo()
+    {
+        if (null == clone_location_chooser.get_file())
+            return (false);
+
+        var p = clone_location_chooser.get_file().get_path();
+
+        if (p == null)
+            return (false);
+
+        repo_file = new File(p + repo_name);
+        debug(repo_file.path);
+        if (!repo_file.exists || (repo_file.is_directory && repo_file.is_empty))
+        {
+            return (true);
+        }
+        return (false);
     }
 }

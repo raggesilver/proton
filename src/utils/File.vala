@@ -101,6 +101,25 @@ public class Proton.File : Object {
         }
     }
 
+    public bool is_empty {
+        get {
+            if (!this.is_directory)
+                return (false);
+            try
+            {
+                var d = Dir.open(this.path);
+                string? s = null;
+                while (null != (s = d.read_name()))
+                    return (false);
+                return (true);
+            }
+            catch
+            {
+                return (false);
+            }
+        }
+    }
+
     private bool get_boolean_file_attribute(string at) throws GLib.Error {
         var info = file.query_info(at, GLib.FileQueryInfoFlags.NONE);
         return info.get_attribute_boolean(at);

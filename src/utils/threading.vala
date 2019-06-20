@@ -358,7 +358,6 @@ public class Proton.FlatpakSubprocess : Object {
 
         Idle.add(() => {
             finished((int) _res);
-            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
             return (false);
         });
 
