@@ -31,11 +31,11 @@ build:
             - '_build/meson-logs/meson-log.txt'
             - '_build/meson-logs/testlog.txt'
         expire_in: 2 days
-        cache:
-            key: "$CI_JOB_NAME"
-            paths:
-                - '.flatpak-builder/downloads'
-                - '.flatpak-builder/git'
+    cache:
+        key: "$CI_JOB_NAME"
+        paths:
+            - '.flatpak-builder/downloads'
+            - '.flatpak-builder/git'
 
 deploy:
     stage: deploy
