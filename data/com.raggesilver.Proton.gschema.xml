@@ -51,10 +51,20 @@
 	    <summary>Left panel visible</summary>
 	    <description>Left panel visible</description>
 	  </key>
+	</schema>
+    <schema
+      id="com.raggesilver.Proton.editor"
+      path="/com/raggesilver/Proton/editor/"
+    >
+      <key name="font-family" type="s">
+	    <default>'Monospace 12'</default>
+	    <summary>Font family</summary>
+	    <description>Font family</description>
+	  </key>
       <key name="style-id" type="s">
 	    <default>'proton_dark'</default>
 	    <summary>Style scheme id</summary>
 	    <description>Style scheme id</description>
 	  </key>
-	</schema>
+    </schema>
 </schemalist>

@@ -207,76 +207,54 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
     void on_clone_button_pressed()
     {
-        Ggit.init();
-        do_clone.begin((obj, res) => {
-            if (do_clone.end(res))
-            {
-                var w = new Window(this.application, new File(repo_file.path));
-                w.show();
-                destroy();
-            }
-        });
-    }
+        try
+        {
+            clone_repo_entry.set_sensitive(false);
+            clone_button.set_sensitive(false);
+            git_text_view.show();
+            var c = new Cloner(clone_url, repo_file);
 
-    async bool do_clone()
-    {
-        SourceFunc callback = do_clone.callback;
+            var buf = git_text_view.get_buffer();
+            buf.set_text("", -1);
 
-        bool res = false;
+            c.callbacks.percentage.connect((p) => {
+                clone_repo_entry.set_progress_fraction(p / 100);
+            });
 
-        new Thread<bool>("git_clone", () => {
-
-            try
-            {
-                var co = new Ggit.CloneOptions();
-                co.set_checkout_branch("master");
-                var fo = new Ggit.FetchOptions();
-                var rc = new RC();
-
-                assert(rc != null);
-
-                var buf = git_text_view.get_buffer();
-                buf.set_text("", -1);
-
-                git_text_view.show();
-
-                rc.completion.connect((t) => {
-                    print("Remote completed %s", t.to_string());
-                    warning("COMPLETE");
+            c.callbacks.message.connect((text) => {
+                debug(text);
+                Idle.add(() => {
+                    buf.insert_at_cursor(text, text.length);
+                scroll.get_vadjustment().value = scroll.get_vadjustment().upper;
+                return (false);
                 });
+            });
 
-                rc.progress.connect((s) => {
-                    Idle.add(() => {
-                        buf.insert_at_cursor(s, s.length);
-                        scroll.get_vadjustment().value =
-                            scroll.get_vadjustment().upper;
-                        return (false);
-                    });
-                });
+            c.complete.connect((res) => {
+                if (res)
+                {
+                    var w = new Window(this.application,
+                                       new File(repo_file.path));
+                    w.show();
+                    destroy();
+                }
+                else
+                {
+                    clone_repo_entry.set_sensitive(true);
+                    clone_button.set_sensitive(true);
+                    clone_repo_entry.set_progress_fraction(0);
+                }
+            });
 
-                fo.set_remote_callbacks(rc);
-                co.set_fetch_options(fo);
-
-                var r = Ggit.Repository.clone(clone_repo_entry.text,
-                                              repo_file.file,
-                                              co);
-                assert(r != null);
-
-                Idle.add((owned) callback);
-                res = true;
-            }
-            catch(Error e)
-            {
-                warning(e.message);
-                Idle.add((owned) callback);
-                res = false;
-            }
-            return (true);
-        });
-
-        yield;
-
-        return (res);
+            c.clone();
+        }
+        catch(Error e)
+        {
+            warning(e.message);
+            clone_repo_entry.set_sensitive(true);
+            clone_button.set_sensitive(true);
+            clone_repo_entry.set_progress_fraction(0);
+        }
     }
 
     [GtkCallback]
@@ -286,10 +264,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
 
         clone_repo_entry.get_style_context().remove_class("error");
 
-        var r = new Regex("((git|ssh|http(s)?)|(git@[\\w\\.]+))(:(//)?)([\\w\\."
-            + "@\\:/\\-~]+)(\\.git)(/)?", RegexCompileFlags.JAVASCRIPT_COMPAT);
-
-        if (!r.match(clone_url))
+        if (!Cloner.is_valid_url(clone_url))
         {
             clone_repo_entry.get_style_context().add_class("error");
             clone_button.set_sensitive(false);
@@ -315,11 +290,6 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
             return (false);
 
         repo_file = new File(p + repo_name);
-        debug(repo_file.path);
-        if (!repo_file.exists || (repo_file.is_directory && repo_file.is_empty))
-        {
-            return (true);
-        }
-        return (false);
+        return (Cloner.is_valid_target(repo_file));
     }
 }

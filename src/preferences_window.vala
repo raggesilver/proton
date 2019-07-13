@@ -18,65 +18,37 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-class Row : Gtk.ListBoxRow
-{
-    public string page_name;
-
-    public Row(string s)
-    {
-        var lbl = new Gtk.Label(s);
-        lbl.margin = 5;
-        lbl.margin_start = lbl.margin_end = 10;
-        lbl.xalign = 0;
-
-        page_name = s.down();
-
-        add(lbl);
-        show_all();
-    }
-}
-
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/preferences_window.ui")]
 public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 {
     [GtkChild]
-    Gtk.Box layout_box;
+    Gtk.Box color_scheme_box;
 
     [GtkChild]
-    Gtk.ListBox side_list_box;
-
-    [GtkChild]
-    Gtk.Stack stack;
-
-    public Array<string> menus { get; private set; }
+    Gtk.FontButton font_button;
 
     public PreferencesWindow(Window _win)
     {
         Object(application: _win.application);
-        set_transient_for(_win);
 
-        string[] ss = { "Appearence", "Editor" };
-
-        foreach (string s in ss)
-        {
-            var l = new Row(s);
-            side_list_box.insert(l, -1);
-        }
-
-        side_list_box.row_activated.connect((_r) => {
-            var r = _r as Row;
-            stack.set_visible_child_name(r.page_name);
-        });
-
-        var c = new Gtk.SourceStyleSchemeChooserWidget();
+        var c = new Gtk.SourceStyleSchemeChooserButton();
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
-            .get_scheme(settings.style_id));
+            .get_scheme(EditorSettings.get_instance().style_id));
 
         c.notify["style-scheme"].connect(() => {
-            settings.style_id = c.style_scheme.id;
+            EditorSettings.get_instance().style_id = c.style_scheme.id;
         });
 
-        layout_box.pack_start(c, false, true, 0);
-        c.show();
+        color_scheme_box.add(c);
+        color_scheme_box.show_all();
+
+        font_button.font = EditorSettings.get_instance().font_family;
+    }
+
+    [GtkCallback]
+    void on_font_set()
+    {
+        debug("Font set '%s'", font_button.font);
+        EditorSettings.get_instance().font_family = font_button.font;
     }
 }

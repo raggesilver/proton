@@ -91,3 +91,9 @@ button.close:not(.titlebutton) {
     color: inherit;
     border: none;
 }
+
+.titlebar.clean,
+.titlebar.clean > headerbar {
+    border-bottom: 0;
+    background: @theme_bg_color;
+}

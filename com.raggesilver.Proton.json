@@ -1,10 +1,10 @@
 {
-    "app-id": "com.raggesilver.Proton",
-    "runtime": "org.gnome.Sdk",
-    "runtime-version": "3.32",
-    "sdk": "org.gnome.Sdk",
-    "command": "proton",
-    "finish-args": [
+    "app-id" : "com.raggesilver.Proton",
+    "runtime" : "org.gnome.Sdk",
+    "runtime-version" : "3.32",
+    "sdk" : "org.gnome.Sdk",
+    "command" : "proton",
+    "finish-args" : [
         "--share=network",
         "--share=ipc",
         "--socket=x11",
@@ -17,15 +17,17 @@
         "--talk-name=org.freedesktop.Flatpak",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
-    "x-run-args": [],
-    "build-options": {
-        "cflags": "-O2 -g",
-        "cxxflags": "-O2 -g",
-        "env": {
-            "V": "1"
+    "x-run-args" : [
+    ],
+    "build-options" : {
+        "cflags" : "-O2 -g",
+        "cxxflags" : "-O2 -g",
+        "env" : {
+            "V" : "1",
+            "GDK_DEBUG" : null
         }
     },
-    "cleanup": [
+    "cleanup" : [
         "/include",
         "/lib/pkgconfig",
         "/man",
@@ -37,24 +39,24 @@
         "*.la",
         "*.a"
     ],
-    "modules": [
+    "modules" : [
         {
-            "name": "gtksourceview",
-            "sources": [
+            "name" : "gtksourceview",
+            "sources" : [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/gtksourceview",
-                    "tag": "4.2.0"
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/gtksourceview",
+                    "tag" : "4.2.0"
                 }
             ]
         },
         {
-            "name": "vte",
-            "buildsystem": "meson",
-            "sources": [
+            "name" : "vte",
+            "buildsystem" : "meson",
+            "sources" : [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/vte"
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/vte"
                 }
             ]
         },
@@ -69,32 +71,32 @@
             ]
         },
         {
-            "name": "libgranite",
-            "buildsystem": "meson",
-            "sources": [
+            "name" : "libgranite",
+            "buildsystem" : "meson",
+            "sources" : [
                 {
-                    "type": "git",
-                    "url": "https://github.com/elementary/granite"
+                    "type" : "git",
+                    "url" : "https://github.com/elementary/granite"
                 }
             ]
         },
         {
-            "name": "libeditorconfig",
-            "buildsystem": "cmake",
-            "sources": [
+            "name" : "libeditorconfig",
+            "buildsystem" : "cmake",
+            "sources" : [
                 {
-                    "type": "git",
-                    "url": "https://github.com/editorconfig/editorconfig-core-c"
+                    "type" : "git",
+                    "url" : "https://github.com/editorconfig/editorconfig-core-c"
                 }
             ]
         },
         {
-            "name": "libdazzle",
-            "buildsystem": "meson",
-            "sources": [
+            "name" : "libdazzle",
+            "buildsystem" : "meson",
+            "sources" : [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/libdazzle"
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/libdazzle"
                 }
             ]
         },
@@ -149,15 +151,14 @@
             ]
         },
         {
-            "name": "proton",
-            "buildsystem": "meson",
-            "sources": [
+            "name" : "proton",
+            "buildsystem" : "meson",
+            "sources" : [
                 {
-                    "type": "git",
-                    "url": "https://gitlab.com/raggesilver-proton/proton"
+                    "type" : "git",
+                    "url" : "https://gitlab.com/raggesilver-proton/proton"
                 }
             ]
         }
     ]
 }
-

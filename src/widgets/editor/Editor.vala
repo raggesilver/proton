@@ -39,6 +39,8 @@ public class Proton.Editor : Object
     public Gtk.SourceLanguage language { get; private set; }
     public Gtk.Widget         container;
 
+    EditorSettings _settings = EditorSettings.get_instance();
+
     public Editor(string? path, uint id)
     {
         sview = new Gtk.SourceView();
@@ -124,7 +126,14 @@ public class Proton.Editor : Object
     {
         (sview.buffer as Gtk.SourceBuffer).style_scheme =
             Gtk.SourceStyleSchemeManager.get_default()
-                .get_scheme(settings.style_id);
+                .get_scheme(_settings.style_id);
+
+        var f = Pango.FontDescription.from_string(_settings.font_family);
+        if (f.get_family() != null && f.get_family().index_of("None") == -1)
+        {
+            warning("FAMILY: %s", f.get_family());
+            sview.modify_font(f);
+        }
         ui_modified();
     }
 

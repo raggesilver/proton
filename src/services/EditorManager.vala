@@ -23,6 +23,34 @@
  * SPDX-License-Identifier: MIT
  */
 
+public class Proton.EditorSettings : Granite.Services.Settings
+{
+    private static Proton.EditorSettings? instance = null;
+
+    public string font_family { get; set; }
+    public string style_id    { get; set; }
+
+    private EditorSettings()
+    {
+        base("com.raggesilver.Proton.editor");
+    }
+
+    /*
+     * I decided it is better to only have one instance of the settings class
+     * because all project related settings should be stored in .proton/ and IDE
+     * customizations such as theme and panels visibility (things that shouldn't
+     * change on multiple windows at the same time) should only be saved on exit
+     */
+
+    public static Proton.EditorSettings get_instance()
+    {
+        if (instance == null)
+            instance = new Proton.EditorSettings();
+        return instance;
+    }
+}
+
+
 public class Proton.EditorManager : Object
 {
     public signal void changed(Editor? editor);
@@ -39,6 +67,8 @@ public class Proton.EditorManager : Object
         }
     }
 
+    EditorSettings _settings = EditorSettings.get_instance();
+
     public EditorManager(Window _win)
     {
         win = _win;
@@ -52,7 +82,7 @@ public class Proton.EditorManager : Object
 
         mgr.append_search_path(Constants.DATADIR + "/proton/themes");
 
-        settings.notify["style-id"].connect((p) => {
+        _settings.notify.connect((p) => {
             update_ui();
         });
 

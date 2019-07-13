@@ -73,8 +73,13 @@ class Proton.CompletionListRow : Gtk.ListBoxRow
 {
     public string text { get; protected set; }
 
-    public CompletionListRow(string _text, string? markup = null)
+    public weak Command? command { get; protected set; }
+
+    public CompletionListRow(string _text,
+                             string? markup = null,
+                             Command? command = null)
     {
+        this.command = command;
         text = _text;
 
         var l = new Gtk.Label(null);
@@ -193,7 +198,45 @@ public class Proton.CommandPalette : Object
 
     async void do_command_completion()
     {
+        SourceFunc callback = do_command_completion.callback;
 
+        new Thread<bool>("complete_files_thread", () => {
+
+            t_command_completion.begin((_, res) => {
+                Idle.add((owned) callback);
+            });
+
+            return (true);
+        });
+
+        yield;
+    }
+
+    async void t_command_completion()
+    {
+        var text = entry.get_text();
+
+        if (text == "" || text == ">")
+            return ;
+
+        text = text.offset(1);
+
+        foreach (var c in commands.data)
+        {
+            if (c.c.index_of(text) != -1)
+            {
+                var s = @"$(c.g): $(c.c)";
+
+                var r = new CompletionListRow(s,
+                    s.replace(text, @"<b>$text</b>"),
+                    c);
+
+                Idle.add(() => {
+                    completion_list.insert(r, -1);
+                    return (false);
+                });
+            }
+        }
     }
 
     async void do_file_completion()
@@ -259,7 +302,16 @@ public class Proton.CommandPalette : Object
                 (CompletionListRow) actives.first().data :
                 (CompletionListRow) _children.first().data;
 
-            win.activate_action("open_file", l.text);
+            if (completion_mode == CompletionMode.FILE)
+            {
+                win.activate_action("open_file", l.text);
+            }
+            else
+            {
+                if (l.command != null) l.command.cb();
+                else debug("No command");
+            }
+
             palette.hide();
         }
     }

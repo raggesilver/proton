@@ -37,7 +37,6 @@ public class Proton.Settings : Granite.Services.Settings
     public int      left_panel_width     { get; set; }
     public bool     bottom_panel_visible { get; set; }
     public bool     left_panel_visible   { get; set; }
-    public string   style_id             { get; set; }
 
     private Settings()
     {
