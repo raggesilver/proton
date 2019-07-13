@@ -15,3 +15,12 @@ text files contain ASCII and/or {'text', 'empty'}.
 
 Note 2: having the option to manually set exclude patterns for indexing and
 using `.gitignore` would be gold.
+
+## OpenWindow
+
+Since [58ba5efb](https://gitlab.com/raggesilver-proton/proton/commit/58ba5efb6893178f9514a3d381919d6b58915001)
+we began working on cloning existing repos from a remote location. That still
+has a lot of bugs which may cause the entire program to exit.
+
+Templates should also be created. Templating needs design and further planning
+to maybe load templates from a file.
