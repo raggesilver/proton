@@ -1,47 +1,48 @@
-#stages:
-#    - build
-#    - deploy
-#
-#variables:
-#    BUILD_DIR: _build
-#    CONFIG_CMD: meson --buildtype=debug build
-#    BUILD_CMD: ninja -v -C $BUILD_DIR
-#    INSTALL_CMD: ninja -v -C $BUILD_DIR install
-#
-#    APP_ID: com.raggesilver.Proton
-#    BUNDLE: proton.flatpak
-#    FLATPAK_MODULE: proton
-#    GIT_SUBMODULE_STRATEGY: normal
-#    MANIFEST_PATH: com.raggesilver.Proton.json
-#    RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+stages:
+    - build
+    - deploy
 
-#build:
-#    stage: build
-#    image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.32'
-#    script:
-#        - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
-#        - flatpak build app meson --prefix=/app ${MESON_ARGS} _build
-#        - flatpak build app ninja -C _build install
-#        - flatpak-builder --finish-only --repo=repo app ${MANIFEST_PATH}
-#        - flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${APP_ID}
-#    artifacts:
-#        when: 'always'
-#        paths:
-#            - "${BUNDLE}"
-#            - '_build/meson-logs/meson-log.txt'
-#            - '_build/meson-logs/testlog.txt'
-#        expire_in: 2 days
-#    cache:
-#        key: "$CI_JOB_NAME"
-#        paths:
-#            - '.flatpak-builder/downloads'
-#            - '.flatpak-builder/git'
+variables:
+    BUILD_DIR: _build
+    CONFIG_CMD: meson --buildtype=debug build
+    BUILD_CMD: ninja -v -C $BUILD_DIR
+    INSTALL_CMD: ninja -v -C $BUILD_DIR install
 
-#deploy:
-#    stage: deploy
-#    script:
-#        - echo "Generating Flatpak"
-#    artifacts:
-#        paths:
-#            - "${BUNDLE}"
-#        expire_in: 60 days
+    APP_ID: com.raggesilver.Proton
+    BUNDLE: proton.flatpak
+    FLATPAK_MODULE: proton
+    GIT_SUBMODULE_STRATEGY: normal
+    MANIFEST_PATH: com.raggesilver.Proton.json
+    RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+
+build:
+    stage: build
+    image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.32'
+    script:
+        - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
+        - flatpak build app meson --prefix=/app ${MESON_ARGS} _build
+        - flatpak build app ninja -C _build install
+        - flatpak-builder --finish-only --repo=repo app ${MANIFEST_PATH}
+        - flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${APP_ID}
+    artifacts:
+        when: 'always'
+        paths:
+            - "${BUNDLE}"
+            - '_build/meson-logs/meson-log.txt'
+            - '_build/meson-logs/testlog.txt'
+        expire_in: 2 days
+    cache:
+        key: "$CI_JOB_NAME"
+        paths:
+            - '.flatpak-builder/downloads'
+            - '.flatpak-builder/git'
+    when: manual
+
+deploy:
+    stage: deploy
+    script:
+        - echo "Generating Flatpak"
+    artifacts:
+        paths:
+            - "${BUNDLE}"
+        expire_in: 60 days
