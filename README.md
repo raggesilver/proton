@@ -2,23 +2,32 @@
 
 Proton is a simple text editor, soon-to-be IDE.
 
-![Preview](https://imgur.com/D6Va4wi.png)
+![Preview](https://imgur.com/efOlmZ5.png)
 
-## Compile / Install
-Use `flatpak` or `meson` (ninja) to install or compile Proton.
+## Install
+```bash
+flatpak-builder --install --user --force-clean _build com.raggesilver.Proton.json
+```
 
-## Features worth sharing
+## Features
 - Integrated terminal
-- Editorconfig plugin
+- Plugin system (all [../proton-*-plugin](https://gitlab.com/raggesilver-proton/) are core plugins)
+- Overlay command palette + file discover
 
 ## Todos
-1. Command palette - ongoing
-2. File popover + file operations - ongoing
-3. Preferences menu
-4. Plugins: run, 42, git
-5. Finish terminal widget - ongoing
+1. Right click popover on `TreeView`
+3. `PreferencesWindow` (WIP [src/preferences_window.vala](https://gitlab.com/raggesilver-proton/proton/blob/master/src/preferences_window.vala))
+4. Plugins: 42, git, ~~run~~ -> runner (WIP [proton-runner-plugin](https://gitlab.com/raggesilver-proton/proton-runner-plugin))
 6. Finish `OpenWindow`[^1]
-![preview](https://imgur.com/62uOokF.png)
+
+- ~~Finish terminal widget~~ Fair base widget for terminal use. Needs improvement
+- ~~Command palette~~ Works reasonably well
 - ~~File modified characted on the window title (e.g "Proton - filename.c •")~~
 - ~~Prevent app quiting when modified editors are still open~~
 - ~~TreeView updates~~
+
+## Other screenshots
+
+| Welcome window | Preferences window |
+| --- | --- |
+| ![preview](https://imgur.com/ezTDdnt.png) | ![preview](https://imgur.com/DOun2WI.png) |
