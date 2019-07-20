@@ -80,6 +80,8 @@ public class Proton.Window : Gtk.ApplicationWindow
     public TerminalTab    terminal_tab     { get; protected set; }
     public IdeGrid        grid             { get; protected set; }
 
+    private PluginManager pm;
+
     public Window(Gtk.Application app, File root)
     {
         Object(application: app,
@@ -182,27 +184,8 @@ public class Proton.Window : Gtk.ApplicationWindow
 
         build_ui();
 
-        PluginLoader loader = new PluginLoader(this);
-        PluginIface[] _iplugins = {};
-        string[] _plugins = {"editorconfig", "runner"};
-        manager.changed.connect((e) => {
-            loader.editor_changed(e);
-        });
-
-        foreach (var p in _plugins)
-        {
-            try
-            {
-                PluginIface plugin = loader.load(
-                    @"$(Constants.PLUGINDIR)/$p/lib$p");
-                plugin.activate();
-                _iplugins += plugin;
-            }
-            catch (PluginError e)
-            {
-                warning("Error: %s\n", e.message);
-            }
-        }
+        pm = new PluginManager(this);
+        pm.load();
 
         save_button.clicked.connect(save_button_clicked);
 

@@ -27,13 +27,13 @@ public errordomain Proton.PluginError
 {
 	NOT_SUPPORTED,
 	UNEXPECTED_TYPE,
-	NO_REGISTRATION_FUNCTION,
+	NO_REGISTER_FUNCTION,
 	FAILED
 }
 
 public interface Proton.PluginIface : Object
 {
-    public abstract void do_register(PluginLoader loader);
+    public abstract void do_register(PluginManager pm);
     public abstract void activate();
     public abstract void deactivate();
 }
@@ -50,68 +50,109 @@ private class Proton.PluginInfo : Object
     }
 }
 
-public class Proton.PluginLoader : Object
+private class Proton.Plug
+{
+    public PluginIface iface;
+    public PluginInfo  info;
+}
+
+public class Proton.PluginManager : Object
 {
     [CCode (has_target = false)]
     private delegate Type RegisterPluginFunction(Module module);
 
-    public signal void editor_changed(Editor? ed);
+    // Private
+    Plug[] plugs = {};
 
-    private PluginIface[]   plugins = {};
-    private PluginInfo[]    infos = {};
+    // Public
+    public Window window { get; private set; }
 
-    public Gtk.Box  left_hb_box     { get; private set; }
-    public Gtk.Box  right_hb_box    { get; private set; }
-    public string   root_path       { get; private set; }
-    public Window   window          { get; private set; }
-
-    public PluginLoader(Window w)
+    public PluginManager(Window window)
     {
-        window = w;
-        /*
-        ** TODO: These fields should be deprecated, window now is accessible to
-        ** plugins.
-        */
-        left_hb_box = w.left_hb_box;
-        right_hb_box = w.right_hb_box;
-        root_path = w.root.path;
+        this.window = window;
     }
 
-    public PluginIface load(string path) throws PluginError
+    public async void load()
+    {
+        SourceFunc callback = load.callback;
+
+        new Thread<bool>("plugin_manager_load", () => {
+            try { do_load(); }
+            catch(Error e) { error("Error: %s.", e.message); }
+            Idle.add((owned)callback);
+            return (true);
+        });
+
+        yield;
+    }
+
+    private void do_load() throws Error
     {
         if (!Module.supported())
-        {
             throw new PluginError.NOT_SUPPORTED("Plugins are not supported");
-        }
 
-        Module module = Module.open(path, ModuleFlags.BIND_LAZY);
+        // Iterate through plugindir and load plugins
+        var dir = Dir.open(Constants.PLUGINDIR);
+        string? fname = null;
+
+        while (null != (fname = dir.read_name()))
+        {
+            var f = new File(
+                Constants.PLUGINDIR + Path.DIR_SEPARATOR_S + fname);
+
+            var p = load_plugin(f);
+
+            if (p != null)
+            {
+                p.iface.activate();
+
+                debug("Plugin '%s' loaded.", f.name);
+            }
+        }
+    }
+
+    private Plug? load_plugin(File f)
+    {
+        var pa = f.path + Path.DIR_SEPARATOR_S + "lib" + f.name;
+        var module = Module.open(pa, ModuleFlags.BIND_LAZY);
+
         if (module == null)
         {
-            throw new PluginError.FAILED(Module.error());
+            warning("Failed to load plugin '%s'", f.path);
+            warning("%s", Module.error());
+            return (null);
         }
 
         void *function;
         module.symbol("register_plugin", out function);
         if (function == null)
         {
-            throw new PluginError.NO_REGISTRATION_FUNCTION(
-                "register_plugin not found");
+            warning("Plugin '%s' has no register funcion", f.name);
+            return (null);
         }
 
-        var register_plugin = (RegisterPluginFunction) function;
-        Type type = register_plugin(module);
+        var register_plugin = (RegisterPluginFunction)function;
+        var type = register_plugin(module);
+
         if (type.is_a(typeof(PluginIface)) == false)
         {
-            throw new PluginError.UNEXPECTED_TYPE("Unexpected type");
+            warning("Weird type for plugin '%s'", f.name);
         }
 
         PluginInfo info = new PluginInfo(type, (owned)module);
-        infos += info;
 
-        PluginIface plugin = (PluginIface) Object.new(type);
-        plugins += plugin;
-        plugin.do_register(this);
+        var iface = (PluginIface)Object.new(type);
+        iface.do_register(this);
 
-        return plugin;
+        var p = new Plug();
+        p.iface = iface;
+        p.info = info;
+
+        Idle.add(() => {
+            plugs += p;
+            return (false);
+        });
+
+        return (p);
     }
 }

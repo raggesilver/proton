@@ -20,9 +20,9 @@
 
 private class Editorconfig : Object, Proton.PluginIface
 {
-    public void do_register(Proton.PluginLoader loader)
+    public void do_register(Proton.PluginManager pm)
     {
-        loader.window.manager.created.connect((ed) => {
+        pm.window.manager.created.connect((ed) => {
 
             if (ed == null || ed.file == null)
                 return ;
