@@ -29,6 +29,7 @@ proton_sources = [
   'services/PluginManager.vala',
   'services/Core.vala',
   'services/EditorManager.vala',
+  'services/FileIconProvider.vala',
 ]
 
 subdir('widgets')

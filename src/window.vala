@@ -185,7 +185,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         build_ui();
 
         pm = new PluginManager(this);
-        pm.load();
+        pm.load.begin();
 
         save_button.clicked.connect(save_button_clicked);
 

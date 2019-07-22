@@ -132,7 +132,7 @@ public class Proton.Editor : Object
         if (f.get_family() != null && f.get_family().index_of("None") == -1)
         {
             warning("FAMILY: %s", f.get_family());
-            sview.modify_font(f);
+            sview.override_font(f);
         }
         ui_modified();
     }

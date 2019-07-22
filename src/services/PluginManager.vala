@@ -114,7 +114,7 @@ public class Proton.PluginManager : Object
     private Plug? load_plugin(File f)
     {
         var pa = f.path + Path.DIR_SEPARATOR_S + "lib" + f.name;
-        var module = Module.open(pa, ModuleFlags.BIND_LAZY);
+        var module = Module.open(pa, ModuleFlags.LAZY);
 
         if (module == null)
         {

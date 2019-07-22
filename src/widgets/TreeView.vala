@@ -23,200 +23,154 @@
  * SPDX-License-Identifier: MIT
  */
 
-const string[] folder_icons = {
-    "\\.git", "text-x-git-symbolic"
-};
-
-const string[] file_icons = {
-    "(.)+\\~$", "text-x-temp-symbolic",
-    "(.)+\\.(cpp|hpp)(\\.in)?$", "text-x-cpp-symbolic",
-    "(.)+\\.(c|h)(\\.in)?$", "text-x-c-symbolic",
-    "(.)+\\.(css)$", "text-x-css-symbolic",
-    "(.)+\\.(vala)(\\.in)?$", "text-x-vala-symbolic",
-    "(.)+\\.(js)$", "text-x-js-symbolic",
-    "meson\\.build$", "text-x-meson-symbolic",
-    "(.)+\\.(xml|ui|glade)(\\.in)?$", "text-x-xml-symbolic"
-};
-
 public class Proton.TreeItem : Gtk.Box
 {
     public signal bool left_click();
     public signal bool right_click();
-    public signal void populate(SourceFunc f);
+    public signal bool populate(SourceFunc f);
 
-    public File file { get; protected set; }
-    public SortableBox container = null;
-    public bool is_directory {
+    public File         file            { get; protected set; }
+    public SortableBox  container       { get; protected set; default = null; }
+    public bool         is_populated    { get; protected set; default = false; }
+
+    public bool         is_directory {
         get {
             return (file.is_directory);
         }
     }
-    public bool populated = false;
 
-    Gtk.Label label;
-    Gtk.Image icon;
-    Gtk.Box   box;
-    int       level;
+    private Gtk.Label   label;
 
-    public TreeItem(File _file, int _level = 0)
+    /*
+    ** TreeIcon is a new class defined in FileIconProvider that contains a
+    ** Gtk.Image and more information on the icon.
+    */
+    private TreeIcon    icon;
+
+    private Gtk.Box     box;
+    private uint        level;
+
+    public TreeItem(File file, uint level = 0)
     {
         Object(orientation: Gtk.Orientation.VERTICAL,
-               spacing: 0);
+               spacing: 2);
 
         get_style_context().add_class("treeitem");
 
-        file = _file;
-        level = _level;
+        this.file = file;
+        this.level = level;
 
         build_ui();
     }
 
-    public TreeItem.from_path(string s, int _level = 0)
+    public TreeItem.from_path(string s, uint level = 0)
     {
-        this(new File(s), _level);
+        this(new File(s), level);
     }
 
     public void toggle_expanded()
     {
-        if (!is_directory)
+        // Only folders can be expanded
+        if (!this.is_directory)
             return ;
 
-        bool s = !container.get_visible();
+        bool s = !this.container.get_visible();
 
-        if (get_icon_name() == "folder-symbolic")
-        {
-            icon.set_from_icon_name(
-                s ? "folder-open-symbolic" : "folder-symbolic",
-                Gtk.IconSize.MENU);
-        }
-
-        container.set_visible(s);
-    }
-
-    public static SortableBox? tree_is_sortable_function(void *_a)
-    {
-        var a = (_a as TreeItem);
-        return ((a.is_directory) ? a.container : null);
-    }
-
-    public static int tree_sort_function(void *_a, void *_b)
-    {
-        var a = (_a as TreeItem);
-        var b = (_b as TreeItem);
-
-        if (a.is_directory)
-        {
-            if (!b.is_directory)
-                return (-1);
-        }
-        if (b.is_directory)
-        {
-            if (!a.is_directory)
-                return (1);
-        }
-
-        return (strcmp(a.file.name, b.file.name));
+        this.icon.is_expanded = s;
+        this.container.set_visible(s);
     }
 
     public void set_modified(bool modified)
     {
         if (modified)
-        {
             label.set_label(file.name + " •");
-            // get_style_context().add_class("modified");
-        }
         else
-        {
             label.set_label(file.name);
-            // get_style_context().remove_class("modified");
-        }
     }
 
     public void do_sort()
     {
-        container.sort(tree_sort_function, tree_is_sortable_function);
+        container.sort(TreeItem.tree_sort_function,
+                       TreeItem.tree_is_sortable_function);
     }
 
-    void build_ui()
+    private void build_ui()
     {
-        var eb = new Gtk.EventBox();
+        this.box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
 
-        box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        var eb = new Gtk.EventBox();
         eb.button_release_event.connect((e) => {
             if (e.button == 1)
             {
-                if (!is_directory || populated)
-                    return (left_click());
+                if (!this.is_directory || this.is_populated)
+                {
+                    return (this.left_click());
+                }
                 else
                 {
                     populate(() => {
-                        populated = true;
-                        left_click();
+                        this.is_populated = true;
+                        this.left_click();
                         return (false);
                     });
                     return (false);
                 }
             }
             else if (e.button == 3)
-                return (right_click());
+            {
+                return (this.right_click());
+            }
+
             return (false);
         });
-        eb.add(box);
 
-        box.set_size_request(-1, 25);
+        eb.add(this.box);
 
-        icon = new Gtk.Image.from_icon_name(
-            get_icon_name(), Gtk.IconSize.MENU);
-        icon.margin_start += 5 + (level * 16);
+        this.box.set_size_request(-1, 28);
 
-        label = new Gtk.Label(file.name);
-        label.xalign = 0;
+        var ic_provider = ProtonIconProvider.get_default();
+        this.icon = ic_provider.get_icon_for_file(this.file);
 
-        box.pack_start(icon, false, true, 10);
-        box.pack_start(label, false, true, 0);
+        this.icon.image.margin_start += (8 + ((int)level * 20));
 
-        pack_start(eb, false, true, 0);
-        show_all();
+        this.label = new Gtk.Label(file.name);
+        this.label.xalign = 0;
 
-        if (file.is_directory)
+        this.box.pack_start(this.icon.image, false, true, 10);
+        this.box.pack_start(this.label, true, true, 0);
+
+        this.pack_start(eb, false, true, 0);
+
+        this.show_all();
+
+        if (this.file.is_directory)
         {
-            container = new SortableBox(Gtk.Orientation.VERTICAL, 0);
-            pack_end(container, false, true, 0);
+            this.container = new SortableBox(Gtk.Orientation.VERTICAL, 0);
+            this.pack_end(this.container, false, true, 0);
         }
     }
 
-    string get_icon_name()
+    /*
+    ** Static functions
+    */
+
+    public static SortableBox? tree_is_sortable_function(void *a)
     {
-        if (file.is_directory)
-        {
-            try
-            {
-                for (int i = 0; i < folder_icons.length; i += 2)
-                {
-                    var r = new Regex(folder_icons[i],
-                                      GLib.RegexCompileFlags.JAVASCRIPT_COMPAT);
-                    if (r.match(file.name))
-                        return (folder_icons[i + 1]);
-                }
-            }
-            catch {}
-            return ("folder-symbolic");
-        }
-        else
-        {
-            try
-            {
-                for (int i = 0; i < file_icons.length; i += 2)
-                {
-                    var r = new Regex(file_icons[i],
-                                      GLib.RegexCompileFlags.JAVASCRIPT_COMPAT);
-                    if (r.match(file.name))
-                        return (file_icons[i + 1]);
-                }
-            }
-            catch {}
-            return ("text-x-generic-symbolic");
-        }
+        var _a = (a as TreeItem);
+        return ((_a.is_directory) ? _a.container : null);
+    }
+
+    public static int tree_sort_function(void *a, void *b)
+    {
+        var _a = (a as TreeItem);
+        var _b = (b as TreeItem);
+
+        if (_a.is_directory && !_b.is_directory)
+            return (-1);
+        if (_b.is_directory && !_a.is_directory)
+            return (1);
+
+        return (strcmp(_a.file.name, _b.file.name));
     }
 }
 
@@ -226,156 +180,143 @@ public class Proton.TreeView : Sortable
     public signal void renamed(string old, string _new);
     public signal void monitor_changed(File f, File? of, FileMonitorEvent e);
 
-    public File                        root     { get; protected set; }
-    public HashTable<string, TreeItem> items;
-    public TreeItem?                   selected { get; protected set; }
+    public File                         root     { get; protected set; }
+    public TreeItem?                    selected { get; protected set; }
+    public HashTable<string, TreeItem>  items;
 
-    FileMonitor[] monitors = {};
-    Gtk.Popover   popover;
+    private FileMonitor[]   monitors = {};
+    private Gtk.Popover     popover;
+    private Array<string>   to_be_removed = new Array<string>();
+    private Mutex           mutex = Mutex();
 
     public TreeView(File root)
     {
         base(Gtk.Orientation.VERTICAL, 0);
 
-        items = new HashTable<string, TreeItem>(str_hash, str_equal);
+        this.items = new HashTable<string, TreeItem>(str_hash, str_equal);
         this.root = root;
-        selected = null;
+        this.selected = null;
 
-        margin_top = 5;
+        this.margin_top = 5;
 
         var b = new Gtk.Builder.from_resource(
-            "/com/raggesilver/Proton/layouts/treeview_popover.ui");
-        popover = b.get_object("menu") as Gtk.Popover;
+            "/com/raggesilver/Proton/layouts/treeview_popover.ui"
+        );
+        this.popover = b.get_object("menu") as Gtk.Popover;
 
-        loading = true;
+        this.loading = true; // this is a loadable compopnent
 
-        build.begin(this.root, (_, res) => {
-            build.end(res);
-            sort.begin((__, ress) => {
-                sort.end(ress);
-                loading = false;
+        this.build.begin(this.root, (_, res) => {
+            this.build.end(res);
+            this.sort.begin((__, _res) => {
+                this.sort.end(_res);
+                this.loading = false;
             });
         });
     }
 
-    void select(TreeItem r, bool soft = false)
+    private void select(TreeItem r, bool soft = false)
     {
-        if (selected != null)
-            selected.get_style_context().remove_class("selected");
+        if (this.selected != null)
+            this.selected.get_style_context().remove_class("selected");
 
         r.get_style_context().add_class("selected");
-        selected = r;
+        this.selected = r;
 
         if (!soft)
-            changed(r.file);
+            this.changed(r.file);
     }
 
-    void do_sort()
+    private void do_sort()
     {
         base.sort(TreeItem.tree_sort_function,
                   TreeItem.tree_is_sortable_function);
     }
 
-    new async void sort()
+    private new async void sort()
     {
-        SourceFunc callback = sort.callback;
+        SourceFunc callback = this.sort.callback;
 
         new Thread<bool>("sort_tree_thread", () => {
-            do_sort();
-            Idle.add((owned) callback);
+            this.do_sort();
+            Idle.add((owned)callback);
             return (true);
         });
 
         yield;
     }
 
-    void on_monitor_changed(GLib.File _f, GLib.File? _of, FileMonitorEvent e)
+    private void on_monitor_changed(GLib.File _f,
+                                    GLib.File? _of,
+                                    FileMonitorEvent e)
     {
         var f = new File(_f.get_path());
         var of = (_of == null) ? null : new File(_of.get_path());
 
         if (e == FileMonitorEvent.CREATED)
         {
-            t_insert_file.begin(f);
-
-            if (f.is_directory)
-            {
-                build.begin(f);
-            }
+            this.t_insert_file.begin(f);
         }
         else if (e == FileMonitorEvent.MOVED_IN)
         {
-            t_insert_file.begin(f);
-
-            renamed(of.path, f.path);
-
-            if (f.is_directory)
-                build.begin(f);
+            this.t_insert_file.begin(f);
+            this.renamed(f.path, of.path);
         }
         else if (e == FileMonitorEvent.MOVED_OUT)
         {
-            remove_file(f);
-            renamed(f.path, of.path);
+            this.remove_file(f);
+            this.renamed(f.path, of.path);
         }
         else if (e == FileMonitorEvent.RENAMED)
         {
-            remove_file(f);
-            t_insert_file.begin(of);
-            renamed(f.path, of.path);
+            // FIXME: This could be optimized by actually just renaming the file
+            this.remove_file(f);
+            this.t_insert_file.begin(of);
+            this.renamed(f.path, of.path);
         }
         else if (e == FileMonitorEvent.DELETED)
         {
-            remove_file(f);
+            this.remove_file(f);
         }
-        monitor_changed(f, of, e);
+        this.monitor_changed(f, of, e);
     }
 
-    async void build(File _root)
+    private async void build(File _root)
     {
-        SourceFunc callback = build.callback;
+        SourceFunc callback = this.build.callback;
 
         new Thread<bool>("build_tree_thread", () => {
-
-            t_do_build.begin(_root, (_, res) => {
-                Idle.add((owned) callback);
+            this.t_do_build(_root, (_, res) => {
+                this.t_do_build.end(res);
+                Idle.add((owned)callback);
             });
-
             return (true);
         });
 
         yield;
     }
 
-    async void t_do_build(File _root)
+    private async void t_do_build(File _root)
     {
         try
         {
             var dir = Dir.open(_root.path);
             string? fname = null;
 
-            // Attach monitor
-            try
-            {
-                var m = _root.file.monitor_directory(
-                            FileMonitorFlags.WATCH_MOVES);
+            var m = _root.file.monitor_directory(
+                FileMonitorFlags.WATCH_MOVES
+            );
 
-                m.changed.connect(on_monitor_changed);
-                monitors += m;
-            }
-            catch
-            {
-                warning("Could not create monitor for %s\n", _root.path);
-            }
+            m.changed.connect(this.on_monitor_changed);
+            this.monitors += m;
 
             while ((fname = dir.read_name()) != null)
             {
                 var f = new File(
-                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname");
+                    @"$(_root.path)$(Path.DIR_SEPARATOR_S)$fname"
+                );
 
                 yield t_insert_file(f, false);
-
-                // if (f.is_directory)
-                //     yield t_do_build(f);
             }
         }
         catch (Error e) { warning(e.message); }
@@ -383,27 +324,29 @@ public class Proton.TreeView : Sortable
 
     async void t_item_insert(string key, TreeItem val)
     {
-        SourceFunc cb = t_item_insert.callback;
-
-        Idle.add(() => {
-            items.insert(key, val);
-            cb();
-            return (false);
-        });
-
-        yield;
+        mutex.lock();
+        this.items.insert(key, val);
+        mutex.unlock();
     }
 
-    async void t_insert_file(File f, bool do_sort = true)
+    private async void t_insert_file(File f, bool do_sort = true)
     {
-        if (items.get(f.path) != null)
+        // Prevent double insert
+        if (this.items.get(f.path) != null)
             return ;
 
-        var arr = f.path.replace(@"$(this.root.path)/", "").split("/");
+        if (this.should_be_removed(f.path))
+        {
+            this.remove_from_to_be_removed(f.path);
+            return ;
+        }
+
+        // Get path segments starting at project root
+        var arr = f.path.replace(this.root.path + "/", "").split("/");
         var r = new TreeItem(f, arr.length - 1);
 
         r.left_click.connect(() => {
-            select(r);
+            this.select(r);
 
             if (r.is_directory)
                 r.toggle_expanded();
@@ -412,89 +355,127 @@ public class Proton.TreeView : Sortable
         });
 
         r.right_click.connect(() => {
-            select(r, true);
+            this.select(r, true);
 
-            popover.relative_to = r;
-            popover.popup();
+            this.popover.relative_to = r;
+            this.popover.popup();
             return (false);
         });
 
         r.populate.connect((f) => {
-            t_do_build.begin(r.file, (_, res) => {
-                t_do_build.end(res);
+            this.build.begin(r.file, (_, res) => {
+                this.build.end(res);
                 r.do_sort();
                 f();
             });
+            return (true);
         });
 
         var p = f.file.get_parent();
 
-        if (p != null && p.get_path() == root.path)
+        // Direct child of project root
+        if (p != null && p.get_path() == this.root.path)
         {
-            pack_start(r, false, true, 0);
+            this.pack_start(r, false, true, 0);
             yield t_item_insert(f.path, r);
 
             if (do_sort)
-                base.sort(TreeItem.tree_sort_function, null);
+                this.do_sort();
         }
         else if (p != null)
         {
-            var parent = items.get(p.get_path());
+            var r_parent = this.items.get(p.get_path());
 
-            if (parent == null)
+            // Parent row (TreeItem) doesn't yet exist
+            if (r_parent == null)
             {
                 yield t_insert_file(new File(p.get_path()), do_sort);
-                parent = items.get(p.get_path());
+                r_parent = this.items.get(p.get_path());
             }
 
-            if (parent != null)
+            if (r_parent != null)
             {
                 yield t_item_insert(f.path, r);
-                parent.container.pack_start(r, false, true, 0);
+                r_parent.container.pack_start(r, false, true, 0);
 
                 if (do_sort)
-                {
-                    parent.container.sort(TreeItem.tree_sort_function, null);
-                }
+                    r_parent.container.sort(TreeItem.tree_sort_function, null);
             }
-            // If there is no parent and do_sort is true, sort the root
+            // FIXME: This next line is most likely unecessary
             else if (do_sort)
-                base.sort(TreeItem.tree_sort_function, null);
+                this.do_sort();
         }
     }
 
-    void remove_file(File f, uint _retrial = 0)
+    private long to_be_removed_id = 0;
+
+    private void add_to_be_removed(string file)
+    {
+        foreach (var _f in this.to_be_removed.data)
+            if (_f == file)
+                return ;
+        this.to_be_removed.append_val(file);
+
+        to_be_removed_id = Timeout.add(10, () => {
+            return (this._try_remove());
+        });
+    }
+
+    private bool _try_remove()
+    {
+        foreach (var _f in this.to_be_removed.data)
+        {
+            if (this.items.get(_f) != null)
+                this.remove_file(new File(_f));
+        }
+        if (this.to_be_removed.length > 0)
+            to_be_removed_id = Timeout.add(10, () => {
+                return (this._try_remove());
+            });
+        return (false);
+    }
+
+    private bool should_be_removed(string file)
+    {
+        foreach (var _f in this.to_be_removed.data)
+            if (_f == file)
+                return (true);
+        return (false);
+    }
+
+    private void remove_from_to_be_removed(string file)
+    {
+        for (uint i = 0; i < this.to_be_removed.length; i++)
+            if (this.to_be_removed.index(i) == file)
+            {
+                this.to_be_removed.remove_index(i);
+                return ;
+            }
+    }
+
+    private void remove_file(File f)
     {
         string target = f.path;
         TreeItem? r = null;
 
-        if ((r = (items.get(target))) == null)
+        if ((r = this.items.get(target)) == null)
         {
-            if (_retrial < 4)
+            add_to_be_removed(target);
+        }
+        else
+        {
+            remove_from_to_be_removed(target);
+            this.items.steal(target);
+
+            if (r.container != null)
             {
-                /*
-                 * Try deleting the file after 5ms (should be enough time for a
-                 * possible file to be asyn-added to the treeview
-                 */
-                Timeout.add(5, () => {
-                    remove_file(f, _retrial + 1);
-                    return (false);
-                });
+                var lst = r.container.get_children();
+                foreach (var k in lst)
+                    remove_file((k as TreeItem).file);
             }
-            return ;
+
+            r.destroy();
         }
-
-        if (!items.steal(target))
-            warning("COULDN'T STEAL %s", target);
-
-        if (r.container != null)
-        {
-            var lst = r.container.get_children();
-            foreach (var k in lst)
-                remove_file((k as TreeItem).file);
-        }
-
-        r.destroy();
     }
 }
 
