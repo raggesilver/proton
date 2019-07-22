@@ -33,32 +33,34 @@ public class Proton.SortableBox : Gtk.Box
                      PIsSortableFunction?   is_sort,
                      bool                   do_recursion = true)
     {
-        // EventBox > Box > Image + Label
-        var lst = new Array<Gtk.Widget>();
+#if DEBUG_SORTABLE_BOX
+        var t = new Timer();
+        t.start();
+#endif
 
-        get_children().foreach((k) => { lst.append_val(k); });
+        var lst = get_children();
+        var len = lst.length();
 
-        var len = lst.length;
+        if (len == 0)
+            return ;
 
-        for (uint i = 0; i < len; i++)
-        {
-            for (uint j = i + 1; j < len; j++)
-                if (comp(lst.index(j), lst.index(i)) < 0)
-                {
-                    Gtk.Widget tmp = lst.index(i);
-                    lst.data[i] = lst.index(j);
-                    lst.data[j] = tmp;
-                }
-        }
+        lst.sort((CompareFunc<void *>)comp);
 
         for (uint i = 0; i < len; i++)
-            reorder_child(lst.index(i), (int)i);
+            reorder_child(lst.nth_data(i), (int)i);
+
+#if DEBUG_SORTABLE_BOX
+        t.stop();
+        ulong mc = 0;
+        t.elapsed(out mc);
+        debug("[SortableBox] Sort ended in %lu microseconds", mc);
+#endif
 
         if (is_sort != null && do_recursion)
         {
             for (uint i = 0; i < len; i++)
             {
-                var s = is_sort(lst.index(i));
+                var s = is_sort(lst.nth_data(i));
                 if (s != null)
                     s.sort(comp, is_sort);
             }
