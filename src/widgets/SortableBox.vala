@@ -20,8 +20,8 @@
 
 public class Proton.SortableBox : Gtk.Box
 {
-    public delegate int PCompareFunction(void *a, void *b);
-    public delegate SortableBox? PIsSortableFunction(void *a);
+    public delegate int             PCompareFunction(void *a, void *b);
+    public delegate SortableBox?    PIsSortableFunction(void *a);
 
     public SortableBox(Gtk.Orientation orientation, int spacing)
     {
@@ -29,9 +29,9 @@ public class Proton.SortableBox : Gtk.Box
                spacing: spacing);
     }
 
-    public void sort(PCompareFunction comp,
-                     PIsSortableFunction? is_sort,
-                     bool do_recursion = true)
+    public void sort(PCompareFunction       comp,
+                     PIsSortableFunction?   is_sort,
+                     bool                   do_recursion = true)
     {
         // EventBox > Box > Image + Label
         var lst = new Array<Gtk.Widget>();
@@ -42,15 +42,17 @@ public class Proton.SortableBox : Gtk.Box
 
         for (uint i = 0; i < len; i++)
         {
-            for (uint j = i; j < len; j++)
+            for (uint j = i + 1; j < len; j++)
                 if (comp(lst.index(j), lst.index(i)) < 0)
                 {
-                    reorder_child(lst.index(j), (int)i);
                     Gtk.Widget tmp = lst.index(i);
                     lst.data[i] = lst.index(j);
                     lst.data[j] = tmp;
                 }
         }
+
+        for (uint i = 0; i < len; i++)
+            reorder_child(lst.index(i), (int)i);
 
         if (is_sort != null && do_recursion)
         {
