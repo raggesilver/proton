@@ -488,8 +488,12 @@ public class Proton.RegularSubprocess : Proton.Subprocess
 
         sub = sp.spawnv(argv);
         sub.wait_async.begin(null, (_, res) => {
-            sub.wait_async.end(res);
-            finished(sub.get_exit_status());
+            try
+            {
+                sub.wait_async.end(res);
+                finished(sub.get_exit_status());
+            }
+            catch (Error e) { warning(e.message); }
         });
     }
 

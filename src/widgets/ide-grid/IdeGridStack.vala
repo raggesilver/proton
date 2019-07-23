@@ -155,28 +155,32 @@ public class Proton.IdeGridStack : Gtk.Box
             titlebar.get_style_context().remove_provider(provider);
         }
 
-        provider = new Gtk.CssProvider();
-        provider.load_from_data("""
-        .panel-header {
-            border-bottom: 1px solid darker(%s);
-        }
-        .panel-header,
-        .panel-header > * {
-            background: %s;
-        }
-        .panel-header > * { color: %s; }
-        .panel-header > button:hover,
-        .panel-header > button:active,
-        .panel-header > button:checked {
-            background: shade(%s, .9);
-        }
-        """.printf(page.bg, page.bg, page.fg, page.bg));
+        try
+        {
+            provider = new Gtk.CssProvider();
+            provider.load_from_data("""
+            .panel-header {
+                border-bottom: 1px solid darker(%s);
+            }
+            .panel-header,
+            .panel-header > * {
+                background: %s;
+            }
+            .panel-header > * { color: %s; }
+            .panel-header > button:hover,
+            .panel-header > button:active,
+            .panel-header > button:checked {
+                background: shade(%s, .9);
+            }
+            """.printf(page.bg, page.bg, page.fg, page.bg));
 
-        titlebar.get_style_context().add_provider(
-            provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-        foreach (var c in titlebar.get_children())
-            c.get_style_context().add_provider(
+            titlebar.get_style_context().add_provider(
                 provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            foreach (var c in titlebar.get_children())
+                c.get_style_context().add_provider(
+                    provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        catch (Error e) { warning(e.message); }
     }
 
     [GtkCallback]

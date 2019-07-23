@@ -135,6 +135,7 @@ public class Proton.TreeItem : Gtk.Box
 
         this.label = new Gtk.Label(file.name);
         this.label.xalign = 0;
+        this.label.margin_end = 18;
 
         this.box.pack_start(this.icon.image, false, true, 10);
         this.box.pack_start(this.label, true, true, 0);
@@ -286,7 +287,7 @@ public class Proton.TreeView : Sortable
         SourceFunc callback = this.build.callback;
 
         new Thread<bool>("build_tree_thread", () => {
-            this.t_do_build(_root, (_, res) => {
+            this.t_do_build.begin(_root, (_, res) => {
                 this.t_do_build.end(res);
                 Idle.add((owned)callback);
             });

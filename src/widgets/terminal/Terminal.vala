@@ -69,19 +69,48 @@ public class Proton.Terminal : Vte.Terminal
 
         try
         {
-            spawn_sync(Vte.PtyFlags.DEFAULT,
-                       win.root.path,
-                       { Environ.get_variable(Environ.get(), "SHELL") },
-                       {"TERM=xterm-256color"},
-                       self_destroy ? 0 : SpawnFlags.DO_NOT_REAP_CHILD,
-                       null, null, null);
-
-
             if (is_flatpak())
             {
-                feed_child((char[]) ("flatpak-spawn --env=\"TERM=xterm-256color"
-                    + "\" --host bash\n$(getent passwd $LOGNAME | cut -d: -f7)"
-                    + "\nreset\n"));
+
+                string? shell = fp_guess_shell();
+                if (shell == null)
+                    shell = "/usr/bin/bash";
+
+                string[] real_argv = {
+                    "/usr/bin/flatpak-spawn",
+                    "--host",
+                    "--watch-bus"
+                };
+
+		        var env = Environ.get();
+		        env += "G_MESSAGES_DEBUG=false";
+
+		        for (uint i = 0; i < env.length; i++)
+                    real_argv += @"--env=$(env[i])";
+
+                // shell = shell.strip();
+                real_argv += shell;
+                real_argv += "--login";
+
+                spawn_sync(
+                    Vte.PtyFlags.NO_CTTY,
+                    win.root.path,
+                    real_argv,
+                    env,
+                    SpawnFlags.DO_NOT_REAP_CHILD,
+                    null, null, null);
+            }
+            else
+            {
+                var env = Environ.get();
+		        env += "G_MESSAGES_DEBUG=false";
+
+                spawn_sync(Vte.PtyFlags.DEFAULT,
+                       win.root.path,
+                       { Environ.get_variable(Environ.get(), "SHELL") },
+                       env,
+                       self_destroy ? 0 : SpawnFlags.DO_NOT_REAP_CHILD,
+                       null, null, null);
             }
 
             if (command != null)
