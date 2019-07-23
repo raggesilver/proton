@@ -84,6 +84,7 @@ public class Proton.Terminal : Vte.Terminal
 
 		        var env = Environ.get();
 		        env += "G_MESSAGES_DEBUG=false";
+		        env += "TERM=xterm-256color";
 
 		        for (uint i = 0; i < env.length; i++)
                     real_argv += @"--env=$(env[i])";
@@ -104,6 +105,7 @@ public class Proton.Terminal : Vte.Terminal
             {
                 var env = Environ.get();
 		        env += "G_MESSAGES_DEBUG=false";
+		        env += "TERM=xterm-256color";
 
                 spawn_sync(Vte.PtyFlags.DEFAULT,
                        win.root.path,
