@@ -48,33 +48,71 @@ const Gdk.RGBA solarized_palette[] = {
 
 public class Proton.Terminal : Vte.Terminal
 {
-    unowned Proton.Window win;
+    static uint sid;
 
-    public uint id;
-    static uint _id;
+    public unowned Proton.Window win { get; protected set; }
+    public uint    id                { get; protected set; }
 
-    Gdk.RGBA bg;
-    Gdk.RGBA fg;
+    private Gdk.RGBA bg;
+    private Gdk.RGBA fg;
 
     public Terminal(Window _win,
                     string? command = null,
                     bool self_destroy = false)
     {
-        Object (allow_bold: true,
-                allow_hyperlink: true);
+        Object(allow_bold: true,
+               allow_hyperlink: true);
 
-        win = _win;
+        this.win = _win;
+        this.id = sid++;
 
-        id = _id++;
+        this.spawn(command, self_destroy);
 
+        win.style_updated.connect(this.update_ui);
+        this.update_ui();
+
+        this.connect_accels();
+        show();
+    }
+
+    private void connect_accels()
+    {
+        this.win.on_accel.connect((ac) => {
+            if (!this.has_focus)
+                return (false);
+
+            switch(ac)
+            {
+                case "<ctrl><shift>C":
+                    if (!this.get_has_selection())
+                        return (false);
+                    this.copy_clipboard();
+                    return (true);
+                case "<ctrl><shift>V":
+                    this.paste_clipboard();
+                    return (true);
+                default:
+                    return (false);
+            }
+        });
+    }
+
+    private void update_ui()
+    {
+        win.get_style_context().lookup_color("theme_base_color", out bg);
+        win.get_style_context().lookup_color("theme_fg_color", out fg);
+
+        set_colors(fg, bg, solarized_palette);
+    }
+
+    private void spawn(string? command = null,
+                       bool self_destroy = false)
+    {
         try
         {
             if (is_flatpak())
             {
-
-                string? shell = fp_guess_shell();
-                if (shell == null)
-                    shell = "/usr/bin/bash";
+                string shell = fp_guess_shell() ?? "/usr/bin/bash";
 
                 string[] real_argv = {
                     "/usr/bin/flatpak-spawn",
@@ -119,20 +157,6 @@ public class Proton.Terminal : Vte.Terminal
                 feed_child((char[]) command);
         }
         catch (Error e) { warning(e.message); }
-
-        win.style_updated.connect(update_ui);
-
-        update_ui();
-
-        show();
-    }
-
-    private void update_ui()
-    {
-        win.get_style_context().lookup_color("theme_base_color", out bg);
-        win.get_style_context().lookup_color("theme_fg_color", out fg);
-
-        set_colors(fg, bg, solarized_palette);
     }
 }
 

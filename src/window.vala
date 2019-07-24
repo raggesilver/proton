@@ -69,6 +69,8 @@ public class Proton.Window : Gtk.ApplicationWindow
     [GtkChild]
     public Gtk.Overlay overlay;
 
+    public signal bool on_accel(string accel);
+
     PreferencesWindow preferences_window = null;
 
     public TreeView       tree_view        { get; private set; }
@@ -217,6 +219,17 @@ public class Proton.Window : Gtk.ApplicationWindow
                             Gdk.ModifierType.CONTROL_MASK,
                             0,
                             toggle_left_panel);
+
+        key_press_event.connect((e) => {
+            string? k = null;
+            if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
+                (e.state & Gdk.ModifierType.SHIFT_MASK) != 0 &&
+                (k = Gdk.keyval_name(e.keyval)) != null)
+            {
+                return (on_accel(@"<ctrl><shift>$k"));
+            }
+            return (false);
+        });
     }
 
     public bool toggle_left_panel()
