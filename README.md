@@ -1,7 +1,5 @@
-
 <div align="center">
     <h1>
-        <br />
         <img src="https://gitlab.com/raggesilver-proton/proton/raw/master/data/icons/hicolor/scalable/apps/com.raggesilver.Proton.svg" /> Proton
     </h1>
     <h4>A soon-to-be IDE</h4>
