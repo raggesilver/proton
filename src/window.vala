@@ -81,6 +81,7 @@ public class Proton.Window : Gtk.ApplicationWindow
     public BottomPanel    bottom_panel     { get; protected set; }
     public TerminalTab    terminal_tab     { get; protected set; }
     public IdeGrid        grid             { get; protected set; }
+    public StatusBox      status_box       { get; private set; }
 
     private PluginManager pm;
 
@@ -102,8 +103,8 @@ public class Proton.Window : Gtk.ApplicationWindow
         grid = new IdeGrid(this);
         grid.show();
 
-        var status_box = new StatusBox(this);
-        title_box.set_center_widget(status_box);
+        this.status_box = new StatusBox(this);
+        title_box.set_center_widget(this.status_box);
 
         tree_view.changed.connect((f) => {
             if (f.is_directory || !f.is_valid_textfile)

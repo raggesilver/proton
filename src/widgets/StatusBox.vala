@@ -18,27 +18,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-internal class Proton.Status
+public class Proton.Status
 {
-    public uint                             id { get; private set; }
     public StatusBox.Priority               p  { get; set; }
-    public weak StatusBox.StatusCallback    cb { get; private set; }
+    public weak StatusBox.StatusCallback    cb { get; set; }
 
-    public Status(uint id, StatusBox.StatusCallback cb, StatusBox.Priority p)
+    public Status(StatusBox.StatusCallback cb, StatusBox.Priority p)
     {
-        this.id = id;
         this.p = p;
         this.cb = cb;
     }
 }
 
 /*
-** TODO: Proton.Status should be public, Stauts.cb should be modifiable,
-** add_status should return a Proton.Status and the field id would be no longer
-** necessary.
-** TODO: We are also missing `remove_status`, `display_now`, and some sort of
-** permanent message that will be presented until the Status signals it's ok to
-** continue the cyle.
 ** FIXME: This design doesn't support any other kind of widget, maybe the
 ** Status.cb should return a Gtk.Widget that would be added to the stack
 ** either directly for full control or in some kind of container.
@@ -87,43 +79,67 @@ public class Proton.StatusBox : Gtk.Box
 
         show_all();
 
-        add_status(() => {
+        add_status(new Status(() => {
             return (@"Project: $(window.root.name)");
-        }, Priority.HIGH);
+        }, Priority.LOW));
 
         start_cycle();
     }
 
-    static uint id;
-    public uint add_status(StatusCallback cb, Priority p = Priority.MEDIUM)
+    public void show_status(Status s)
     {
-        var s = new Status(id++, cb, p);
-        status_list.append(s);
+        Source.remove(this.cycle_id);
+        this.set_status(s);
+        Timeout.add_seconds(s.p, this.cycle_step);
+    }
 
-        return (id - 1);
+    public void add_status(Status s)
+    {
+        status_list.append(s);
+    }
+
+    public void add_status_show(Status s)
+    {
+        this.add_status(s);
+        this.show_status(s);
+    }
+
+    public void remove_status(Status status)
+    {
+        if (status == this.current_status)
+        {
+            Source.remove(cycle_id);
+        }
+
+        this.status_list.remove(status);
+        this.cycle_step();
     }
 
     void start_cycle()
     {
         current_status = status_list.first().data;
-        cycle_step();
+        this.cycle_step();
     }
 
     bool cycle_step()
     {
-        tmp_label.label = label.label;
-        stack.set_visible_child_full("tmp", Gtk.StackTransitionType.NONE);
-
         var i = status_list.index(current_status) + 1;
         if (i >= status_list.length())
             i = 0;
 
         current_status = status_list.nth(i).data;
+        set_status(current_status);
 
-        label.label = current_status.cb();
-        stack.set_visible_child(label);
-
-        cycle_id = Timeout.add_seconds(current_status.p, cycle_step);
+        cycle_id = Timeout.add_seconds(current_status.p, this.cycle_step);
         return (false);
+    }
+
+    void set_status(Status status)
+    {
+        tmp_label.label = label.label;
+        stack.set_visible_child_full("tmp", Gtk.StackTransitionType.NONE);
+
+        label.label = status.cb();
+        stack.set_visible_child(label);
     }
 }
