@@ -52,6 +52,7 @@ public class Proton.Terminal : Vte.Terminal
 
     public unowned Proton.Window win { get; protected set; }
     public uint    id                { get; protected set; }
+    public Pid     pid;
 
     private Gdk.RGBA bg;
     private Gdk.RGBA fg;
@@ -67,6 +68,20 @@ public class Proton.Terminal : Vte.Terminal
         this.id = sid++;
 
         this.spawn(command, self_destroy);
+
+        win.style_updated.connect(this.update_ui);
+        this.update_ui();
+
+        this.connect_accels();
+        show();
+    }
+
+    public Terminal.no_spawn(Window win)
+    {
+        Object(allow_bold: true, allow_hyperlink: true);
+
+        this.win = win;
+        this.id = sid++;
 
         win.style_updated.connect(this.update_ui);
         this.update_ui();
@@ -105,7 +120,7 @@ public class Proton.Terminal : Vte.Terminal
         set_colors(fg, bg, solarized_palette);
     }
 
-    private void spawn(string? command = null,
+    public void spawn(string? command = null,
                        bool self_destroy = false)
     {
         try
@@ -127,9 +142,14 @@ public class Proton.Terminal : Vte.Terminal
 		        for (uint i = 0; i < env.length; i++)
                     real_argv += @"--env=$(env[i])";
 
-                // shell = shell.strip();
                 real_argv += shell;
-                real_argv += "--login";
+                if (command != null)
+                {
+                    real_argv += "-c";
+                    real_argv += command;
+                }
+                else
+                    real_argv += "--login";
 
                 spawn_sync(
                     Vte.PtyFlags.NO_CTTY,
@@ -137,7 +157,7 @@ public class Proton.Terminal : Vte.Terminal
                     real_argv,
                     env,
                     SpawnFlags.DO_NOT_REAP_CHILD,
-                    null, null, null);
+                    null, out pid, null);
             }
             else
             {
@@ -145,16 +165,23 @@ public class Proton.Terminal : Vte.Terminal
 		        env += "G_MESSAGES_DEBUG=false";
 		        env += "TERM=xterm-256color";
 
+		        string[] argv = {
+		            Environ.get_variable(Environ.get(), "SHELL")
+		        };
+
+		        if (command != null)
+		        {
+		            argv += "-c";
+		            argv += command;
+		        }
+
                 spawn_sync(Vte.PtyFlags.DEFAULT,
                        win.root.path,
-                       { Environ.get_variable(Environ.get(), "SHELL") },
+                       argv,
                        env,
                        self_destroy ? 0 : SpawnFlags.DO_NOT_REAP_CHILD,
-                       null, null, null);
+                       null, out pid, null);
             }
-
-            if (command != null)
-                feed_child((char[]) command);
         }
         catch (Error e) { warning(e.message); }
     }

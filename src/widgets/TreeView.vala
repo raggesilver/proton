@@ -408,6 +408,32 @@ public class Proton.TreeView : Sortable
         }
     }
 
+    /*
+    ** The functions `add_to_be_removed`, `_try_remove`, `should_be_removed` and
+    ** `remove_from_to_be_removed` are part of the solution to the problem that
+    ** files that were created and deleted instantly would remain in the
+    ** TreeView forever. The problem was:
+    **
+    ** file gets created    -->    file gets deleted
+    **         |                          |
+    **      (async)                     (sync)
+    **         |                          |
+    **         V                          V
+    **  THREAD puts new             tries to remove
+    **    file in the                the file from
+    **     TreeView                  TreeView but      -->    never tries
+    **                               thread hasn't            to remove
+    **                               finished yet             file again
+    **
+    **
+    ** The current solution saves files that were supposed to be in the TreeView
+    ** by the time the function to remove them was called. As soon as the first
+    ** file is added to the list of files to be deleted a timer is set to check
+    ** if the THREAD has finished inserting the file in the TreeView. This timer
+    ** will call itself again and again until there are no files left to be
+    ** deleted.
+    */
+
     private long to_be_removed_id = 0;
 
     private void add_to_be_removed(string file)
