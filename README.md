@@ -1,6 +1,24 @@
-# Proton
 
-Proton is a simple text editor, soon-to-be IDE.
+<div align="center">
+    <h1>
+        <br />
+        <img src="https://gitlab.com/raggesilver-proton/proton/raw/master/data/icons/hicolor/scalable/apps/com.raggesilver.Proton.svg" /> Proton
+    </h1>
+    <h4>A soon-to-be IDE</h4>
+    <p>
+        <a href="https://gitlab.com/raggesilver-proton/proton/pipelines">
+            <img src="https://gitlab.com/raggesilver-proton/proton/badges/master/pipeline.svg" alt="Build Status" />
+        </a>
+        <a href="https://www.patreon.com/raggesilver">
+            <img src="https://img.shields.io/badge/patreon-donate-orange.svg?logo=patreon" alt="Proton on Patreon" />
+        </a>
+    </p>
+    <p>
+        <a href="#Install">Install</a> •
+        <a href="#Features">Features</a> •
+        <a href="https://gitlab.com/raggesilver-proton/proton/blob/master/COPYING">License</a>
+    </p>
+</div>
 
 ![Preview](https://imgur.com/efOlmZ5.png)
 
