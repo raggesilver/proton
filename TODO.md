@@ -14,7 +14,7 @@ Note: the command `file <filename>` outputs information of the given file. Valid
 text files contain ASCII and/or {'text', 'empty'}.
 
 Note 2: having the option to manually set exclude patterns for indexing and
-using `.gitignore` would be gold.
+using `.gitignore` would be good.
 
 ## OpenWindow
 
