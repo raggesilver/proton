@@ -32,29 +32,39 @@ namespace Proton
                           out int standard_output = null,
                           out int standard_error = null)
     {
-        try {
-            string[] argv = {"/bin/sh"};
-            if (is_flatpak()) {
+        try
+        {
+            string[] argv = {};
+
+            if (is_flatpak())
+            {
                 argv += "flatpak-spawn";
                 argv += "--host";
             }
+
+            argv += "/usr/bin/bash";
+
+            var env = Environ.get();
+
             foreach (var s in command.split(" "))
                 argv += s;
 
             return Process.spawn_async_with_pipes(
-                null,
+                cwd,
                 argv,
-                {},
-                SpawnFlags.DO_NOT_REAP_CHILD,
+                env,
+                0,
                 null,
                 out _pid,
                 out standard_input,
                 out standard_output,
                 out standard_error
             );
-        } catch(SpawnError e) {
+        }
+        catch (SpawnError e)
+        {
             warning(e.message);
-            return false;
+            return (false);
         }
     }
 }
