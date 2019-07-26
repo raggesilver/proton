@@ -135,7 +135,8 @@ public class Proton.Terminal : Vte.Terminal
                     "--watch-bus"
                 };
 
-		        var env = Environ.get();
+		        var env = fp_get_env() ?? Environ.get();
+
 		        env += "G_MESSAGES_DEBUG=false";
 		        env += "TERM=xterm-256color";
 
