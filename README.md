@@ -12,8 +12,8 @@
         </a>
     </p>
     <p>
-        <a href="#Install">Install</a> •
-        <a href="#Features">Features</a> •
+        <a href="#install">Install</a> •
+        <a href="#features">Features</a> •
         <a href="https://gitlab.com/raggesilver-proton/proton/blob/master/COPYING">License</a>
     </p>
 </div>
