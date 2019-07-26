@@ -23,8 +23,6 @@ proton_sources = [
   'utils/git/Cloner.vala',
   'utils/File.vala',
   'utils/utils.vala',
-  'utils/subprocess.vala',
-  'utils/threading.vala',
   'utils/terminal/terminal.vala',
   'services/Settings.vala',
   'services/PluginManager.vala',
