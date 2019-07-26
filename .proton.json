@@ -1,0 +1,4 @@
+{
+    "buildsystem": "simple",
+    "command": "sh test.sh"
+}
