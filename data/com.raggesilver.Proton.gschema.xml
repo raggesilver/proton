@@ -67,4 +67,14 @@
 	    <description>Style scheme id</description>
 	  </key>
     </schema>
+    <schema
+      id="com.raggesilver.Proton.plugins"
+      path="/com/raggesilver/Proton/plugins/"
+    >
+      <key name="disabled" type="as">
+        <default>[]</default>
+	    <summary>Disabled plugins</summary>
+	    <description>Disabled plugins</description>
+      </key>
+    </schema>
 </schemalist>

@@ -18,6 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*
+** Reference: https://valadoc.org/gmodule-2.0/GLib.Module.html
+*/
+
 public errordomain Proton.PluginError
 {
 	NOT_SUPPORTED,
@@ -36,11 +40,11 @@ public interface Proton.PluginIface : Object
 private class Proton.PluginInfo : Object
 {
     public Module module;
-    public Type gtype;
+    public Type   gtype;
 
     public PluginInfo(Type type, owned Module module)
     {
-        this.module = (owned) module;
+        this.module = (owned)module;
         this.gtype = type;
     }
 }
@@ -56,11 +60,11 @@ public class Proton.PluginManager : Object
     [CCode (has_target = false)]
     private delegate Type RegisterPluginFunction(Module module);
 
-    // Private
-    Plug[] plugs = {};
+    private Mutex          mutex = Mutex();
+    private Plug[]         plugs = {};
+    private PluginSettings settings = PluginSettings.get_instance();
 
-    // Public
-    public Window window { get; private set; }
+    public weak Window window { get; private set; }
 
     public PluginManager(Window window)
     {
@@ -92,6 +96,12 @@ public class Proton.PluginManager : Object
 
         while (null != (fname = dir.read_name()))
         {
+            if (fname in settings.disabled)
+            {
+                debug("[PluginManager] plugin %s disabled, skipping...", fname);
+                continue ;
+            }
+
             var f = new File(
                 Constants.PLUGINDIR + Path.DIR_SEPARATOR_S + fname);
 
@@ -132,6 +142,7 @@ public class Proton.PluginManager : Object
         if (type.is_a(typeof(PluginIface)) == false)
         {
             warning("Weird type for plugin '%s'", f.name);
+            return (null);
         }
 
         PluginInfo info = new PluginInfo(type, (owned)module);
@@ -143,10 +154,9 @@ public class Proton.PluginManager : Object
         p.iface = iface;
         p.info = info;
 
-        Idle.add(() => {
-            plugs += p;
-            return (false);
-        });
+        mutex.lock();
+        plugs += p;
+        mutex.unlock();
 
         return (p);
     }
