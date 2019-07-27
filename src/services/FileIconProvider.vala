@@ -25,13 +25,63 @@ public interface Proton.FileIconProvider : Object
 
 public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
 {
+    private HashTable<string, string> ext_table;
+    private HashTable<string, string> name_table;
+
+    private ProtonIconProvider()
+    {
+        this.ext_table = new HashTable<string, string>(str_hash, str_equal);
+        this.name_table = new HashTable<string, string>(str_hash, str_equal);
+
+        this.ext_table.insert("c", "text-x-c-symbolic");
+        this.ext_table.insert("h", "text-x-c-symbolic");
+        this.ext_table.insert("c++", "text-x-cpp-symbolic");
+        this.ext_table.insert("cpp", "text-x-cpp-symbolic");
+        this.ext_table.insert("cc", "text-x-cpp-symbolic");
+        this.ext_table.insert("h++", "text-x-cpp-symbolic");
+        this.ext_table.insert("hpp", "text-x-cpp-symbolic");
+        this.ext_table.insert("vala", "text-x-vala-symbolic");
+        this.ext_table.insert("css", "text-x-css-symbolic");
+        this.ext_table.insert("sh", "text-x-script-symbolic");
+        this.ext_table.insert("xml", "text-x-xml2-symbolic");
+        this.ext_table.insert("ui", "text-x-xml2-symbolic");
+        this.ext_table.insert("glade", "text-x-xml2-symbolic");
+        this.ext_table.insert("json", "text-x-json-symbolic");
+
+        this.name_table.insert(".gitattributes", "text-x-git-symbolic");
+        this.name_table.insert(".gitmodules", "text-x-git-symbolic");
+        this.name_table.insert(".gitignore", "text-x-git-symbolic");
+        this.name_table.insert("meson.build", "text-x-meson-symbolic");
+        this.name_table.insert(".editorconfig", "text-x-editorconfig-symbolic");
+    }
+
     public string get_icon_name_for_file(File f)
     {
         if (f.is_directory)
             return (get_dir_icon_name(f));
         else
-            // return (get_file_icon_name(f));
-            return ("text-x-generic-symbolic");
+        {
+            string? ic = null;
+
+            if (f.name.has_suffix("~"))
+                return ("text-x-temp-symbolic");
+
+            if ((ic = this.name_table.get(f.name)) != null)
+                return (ic);
+
+            string[]? arr = (f.name != null) ? f.name.split(".") : null;
+
+            if (arr != null && arr.length > 0)
+            {
+                string ext = arr[arr.length - 1];
+                if (ext == "in" && arr.length > 1)
+                    ext = arr[arr.length - 2];
+
+                ic = this.ext_table.get(ext);
+            }
+
+            return (ic ?? "text-x-generic-symbolic");
+        }
     }
 
     string get_dir_icon_name(File f)
