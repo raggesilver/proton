@@ -1,107 +1,126 @@
 /* File.vala
  *
+ * The following code is a derivative work of the code from
+ * https://github.com/elementary/code/blob/master/src/FolderManager/File.vala
+ * which is also licensed under GNU General Public License version 3 of the
+ * License, or (at your option) any later version.
+ *
  * Copyright 2019 Paulo Queiroz <pvaqueiroz@gmail.com>
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-public class Proton.File : Object {
+public class Proton.File : Object
+{
+    public GLib.File        file { get; private set; }
 
-    public GLib.File file { get; private set; }
-    private GLib.FileInfo info;
+    private FileInfo?  info = null;
 
-    public File(string path) {
+    public File(string path)
+    {
         Object(path: path);
     }
 
-    public string path {
+    public string path
+    {
+        owned get { return (this.file.get_path()); }
+        construct set { this.load_file_for_path(value); }
+    }
+
+    public string name
+    {
         owned get {
-            return file.get_path();
-        }
-        set construct {
-            load_file_for_path(value);
+            if (this.info != null)
+            {
+                return (this.info.get_display_name());
+            }
+
+            string[] arr = this.path.split("/");
+            if (arr.length > 0)
+                return (arr[arr.length - 1]);
+
+            return (this.path);
         }
     }
 
-    private string _name;
-    public  string  name {
+    public string? content_type
+    {
         get {
-            if (_name != null)
-                return _name;
-            _name = info.get_display_name();
-            return _name;
+            if (this.info != null)
+                return (this.info.get_content_type());
+
+            return (null);
         }
     }
 
-    public string content_type {
-        get {
-            return info.get_content_type();
+    public GLib.Icon? icon
+    {
+        owned get {
+            if (this.info != null)
+                return (ContentType.get_icon(this.info.get_content_type()));
+
+            return (null);
         }
     }
 
-    private GLib.Icon? _icon = null;
-    public GLib.Icon icon {
+    public bool exists
+    {
+        get { return this.file.query_exists(); }
+    }
+
+    public bool is_directory
+    {
         get {
-            if (_icon != null)
-                return (_icon);
-            _icon = GLib.ContentType.get_icon(info.get_content_type());
-            return (_icon);
+            return (file.query_file_type(0, null) == FileType.DIRECTORY);
         }
     }
 
-    public bool exists {
-        get { return file.query_exists(); }
-    }
-
-    public bool is_directory {
+    public bool is_valid_textfile
+    {
         get {
-            return (info.get_file_type() == FileType.DIRECTORY);
+            if (this.info == null || this.info.get_is_backup())
+                return (false);
+
+            if (this.info.get_file_type() == FileType.REGULAR &&
+                ContentType.is_a(this.info.get_content_type(), "text/*"))
+                return (true);
+
+            return (false);
         }
     }
 
-    public bool is_valid_textfile {
+    public bool is_executable
+    {
         get {
-            if (info.get_is_backup())
-                return false;
-
-            if (info.get_file_type() == FileType.REGULAR &&
-                ContentType.is_a(info.get_content_type(), "text/*"))
-                return true;
-
-            return false;
-        }
-    }
-
-    public bool is_executable {
-        get {
-            try {
-                return get_boolean_file_attribute(
-                    GLib.FileAttribute.ACCESS_CAN_EXECUTE);
-            } catch (GLib.Error error) {
-                return false;
+            try
+            {
+                return (
+                    get_boolean_file_attribute(FileAttribute.ACCESS_CAN_EXECUTE)
+                );
+            }
+            catch (Error error)
+            {
+                warning("[File error] %s", error.message);
+                return (false);
             }
         }
     }
 
-    public bool is_empty {
+    public bool is_empty
+    {
         get {
             if (!this.is_directory)
                 return (false);
@@ -120,56 +139,59 @@ public class Proton.File : Object {
         }
     }
 
-    private bool get_boolean_file_attribute(string at) throws GLib.Error {
-        var info = file.query_info(at, GLib.FileQueryInfoFlags.NONE);
-        return info.get_attribute_boolean(at);
+    private bool get_boolean_file_attribute(string at) throws Error
+    {
+        var inf = file.query_info(at, FileQueryInfoFlags.NONE);
+        return (inf.get_attribute_boolean(at));
     }
 
-    private void load_file_for_path(string path) {
-        file = GLib.File.new_for_path(path);
+    private void load_file_for_path(string path)
+    {
+        this.file = GLib.File.new_for_path(path);
 
-        try {
-            var query = GLib.FileAttribute.STANDARD_CONTENT_TYPE + "," +
-                            GLib.FileAttribute.STANDARD_IS_BACKUP + "," +
-                            GLib.FileAttribute.STANDARD_IS_HIDDEN + "," +
-                            GLib.FileAttribute.STANDARD_DISPLAY_NAME + "," +
-                            GLib.FileAttribute.STANDARD_TYPE;
+        try
+        {
+            var query = FileAttribute.STANDARD_CONTENT_TYPE + "," +
+                            FileAttribute.STANDARD_IS_BACKUP + "," +
+                            FileAttribute.STANDARD_IS_HIDDEN + "," +
+                            FileAttribute.STANDARD_DISPLAY_NAME + "," +
+                            FileAttribute.STANDARD_TYPE;
 
-            info = file.query_info(query, FileQueryInfoFlags.NONE);
-        } catch (GLib.Error error) {
+            this.info = file.query_info(query, FileQueryInfoFlags.NONE);
+        }
+        catch (Error error)
+        {
             // Supress error for inexistent file
             if (error.message.index_of("No such file or directory") == -1)
-                warning(error.message);
+                warning("[File error] %s", error.message);
+            else
+                warning("[File error] Working with non-existent file %s", path);
+
+            this.info = null;
         }
     }
 
-    public void rename(string name) {
-        try {
-            file.set_display_name(name);
-        } catch (GLib.Error error) {
-            warning(error.message);
-        }
+    public void rename(string name) throws Error
+    {
+        this.file.set_display_name(name);
     }
 
-    public void trash() {
-        try {
-            file.trash();
-        } catch (GLib.Error error) {
-            warning(error.message);
-        }
+    public void trash() throws Error
+    {
+        this.file.trash();
     }
 
-    public async string? read_async() {
-
-        if (!exists)
+    public async string? read_async()
+    {
+        if (!this.exists)
         {
-            warning(@"File does not exist $(name)");
+            warning("File does not exist %s", this.name);
             return (null);
         }
 
-        if (is_directory)
+        if (this.is_directory)
         {
-            warning(@"Tried to read a directory $(name)");
+            warning("Tried to read a directory %s", this.name);
             return (null);
         }
 
@@ -178,7 +200,7 @@ public class Proton.File : Object {
          * line by line
          */
 
-        var f = FileStream.open(path, "r");
+        var f = FileStream.open(this.path, "r");
         f.seek(0, FileSeek.END);
         long size = f.tell();
         f.rewind();
@@ -186,7 +208,11 @@ public class Proton.File : Object {
         var buf = new uint8[size];
         var sz = f.read(buf, 1);
 
-        assert(sz == size);
+        if (sz != size)
+        {
+            warning("[File error] invalid read size.");
+            return (null);
+        }
 
         var s = (sz == 0) ? "" : (string)buf;
         s = s.make_valid((ssize_t)sz);
@@ -194,23 +220,31 @@ public class Proton.File : Object {
         return (s);
     }
 
-    public async bool write_async(string text) {
-        try {
-            var ios = yield file.replace_readwrite_async(
+    // FIXME: This function should throw errors and let the caller handle them
+    public async bool write_async(string text)
+    {
+        try
+        {
+            var ios = yield this.file.replace_readwrite_async(
                 null, false, FileCreateFlags.NONE);
 
             var dos = new DataOutputStream(ios.output_stream);
-            return dos.put_string(text);
-        } catch (Error e) {
+
+            return (dos.put_string(text));
+        }
+        catch (Error e)
+        {
             warning(e.message);
-            return false;
+            return (false);
         }
     }
 
-    public static bool equ(File? a, File? b) {
+    public static bool equ(File? a, File? b)
+    {
         if (a == null || b == null)
-            return false;
-        return a.file.equal(b.file);
+            return (false);
+
+        return (a.file.equal(b.file));
     }
 }
 

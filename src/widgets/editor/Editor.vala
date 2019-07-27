@@ -2,25 +2,20 @@
  *
  * Copyright 2019 Paulo Queiroz <pvaqueiroz@gmail.com>
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * SPDX-License-Identifier: MIT
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 public class Proton.Editor : Object
@@ -30,8 +25,10 @@ public class Proton.Editor : Object
     public signal void destroy();
     public signal bool before_save();
 
-    private uint    id;
-    private string? last_saved_content = null;
+    private uint        id;
+    private string?     last_saved_content = null;
+    private Gtk.TextTag highlight_tag;
+
     public File?    file               { get; set; default = null; }
     public bool     is_modified        { get; private set; default = false; }
 
@@ -43,18 +40,25 @@ public class Proton.Editor : Object
 
     public Editor(string? path, uint id)
     {
-        sview = new Gtk.SourceView();
-        sview.show();
         this.id = id;
 
-        editor_apply_settings();
-        update_ui();
+        this.sview = new Gtk.SourceView();
+        this.highlight_tag = this.sview.buffer.create_tag(
+            // Tag name
+            "highlight-tag",
+            // null terminaded list of property pairs
+            "background", "yellow",
+            null
+        );
 
-        add_completion_words();
+        this.editor_apply_settings();
+        this.update_ui();
+        this.add_completion_words();
 
-        if (path != null) {
-            file = new Proton.File(path);
-            open();
+        if (path != null)
+        {
+            this.file = new Proton.File(path);
+            this.open();
         }
 
         // FIXME this is a terrible temporary solution to gutter padding
@@ -71,7 +75,6 @@ public class Proton.Editor : Object
 
         // TODO make this optional
         sview.parent_set.connect((_) => {
-
             // Prevents on window close critical error messages
             if (sview.parent == null || _ != null)
                 return ;
@@ -88,6 +91,38 @@ public class Proton.Editor : Object
                 return (false);
             });
         });
+
+        var buf = sview.buffer as Gtk.SourceBuffer;
+        buf.notify.connect((spec) => {
+            Gtk.TextIter buf_siter, buf_eiter, sel_siter, sel_eiter;
+
+            buf.get_bounds(out buf_siter, out buf_eiter);
+            buf.remove_tag_by_name("highlight-tag", buf_siter, buf_eiter);
+
+            if (!buf.has_selection)
+                return ;
+
+            buf.get_selection_bounds(out sel_siter, out sel_eiter);
+
+            string text = buf.get_text(sel_siter, sel_eiter, false);
+            if (text != "")
+            {
+                this.highlight_selected(text, buf_siter);
+            }
+        });
+
+        this.sview.show();
+    }
+
+    void highlight_selected(string text, Gtk.TextIter start)
+    {
+        Gtk.TextIter mstart, mend;
+
+        if (start.forward_search(text, 0, out mstart, out mend, null))
+        {
+            this.sview.buffer.apply_tag(this.highlight_tag, mstart, mend);
+            this.highlight_selected(text, mend);
+        }
     }
 
     // TODO make this optional
@@ -134,6 +169,22 @@ public class Proton.Editor : Object
             warning("FAMILY: %s", f.get_family());
             sview.override_font(f);
         }
+
+        /*
+        ** Try appying the current theme "search-match" style to the highlight
+        ** tag
+        */
+
+        {
+            var scheme = (this.sview.buffer as Gtk.SourceBuffer).style_scheme;
+            var style = scheme.get_style("search-match");
+
+            if (style != null)
+            {
+                style.apply(this.highlight_tag);
+            }
+        }
+
         ui_modified();
     }
 
