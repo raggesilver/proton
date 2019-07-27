@@ -30,24 +30,34 @@ public class Proton.IdeGridStack : Gtk.Box
     public signal void focused();
 
     [GtkChild]
-    public Gtk.Box      titlebar { get; private set; }
-    [GtkChild]
-    public Gtk.Stack    stack { get; private set; }
-    [GtkChild]
-    public Gtk.ListBox  pop_entry_box { get; private set; }
-    [GtkChild]
-    public Gtk.Popover  popover { get; private set; }
-    [GtkChild]
-    Gtk.Label           title_label;
-    [GtkChild]
-    Gtk.EventBox        background_event_box;
+    public Gtk.Box          titlebar        { get; private set; }
 
-    ulong?              style_changed_handler = null;
-    Gtk.CssProvider?    provider = null;
+    [GtkChild]
+    public Gtk.MenuButton   title_button    { get; private set; }
+
+    [GtkChild]
+    public Gtk.Stack        stack           { get; private set; }
+
+    [GtkChild]
+    public Gtk.ListBox      pop_entry_box   { get; private set; }
+
+    [GtkChild]
+    public Gtk.Popover      popover         { get; private set; }
+
+    [GtkChild]
+    Gtk.EventBox            titlebar_eb;
+
+    [GtkChild]
+    Gtk.Label               title_label;
+
+    [GtkChild]
+    Gtk.EventBox            background_event_box;
+
+    ulong?                  style_changed_handler = null;
+    Gtk.CssProvider?        provider = null;
 
 
-    List<IdeGridPage>   pages = new List<IdeGridPage>();
-    // HashTable<IdeGridPage, Gtk.Widget> pop_entries;
+    List<IdeGridPage>       pages = new List<IdeGridPage>();
 
     public IdeGridStack()
     {
@@ -85,8 +95,13 @@ public class Proton.IdeGridStack : Gtk.Box
                 title_label.label = "";
         });
 
-        titlebar.button_release_event.connect(() => {
-            focused();
+        titlebar_eb.button_release_event.connect((e) => {
+            // Middle click on titlebar
+            if (e.button == 2)
+            {
+                on_close_button_clicked();
+                return (true);
+            }
             return (false);
         });
 
