@@ -1,9 +1,0 @@
-[Plugin]
-Module=editorconfig
-Loader=C
-IAge=1
-Name=Editorconfig
-Description=Load settings from a .editorconfig file
-Icon=format-indent-more
-Authors=raggesilver
-Copyright=Copyright © 2019 raggesilver

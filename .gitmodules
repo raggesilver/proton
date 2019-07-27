@@ -1,3 +1,6 @@
 [submodule "src/plugins/runner"]
 	path = src/plugins/runner
 	url = ../proton-runner-plugin.git
+[submodule "src/plugins/editorconfig"]
+	path = src/plugins/editorconfig
+	url = ../proton-editorconfig-plugin.git
