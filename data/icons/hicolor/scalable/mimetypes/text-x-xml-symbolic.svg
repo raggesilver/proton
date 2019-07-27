@@ -25,17 +25,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.2"
-     inkscape:cx="45.621128"
-     inkscape:cy="62.497108"
+     inkscape:zoom="2.8"
+     inkscape:cx="15.639982"
+     inkscape:cy="94.232002"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
-     inkscape:window-width="3840"
-     inkscape:window-height="2010"
+     inkscape:window-width="2048"
+     inkscape:window-height="1088"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata2123">
@@ -45,7 +45,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -55,27 +55,25 @@
      id="layer1"
      transform="translate(0,-263.13332)">
     <g
-       id="g2197"
-       style="fill:#333333">
-      <g
-         id="text2130"
-         style="font-style:normal;font-weight:normal;font-size:30.50490189px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.57196695"
-         aria-label="&lt;">
-        <path
-           id="path2190"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code';stroke-width:0.57196695;fill:#333333"
-           d="m 14.359716,271.51003 -11.7138827,7.22966 v 2.65393 l 11.5918627,7.22966 1.372721,-1.8608 -10.7682308,-6.68057 10.7682308,-6.61956 z" />
-      </g>
-      <g
-         id="text2130-5"
-         style="font-style:normal;font-weight:normal;font-size:30.50490189px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:0.57196695"
-         transform="scale(-1,1)"
-         aria-label="&lt;">
-        <path
-           id="path2187"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code';stroke-width:0.57196695;fill:#333333"
-           d="m -19.506952,271.51003 -11.713882,7.22966 v 2.65393 l 11.591862,7.22966 1.372721,-1.8608 -10.768231,-6.68057 10.768231,-6.61956 z" />
-      </g>
+       aria-label="&lt;/&gt;"
+       style="font-style:normal;font-weight:normal;font-size:10.58333397px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458335"
+       id="text863"
+       transform="matrix(1.5704628,0,0,1.5704628,-13.947073,-142.93485)">
+      <path
+         d="m 16.027816,267.74892 -4.392497,1.65365 4.392497,1.63814 v 0.94568 l -5.4622,-2.16008 v -0.85782 l 5.4622,-2.16008 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458335"
+         id="path865"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 21.071435,264.99974 h 0.981853 l -4.061768,8.69714 H 17.0045 Z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458335"
+         id="path867"
+         inkscape:connector-curvature="0" />
+      <path
+         d="m 23.29869,267.74892 v -0.94051 l 5.462199,2.16008 v 0.85782 l -5.462199,2.16008 v -0.94568 l 4.392497,-1.63814 z"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458335"
+         id="path869"
+         inkscape:connector-curvature="0" />
     </g>
   </g>
 </svg>
