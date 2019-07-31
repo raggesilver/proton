@@ -1,7 +1,7 @@
 {
     "app-id" : "com.raggesilver.Proton",
     "runtime" : "org.gnome.Sdk",
-    "runtime-version" : "master",
+    "runtime-version" : "3.32",
     "sdk" : "org.gnome.Sdk",
     "command" : "proton",
     "finish-args" : [
@@ -43,11 +43,12 @@
     "modules" : [
         {
             "name" : "gtksourceview",
+            "buildsystem": "meson",
             "sources" : [
                 {
                     "type" : "git",
                     "url" : "https://gitlab.gnome.org/GNOME/gtksourceview",
-                    "tag" : "4.2.0"
+                    "tag" : "4.3.1"
                 }
             ]
         },
@@ -148,6 +149,29 @@
                 {
                     "type" : "git",
                     "url" : "https://gitlab.gnome.org/GNOME/libgit2-glib.git"
+                }
+            ]
+        },
+        {
+            "name": "intltool",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/World/intltool.git"
+                }
+            ]
+        },
+        {
+            "name" : "libpeas",
+            "cleanup" : [
+                "/bin/*",
+                "/lib/peas-demo",
+                "/lib/libpeas-gtk*"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.gnome.org/GNOME/libpeas.git"
                 }
             ]
         },
