@@ -8,6 +8,7 @@ conf_data.set_quoted('VERSION', meson.project_version())
 conf_data.set_quoted('PREFIX', get_option('prefix'))
 conf_data.set_quoted('PLUGINDIR', pluginsdir)
 conf_data.set_quoted('DATADIR', join_paths (get_option('prefix'), get_option('datadir')))
+
 config_header = configure_file(
     input : 'config.vala.in',
     output : 'config.vala',
@@ -27,6 +28,7 @@ proton_sources = [
   'services/Settings.vala',
   'services/plugin-manager/PluginManager.vala',
   'services/plugin-manager/PluginSettings.vala',
+  'services/peas-manager/PeasManager.vala',
   'services/Core.vala',
   'services/EditorManager.vala',
   'services/FileIconProvider.vala',
@@ -44,6 +46,7 @@ proton_deps = [
   dependency('libdazzle-1.0'),
   dependency('vte-2.91', version: '>= 0.57.0'),
   dependency('libgit2-glib-1.0', version: '>= 0.28.0.1'),
+  dependency('libpeas-1.0'),
   meson.get_compiler('vala').find_library('linux'),
   meson.get_compiler('vala').find_library('posix'),
 ]
@@ -60,9 +63,10 @@ proton_core = library(
     proton_sources,
     config_header,
     dependencies: proton_deps,
+    #vala_gir: 'Proton-1.0.gir',
     install: true,
-    install_dir: [true, true, true],
-    version: '0.0'
+    install_dir: [true, true, true],#, true],
+    version: '1.0'
 )
 
 pkg = import('pkgconfig')
@@ -83,10 +87,29 @@ proton_core_dep = declare_dependency(
     dependencies: proton_deps,
     include_directories: [include_directories('.')])
 
-subdir('plugins')
-
-executable('proton', link_with: proton_core,
-  vala_args: '--target-glib=2.50',  dependencies: proton_core_dep,
-  install: true,
+proton = executable('proton',
+       link_with: proton_core,
+       vala_args: '--target-glib=2.50',
+    dependencies: proton_core_dep,
+         install: true,
+          c_args: ['-export-dynamic']
 )
+
+pkggirdir = join_paths(get_option('datadir'), 'gir-1.0')
+pkgtypelibdir = join_paths(get_option('libdir'), 'girepository-1.0')
+
+proton_gir = gnome.generate_gir(proton,
+              sources: proton_sources,
+            nsversion: '1.0',
+            namespace: 'Proton',
+        symbol_prefix: 'proton',
+    identifier_prefix: 'Proton',
+             includes: [ 'Gio-2.0', 'Gtk-3.0', 'Dazzle-1.0', 'Peas-1.0', 'Vte-2.91', 'GtkSource-4' ],
+              install: true,
+      install_dir_gir: pkggirdir,
+  install_dir_typelib: pkgtypelibdir,
+           extra_args: ['--pkg-export=proton-1.0'],
+)
+
+subdir('plugins')
 

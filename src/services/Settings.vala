@@ -65,5 +65,18 @@ public class Proton.Settings : Granite.Services.Settings
         }
         recent_projects = _recent;
     }
+
+    public void remove_recent(string s)
+    {
+        string[] _recent = {};
+
+        foreach (var item in recent_projects)
+        {
+            if (item != s)
+                _recent += item;
+        }
+
+        recent_projects = _recent;
+    }
 }
 

@@ -18,6 +18,39 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+internal class PluginRow : Gtk.Box
+{
+    public Gtk.Switch sw { get; private set; }
+    public Gtk.Label lbl { get; private set; }
+    public Gtk.Image img { get; private set; }
+
+    internal PluginRow(string name, bool enabled)
+    {
+        Object(orientation: Gtk.Orientation.HORIZONTAL, spacing: 12);
+
+        this.lbl = new Gtk.Label(name);
+        this.lbl.xalign = 0;
+        this.lbl.margin_start = 12;
+
+        this.pack_start(this.lbl, true, true, 0);
+
+        this.img = new Gtk.Image.from_icon_name("go-next-symbolic",
+                                               Gtk.IconSize.MENU);
+        this.img.margin_end = 12;
+
+        this.pack_end(this.img, false, true, 0);
+
+        this.sw = new Gtk.Switch();
+        this.sw.active = enabled;
+        this.sw.valign = Gtk.Align.CENTER;
+
+        this.pack_end(this.sw, false, true, 0);
+
+        this.set_size_request(-1, 50);
+        this.show_all();
+    }
+}
+
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/preferences_window.ui")]
 public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 {
@@ -27,9 +60,19 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     [GtkChild]
     Gtk.FontButton font_button;
 
-    public PreferencesWindow(Window _win)
+    [GtkChild]
+    Gtk.Stack plugin_stack;
+
+    [GtkChild]
+    Gtk.ListBox plugin_list_box;
+
+    private weak Window window;
+
+    public PreferencesWindow(Window window)
     {
-        Object(application: _win.application);
+        Object(application: window.application);
+
+        this.window = window;
 
         var c = new Gtk.SourceStyleSchemeChooserButton();
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
@@ -43,6 +86,17 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
         color_scheme_box.show_all();
 
         font_button.font = EditorSettings.get_instance().font_family;
+
+        foreach (var plug in window.pm.get_plugins())
+        {
+            var row = new PluginRow(plug.iface.name, plug.iface.active);
+
+            plug.iface.notify["active"].connect(() => {
+                row.sw.active = plug.iface.active;
+            });
+
+            plugin_list_box.insert(row, -1);
+        }
     }
 
     [GtkCallback]
@@ -50,5 +104,11 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     {
         debug("Font set '%s'", font_button.font);
         EditorSettings.get_instance().font_family = font_button.font;
+    }
+
+    [GtkCallback]
+    void on_back_to_plugin_list()
+    {
+        this.plugin_stack.set_visible_child_name("plugin_list");
     }
 }

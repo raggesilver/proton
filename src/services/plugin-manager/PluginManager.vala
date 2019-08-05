@@ -35,24 +35,32 @@ public interface Proton.PluginIface : Object
     public abstract void do_register(PluginManager pm);
     public abstract void activate();
     public abstract void deactivate();
+
+    public abstract bool   active           { get; protected set; }
+    public abstract string name             { get; protected set; }
+    public abstract string repo_url         { get; protected set; }
+    public abstract Gtk.Widget? plugin_page {
+        get; protected set; default = null;
+    }
+
 }
 
-private class Proton.PluginInfo : Object
+public class Proton.PluginInfo : Object
 {
     public Module module;
     public Type   gtype;
 
-    public PluginInfo(Type type, owned Module module)
+    internal PluginInfo(Type type, owned Module module)
     {
         this.module = (owned)module;
         this.gtype = type;
     }
 }
 
-private class Proton.Plug
+public class Proton.Plug
 {
-    public PluginIface iface;
-    public PluginInfo  info;
+    public PluginIface iface { get; internal set; }
+    public PluginInfo  info  { get; internal set; }
 }
 
 public class Proton.PluginManager : Object
@@ -61,7 +69,7 @@ public class Proton.PluginManager : Object
     private delegate Type RegisterPluginFunction(Module module);
 
     private Mutex          mutex = Mutex();
-    private Plug[]         plugs = {};
+    private Array<Plug>    plugs;
     private PluginSettings settings = PluginSettings.get_instance();
 
     public weak Window window { get; private set; }
@@ -69,10 +77,12 @@ public class Proton.PluginManager : Object
     public PluginManager(Window window)
     {
         this.window = window;
+        this.plugs = new Array<Plug>();
     }
 
     public async void load()
     {
+        return ;
         SourceFunc callback = load.callback;
 
         new Thread<bool>("plugin_manager_load", () => {
@@ -96,12 +106,6 @@ public class Proton.PluginManager : Object
 
         while (null != (fname = dir.read_name()))
         {
-            if (fname in settings.disabled)
-            {
-                debug("[PluginManager] plugin %s disabled, skipping...", fname);
-                continue ;
-            }
-
             var f = new File(
                 Constants.PLUGINDIR + Path.DIR_SEPARATOR_S + fname);
 
@@ -109,9 +113,16 @@ public class Proton.PluginManager : Object
 
             if (p != null)
             {
-                p.iface.activate();
-
-                debug("Plugin '%s' loaded.", f.name);
+                if (p.iface.name in this.settings.disabled)
+                {
+                    debug("[PluginManager] plugin %s disabled, skipping...",
+                        fname);
+                }
+                else
+                {
+                    p.iface.activate();
+                    debug("Plugin '%s' loaded.", f.name);
+                }
             }
         }
     }
@@ -155,9 +166,20 @@ public class Proton.PluginManager : Object
         p.info = info;
 
         mutex.lock();
-        plugs += p;
+        plugs.append_val(p);
         mutex.unlock();
 
         return (p);
+    }
+
+    public void disable(Proton.Plug plugin)
+    {
+        plugin.iface.deactivate();
+        this.settings.disable_plugin(plugin.iface.name);
+    }
+
+    public Plug[] get_plugins()
+    {
+        return (this.plugs.data);
     }
 }

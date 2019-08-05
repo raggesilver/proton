@@ -1,0 +1,9 @@
+[Plugin]
+Module=git
+Loader=python3
+IAge=1
+Name=Git
+Description=Integrate git features into Proton
+Icon=emblem-shared-symbolic
+Authors=raggesilver
+Copyright=Copyright © 2019 raggesilver

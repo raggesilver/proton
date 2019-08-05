@@ -36,4 +36,33 @@ public class Proton.PluginSettings : Granite.Services.Settings
 
         return (instance);
     }
+
+    public void disable_plugin(string name)
+    {
+        if (name in this.disabled)
+            return ;
+
+        string[] arr = { name };
+
+        foreach (var s in this.disabled)
+            arr += s;
+
+        this.disabled = arr;
+    }
+
+    public void enable_plugin(string name)
+    {
+        if (!(name in this.disabled))
+            return ;
+
+        string[] arr = {};
+
+        foreach (var s in this.disabled)
+        {
+            if (s != name)
+                arr += s;
+        }
+
+        this.disabled = arr;
+    }
 }

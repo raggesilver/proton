@@ -82,8 +82,7 @@ public class Proton.Window : Gtk.ApplicationWindow
     public TerminalTab    terminal_tab     { get; protected set; }
     public IdeGrid        grid             { get; protected set; }
     public StatusBox      status_box       { get; private set; }
-
-    private PluginManager pm;
+    public PluginManager  pm               { get; private set; }
 
     public Window(Gtk.Application app, File root)
     {
@@ -203,6 +202,8 @@ public class Proton.Window : Gtk.ApplicationWindow
             }
             preferences_window.show();
         });
+
+        var peasm = new PeasManager(this);
 
         delete_event.connect(on_delete);
         apply_settings();

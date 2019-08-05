@@ -193,9 +193,14 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow {
         foreach (var s in recent) {
             f = new File(s);
 
-            if (f.exists && f.is_directory) {
+            if (f.exists && f.is_directory)
+            {
                 has_recent = true;
                 recent_vbox.pack_start(new_recent_row(f), false, true, 0);
+            }
+            else
+            {
+                settings.remove_recent(s);
             }
         }
 
