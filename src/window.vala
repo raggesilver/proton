@@ -360,7 +360,12 @@ public class Proton.Window : Gtk.ApplicationWindow
             css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-        var s = Gtk.Settings.get_default();
-        s.gtk_application_prefer_dark_theme = settings.dark_mode;
+        Gtk.Settings.get_default()
+                .gtk_application_prefer_dark_theme = settings.dark_mode;
+
+        settings.notify["dark-mode"].connect(() => {
+            Gtk.Settings.get_default()
+                .gtk_application_prefer_dark_theme = settings.dark_mode;
+        });
     }
 }

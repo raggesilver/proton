@@ -27,9 +27,18 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     [GtkChild]
     Gtk.FontButton font_button;
 
+    [GtkChild]
+    Gtk.Switch dark_mode_switch;
+
+    private weak Window window;
+    private Settings    settings;
+
     public PreferencesWindow(Window _win)
     {
         Object(application: _win.application);
+
+        this.window = _win;
+        this.settings = Settings.get_instance();
 
         var c = new Gtk.SourceStyleSchemeChooserButton();
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
@@ -43,6 +52,11 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
         color_scheme_box.show_all();
 
         font_button.font = EditorSettings.get_instance().font_family;
+
+        this.dark_mode_switch.active = this.settings.dark_mode;
+        this.settings.notify["dark-mode"].connect(() => {
+            debug("Settings dark mode: %s", this.settings.dark_mode.to_string());
+        });
     }
 
     [GtkCallback]
@@ -50,5 +64,14 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     {
         debug("Font set '%s'", font_button.font);
         EditorSettings.get_instance().font_family = font_button.font;
+    }
+
+    [GtkCallback]
+    bool on_dark_mode_set(bool bla)
+    {
+        debug("Dark mode '%s', bla: '%s'", dark_mode_switch.active.to_string(), bla.to_string());
+        if (bla != this.settings.dark_mode)
+            this.settings.dark_mode = bla;
+        return (false);
     }
 }
