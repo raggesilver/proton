@@ -27,7 +27,7 @@
   <style name="text"                        foreground="#babdb6" background="#2D2D2D"/>
   <style name="selection"                   foreground="#eeeeec" background="#888a85"/>
   <style name="current-line"                background="#404040"/>
-  <style name="current-line-number"         background="red"/>
+  <style name="current-line-number"         background="#404040"/>
   <style name="draw-spaces"                 foreground="lightgray"/>
   <style name="background-pattern"          background="#323232"/>
   <style name="line-numbers"                foreground="#555753" background="#2D2D2D"/>
