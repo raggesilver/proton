@@ -36,7 +36,6 @@ build:
         paths:
             - '.flatpak-builder/downloads'
             - '.flatpak-builder/git'
-    when: manual
 
 deploy:
     stage: deploy
@@ -45,4 +44,4 @@ deploy:
     artifacts:
         paths:
             - "${BUNDLE}"
-        expire_in: 60 days
+    when: on_success
