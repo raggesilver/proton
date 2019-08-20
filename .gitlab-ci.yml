@@ -20,30 +20,30 @@ build:
     image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:master'
     script:
         - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
-        - flatpak build app meson --prefix=/app ${MESON_ARGS} _build
-        - flatpak build app ninja -C _build install
+        - flatpak-builder --run app ${MANIFEST_PATH} meson --prefix=/app ${MESON_ARGS} _build
+        - flatpak-builder --run app ${MANIFEST_PATH} ninja -C _build install
         - flatpak-builder --finish-only --repo=repo app ${MANIFEST_PATH}
-        - flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${APP_ID}
+        - flatpak build-export repo app
+        - flatpak build-bundle repo ${BUNDLE} ${APP_ID}
     artifacts:
-        when: 'always'
         paths:
             - "${BUNDLE}"
-            - '_build/meson-logs/meson-log.txt'
-            - '_build/meson-logs/testlog.txt'
-        expire_in: 2 days
-        name: "logs"
+        expire_in: 5 days
     cache:
-        key: "$CI_JOB_NAME"
+        key: "flatpak"
         paths:
-            - '.flatpak-builder/downloads'
-            - '.flatpak-builder/git'
+            - .flatpak-builder/downloads/
+            - .flatpak-builder/git/
 
 deploy:
     stage: deploy
+    dependencies:
+        - build
     script:
         - echo "Generating Flatpak"
     artifacts:
         paths:
             - "${BUNDLE}"
-        name: "proton-$CI_COMMIT_SHORT_SHA"
-    when: on_success
+    environment:
+        name: deploy/$CI_COMMIT_REF_NAME
+        url: https://gnome.com/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/${BUNDLE}
