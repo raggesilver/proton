@@ -19,6 +19,7 @@ proton_sources = [
   'window.vala',
   'application.vala',
   'open_window.vala',
+  'about_window.vala',
   'preferences_window.vala',
   'utils/git/Cloner.vala',
   'utils/File.vala',

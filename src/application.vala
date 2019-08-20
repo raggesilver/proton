@@ -18,13 +18,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Proton {
+namespace Proton
+{
     public Settings settings;
 }
 
-public class Proton.Application : Gtk.Application {
-
-    construct {
+public class Proton.Application : Gtk.Application
+{
+    construct
+    {
         flags |= ApplicationFlags.HANDLES_OPEN;
         flags |= ApplicationFlags.NON_UNIQUE;
         // TODO man up and use command line
@@ -33,17 +35,18 @@ public class Proton.Application : Gtk.Application {
         application_id = "com.raggesilver.Proton";
     }
 
-    private Application() {
-        settings = Proton.Settings.get_instance ();
+    public Application()
+    {
+        settings = Proton.Settings.get_instance();
     }
 
+    // TODO: If Application is now Public then instance is no longer necessary
     public static Application _instance = null;
     public static Application  instance {
         get {
             if (_instance == null)
-                _instance = new Application ();
+                _instance = new Application();
             return _instance;
         }
     }
-
 }

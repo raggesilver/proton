@@ -204,9 +204,18 @@ public class Proton.Window : Gtk.ApplicationWindow
             preferences_window.show();
         });
 
+        var a = new SimpleAction("about", null);
+        a.activate.connect(on_about);
+        this.add_action(a);
+
         delete_event.connect(on_delete);
         apply_settings();
         bind_accels();
+    }
+
+    private void on_about()
+    {
+        new AboutWindow(this).run();
     }
 
     private void bind_accels()
@@ -259,7 +268,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         side_panel_stack.set_visible_child_name("treeview");
 
         // var grid = new EditorGrid(this, manager);
-        editor_paned.pack1(grid, true, true);
+        editor_paned.pack1(grid, true, false);
 
         editor_paned.pack2(bottom_panel, false, true);
 
