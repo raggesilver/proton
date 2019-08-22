@@ -61,12 +61,6 @@ public class Proton.Window : Gtk.ApplicationWindow
     Gtk.Box side_panel_box;
 
     [GtkChild]
-    Gtk.Paned editor_paned;
-
-    [GtkChild]
-    Gtk.Paned outer_paned;
-
-    [GtkChild]
     public Gtk.Overlay overlay;
 
     public signal bool on_accel(string accel);
@@ -82,6 +76,10 @@ public class Proton.Window : Gtk.ApplicationWindow
     public TerminalTab    terminal_tab     { get; protected set; }
     public IdeGrid        grid             { get; protected set; }
     public StatusBox      status_box       { get; private set; }
+
+    public Dazzle.DockBin      dockbin      { get; private set; }
+    public Dazzle.DockRevealer left_edge    { get; private set; }
+    public Dazzle.DockRevealer bottom_edge  { get; private set; }
 
     private PluginManager pm;
 
@@ -99,9 +97,21 @@ public class Proton.Window : Gtk.ApplicationWindow
         tree_view = new TreeView(root);
         manager = new EditorManager(this);
         bottom_panel = new BottomPanel(this);
-        // grid = new EditorGrid(this);
         grid = new IdeGrid(this);
         grid.show();
+
+        this.dockbin = new Dazzle.DockBin();
+
+        left_edge = this.dockbin.get_left_edge() as Dazzle.DockRevealer;
+        bottom_edge = this.dockbin.get_bottom_edge() as Dazzle.DockRevealer;
+
+        left_edge.transition_type =
+            Dazzle.DockRevealerTransitionType.SLIDE_RIGHT;
+
+        bottom_edge.transition_type =
+            Dazzle.DockRevealerTransitionType.SLIDE_UP;
+
+        left_edge.transition_duration = bottom_edge.transition_duration = 250;
 
         this.status_box = new StatusBox(this);
         title_box.set_center_widget(this.status_box);
@@ -147,7 +157,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         });
 
         settings.notify["left-panel-visible"].connect(() => {
-            side_panel_box.set_visible(settings.left_panel_visible);
+            this.left_edge.reveal_child = settings.left_panel_visible;
 
             if (toggle_left_panel_button.active != settings.left_panel_visible)
             {
@@ -166,7 +176,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         });
 
         settings.notify["bottom-panel-visible"].connect(() => {
-            bottom_panel.set_visible(settings.bottom_panel_visible);
+            this.bottom_edge.reveal_child = settings.bottom_panel_visible;
 
             if (toggle_bottom_panel_button.active
                     != settings.bottom_panel_visible)
@@ -267,19 +277,25 @@ public class Proton.Window : Gtk.ApplicationWindow
 
         side_panel_stack.set_visible_child_name("treeview");
 
-        // var grid = new EditorGrid(this, manager);
-        editor_paned.pack1(grid, true, false);
+        this.left_edge.add(this.side_panel_box);
+        this.side_panel_box.set_vexpand(true);
 
-        editor_paned.pack2(bottom_panel, false, true);
+        this.dockbin.add(grid);
+
+        this.bottom_edge.add(this.bottom_panel);
+        this.bottom_panel.set_hexpand(true);
 
         terminal_tab = new TerminalTab(this);
         bottom_panel.add_tab(terminal_tab);
 
-        side_panel_box.set_visible(settings.left_panel_visible);
-        bottom_panel.set_visible(settings.bottom_panel_visible);
+        left_edge.reveal_child = settings.left_panel_visible;
+        bottom_edge.reveal_child = settings.bottom_panel_visible;
 
-        editor_paned.set_position(settings.bottom_panel_height);
-        outer_paned.set_position(settings.left_panel_width);
+        bottom_edge.set_position(settings.bottom_panel_height);
+        left_edge.set_position(settings.left_panel_width);
+
+        this.overlay.add(this.dockbin);
+        this.dockbin.show();
     }
 
     private bool can_close()
@@ -347,10 +363,10 @@ public class Proton.Window : Gtk.ApplicationWindow
         settings.pos_x = pos_x;
         settings.pos_y = pos_y;
 
-        int bph = editor_paned.get_position();
+        int bph = bottom_edge.get_position();
         settings.bottom_panel_height = bph;
 
-        settings.left_panel_width = outer_paned.get_position();
+        settings.left_panel_width = left_edge.get_position();
 
         if (!can_close())
             return true;

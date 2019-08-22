@@ -164,3 +164,8 @@ button.close:not(.titlebutton) {
     border-bottom: 0;
     background: @theme_bg_color;
 }
+
+.dzldockbinedge.left { border-right: 1px solid darker(@theme_base_color); }
+.dzldockbinedge.right { border-left: 1px solid darker(@theme_base_color); }
+.dzldockbinedge.bottom { border-top: 1px solid darker(@theme_base_color); }
+.dzldockbinedge.top { border-bottom: 1px solid darker(@theme_base_color); }
