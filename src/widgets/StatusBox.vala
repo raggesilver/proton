@@ -42,7 +42,7 @@ public class Proton.Status
 */
 
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/status_box.ui")]
-public class Proton.StatusBox : Gtk.Box
+public class Proton.StatusBox : Gtk.EventBox
 {
     public delegate string StatusCallback();
 
@@ -55,6 +55,12 @@ public class Proton.StatusBox : Gtk.Box
 
     [GtkChild]
     Gtk.Stack       stack;
+
+    [GtkChild]
+    Gtk.Box         box;
+
+    [GtkChild]
+    Gtk.Popover     popover;
 
     Gtk.Label       label;
     Gtk.Label       tmp_label;
@@ -84,6 +90,37 @@ public class Proton.StatusBox : Gtk.Box
         }, Priority.LOW));
 
         start_cycle();
+
+        this.event.connect((e) => {
+
+            if (e.type == Gdk.EventType.ENTER_NOTIFY)
+            {
+                this.box.get_style_context().add_class("hover");
+            }
+            else if (e.type == Gdk.EventType.LEAVE_NOTIFY)
+            {
+                this.box.get_style_context().remove_class("hover");
+            }
+            // FIXME: The popover needs UI and functionality design
+            /* else if (e.type == Gdk.EventType.BUTTON_RELEASE)
+            {
+                this.popover.popup();
+                return (true);
+            } */
+
+            return (false);
+        });
+
+        this.popover.closed.connect(() => {
+            this.box.get_style_context().remove_class("click");
+        });
+
+        this.popover.notify["visible"].connect(() => {
+            if (this.popover.visible)
+                this.box.get_style_context().add_class("click");
+            else
+                this.box.get_style_context().remove_class("click");
+        });
     }
 
     public void show_status(Status s)

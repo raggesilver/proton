@@ -29,7 +29,12 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
         editor = _editor;
 
         scrolled = new Gtk.ScrolledWindow(null, null);
-        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        /*
+         * I have absolutely no idea how Gtk.PolicyType.EXTERNAL works but it
+         * presented the best results in all tests cases for split views and
+         * resizing
+         */
+        scrolled.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.AUTOMATIC);
 
         title = editor.file.name;
 
