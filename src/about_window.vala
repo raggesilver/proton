@@ -44,5 +44,7 @@ public class Proton.AboutWindow : Gtk.AboutDialog
         this.response.connect((res) => {
             this.destroy();
         });
+
+        this.get_header_bar().get_style_context().add_class("clean");
     }
 }

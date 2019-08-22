@@ -20,30 +20,54 @@
 
 ![Preview](https://imgur.com/efOlmZ5.png)
 
-## Install
-```bash
-flatpak-builder --install --user --force-clean _build com.raggesilver.Proton.json
-```
-
 ## Features
 - Integrated terminal
 - Plugin system (all [../proton-*-plugin](https://gitlab.com/raggesilver-proton/) are core plugins)
 - Overlay command palette + file discover
 
-## Todos
-1. Right click popover on `TreeView`
-3. `PreferencesWindow` (WIP [src/preferences_window.vala](https://gitlab.com/raggesilver-proton/proton/blob/master/src/preferences_window.vala))
-4. Plugins: 42, git, ~~run~~ -> runner (WIP [proton-runner-plugin](https://gitlab.com/raggesilver-proton/proton-runner-plugin))
-6. Finish `OpenWindow`[^1]
+## Install
 
-- ~~Finish terminal widget~~ Fair base widget for terminal use. Needs improvement
-- ~~Command palette~~ Works reasonably well
-- ~~File modified characted on the window title (e.g "Proton - filename.c •")~~
-- ~~Prevent app quiting when modified editors are still open~~
-- ~~TreeView updates~~
+**Download**
 
-## Other screenshots
+[Flatpak](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/master/raw/proton.flatpak?job=deploy) • [Zip](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/master/download?job=deploy)
 
-| Welcome window | Preferences window |
-| --- | --- |
-| ![preview](https://imgur.com/ezTDdnt.png) | ![preview](https://imgur.com/DOun2WI.png) |
+*Note: these two links might not work if the latest pipeline failed/is still running*
+
+**Flathub**
+
+> Flathub releases will be available once Proton hits version 1.0.0.
+
+## Compile
+
+**Flatpak from source**
+
+```bash
+# Clone the repo
+git clone --recursive https://gitlab.com/raggesilver-proton/proton
+# cd into the repo
+cd proton
+# Assuming you have both flatpak and flatpak-builder installed
+flatpak-builder --install --user --force-clean _build com.raggesilver.Proton.json
+```
+
+**Regular from source (unsupported)**
+
+```bash
+# Clone the repo
+git clone --recursive https://gitlab.com/raggesilver-proton/proton
+# cd into the repo
+cd proton
+meson _build
+ninja -C _build
+# sudo
+ninja -C _build install
+```
+
+*Note: Proton can be ran from GNOME Builder*
+
+## Gallery
+
+Welcome window
+<img src="https://imgur.com/ezTDdnt.png" /> <br>
+Settings window
+<img src="https://imgur.com/DOun2WI.png" />
