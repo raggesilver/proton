@@ -48,5 +48,9 @@ public class Proton.TerminalGridPage : IdeGridPage
             focused();
             return (false);
         });
+
+        terminal.child_exited.connect((status) => {
+            this.destroy();
+        });
     }
 }
