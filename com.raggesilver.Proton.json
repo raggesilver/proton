@@ -152,6 +152,16 @@
             ]
         },
         {
+            "name" : "marble",
+            "buildsystem" : "meson",
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://gitlab.com/raggesilver/marble"
+                }
+            ]
+        },
+        {
             "name" : "proton",
             "buildsystem" : "meson",
             "sources" : [

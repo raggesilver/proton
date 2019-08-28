@@ -24,6 +24,7 @@ public class Proton.Editor : Object
     public signal void ui_modified();
     public signal void destroy();
     public signal bool before_save();
+    public signal void loading_finished();
 
     private uint        id;
     private string?     last_saved_content = null;
@@ -31,6 +32,7 @@ public class Proton.Editor : Object
 
     public File?    file               { get; set; default = null; }
     public bool     is_modified        { get; private set; default = false; }
+    public bool     is_loading         { get; private set; }
 
     public Gtk.SourceView     sview    { get; private set; }
     public Gtk.SourceLanguage language { get; private set; }
@@ -166,15 +168,13 @@ public class Proton.Editor : Object
         var f = Pango.FontDescription.from_string(_settings.font_family);
         if (f.get_family() != null && f.get_family().index_of("None") == -1)
         {
-            warning("FAMILY: %s", f.get_family());
             sview.override_font(f);
         }
 
         /*
-        ** Try appying the current theme "search-match" style to the highlight
-        ** tag
-        */
-
+         * Try appying the current theme "search-match" style to the highlight
+         * tag
+         */
         {
             var scheme = (this.sview.buffer as Gtk.SourceBuffer).style_scheme;
             var style = scheme.get_style("search-match");
@@ -206,6 +206,8 @@ public class Proton.Editor : Object
         sview.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
         sview.set_insert_spaces_instead_of_tabs(true);
         sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
+
+        // sview.background_pattern = Gtk.SourceBackgroundPatternType.GRID;
 
         sview.space_drawer.set_types_for_locations(
             Gtk.SourceSpaceLocationFlags.ALL, Gtk.SourceSpaceTypeFlags.NONE);
@@ -243,23 +245,37 @@ public class Proton.Editor : Object
 
     private void open()
     {
-        file.read_async.begin((obj, res) => {
-            string text = file.read_async.end(res);
-            (sview.buffer as Gtk.SourceBuffer).begin_not_undoable_action();
-            sview.buffer.set_text(text);
-            (sview.buffer as Gtk.SourceBuffer).end_not_undoable_action();
-            _set_language();
+        this.is_loading = true;
+        debug("[Editor] Load start");
 
-            if (last_saved_content == null)
-            {
-                last_saved_content = text;
-                sview.buffer.changed.connect(update_modified);
-            }
-            else
-                last_saved_content = text;
+        this.file.read_async.begin(null, this.open_finished);
+    }
 
-            adjust_margin();
-        });
+    private void open_finished(GLib.Object? obj, GLib.AsyncResult res)
+    {
+        string text = file.read_async.end(res);
+        var buf     = this.sview.buffer as Gtk.SourceBuffer;
+
+        debug("[Editor] Load end, text size: %lu", text.length);
+
+        buf.begin_not_undoable_action();
+        buf.set_text(text);
+        buf.end_not_undoable_action();
+
+        this._set_language();
+
+        if (this.last_saved_content == null)
+        {
+            this.last_saved_content = text;
+            buf.changed.connect(this.update_modified);
+        }
+        else
+            this.last_saved_content = text;
+
+        this.adjust_margin();
+
+        this.is_loading = false;
+        this.loading_finished();
     }
 
     private void update_modified()

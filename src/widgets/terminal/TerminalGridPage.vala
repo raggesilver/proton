@@ -29,7 +29,7 @@ public class Proton.TerminalGridPage : IdeGridPage
 
         terminal = new Terminal(win);
         var scrolled = new Gtk.ScrolledWindow(null, null);
-        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+        scrolled.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.AUTOMATIC);
         scrolled.add(terminal);
 
         pack_start(scrolled, true, true, 0);

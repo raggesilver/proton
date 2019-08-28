@@ -181,7 +181,7 @@ public class Proton.File : Object
         this.file.trash();
     }
 
-    public async string? read_async()
+    public async string? read_async(Cancellable? cancellable = null)
     {
         if (!this.exists)
         {
@@ -195,29 +195,34 @@ public class Proton.File : Object
             return (null);
         }
 
-        /*
-         * This may seem odd, but it is still faster than reading the file
-         * line by line
-         */
+        string? res = null;
+        SourceFunc callback = this.read_async.callback;
 
-        var f = FileStream.open(this.path, "r");
-        f.seek(0, FileSeek.END);
-        long size = f.tell();
-        f.rewind();
+        new Thread<bool>("proton_file_read", () => {
 
-        var buf = new uint8[size];
-        var sz = f.read(buf, 1);
+            var f = FileStream.open(this.path, "r");
+            f.seek(0, FileSeek.END);
+            long size = f.tell();
+            f.rewind();
 
-        if (sz != size)
-        {
-            warning("[File error] invalid read size.");
-            return (null);
-        }
+            var buf = new uint8[size];
+            var sz = f.read(buf, 1);
 
-        var s = (sz == 0) ? "" : (string)buf;
-        s = s.make_valid((ssize_t)sz);
+            if (sz != size)
+            {
+                warning("[File error] invalid read size.");
+            }
 
-        return (s);
+            res = (sz == 0) ? "" : (string)buf;
+            res = res.make_valid((ssize_t)sz);
+
+            Idle.add((owned)callback);
+            return (true);
+        });
+
+        yield;
+
+        return (res);
     }
 
     // FIXME: This function should throw errors and let the caller handle them

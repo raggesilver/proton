@@ -63,94 +63,93 @@ public class Proton.Window : Gtk.ApplicationWindow
     [GtkChild]
     public Gtk.Overlay overlay;
 
+    //
+    // Signals
+
     public signal bool on_accel(string accel);
 
-    PreferencesWindow preferences_window = null;
+    //
+    // Members
 
-    public TreeView       tree_view        { get; private set; }
-    public EditorManager  manager          { get; private set; }
-    public Gtk.AccelGroup accel_group      { get; private set; }
-    public CommandPalette command_palette  { get; private set; }
-    public File           root             { get; protected set; }
-    public BottomPanel    bottom_panel     { get; protected set; }
-    public TerminalTab    terminal_tab     { get; protected set; }
-    public IdeGrid        grid             { get; protected set; }
-    public StatusBox      status_box       { get; private set; }
+    public BottomPanel         bottom_panel    { get; protected set; }
+    public CommandPalette      command_palette { get; private set; }
+    public Dazzle.DockBin      dockbin         { get; private set; }
+    public Dazzle.DockRevealer bottom_edge     { get; private set; }
+    public Dazzle.DockRevealer left_edge       { get; private set; }
+    public EditorManager       manager         { get; private set; }
+    public File                root            { get; protected set; }
+    public Gtk.AccelGroup      accel_group     { get; private set; }
+    public IdeGrid             grid            { get; protected set; }
+    public StatusBox           status_box      { get; private set; }
+    public TerminalTab         terminal_tab    { get; protected set; }
+    public TreeView            tree_view       { get; private set; }
 
-    public Dazzle.DockBin      dockbin      { get; private set; }
-    public Dazzle.DockRevealer left_edge    { get; private set; }
-    public Dazzle.DockRevealer bottom_edge  { get; private set; }
-
-    private PluginManager pm;
+    private PreferencesWindow  preferences_window = null;
+    private PluginManager      pm;
 
     public Window(Gtk.Application app, File root)
     {
-        Object(application: app,
-               root: root);
+        Object(application: app, root: root);
 
         Gtk.IconTheme.get_default().append_search_path(
             @"$(Constants.DATADIR)/proton/icons");
 
         // Initialize stuff
-        accel_group = new Gtk.AccelGroup();
-        command_palette = new CommandPalette(this);
-        tree_view = new TreeView(root);
-        manager = new EditorManager(this);
-        bottom_panel = new BottomPanel(this);
-        grid = new IdeGrid(this);
-        grid.show();
+        this.accel_group     = new Gtk.AccelGroup();
+        this.bottom_panel    = new BottomPanel(this);
+        this.command_palette = new CommandPalette(this);
+        this.dockbin         = new Dazzle.DockBin();
+        this.manager         = new EditorManager(this);
+        this.pm              = new PluginManager(this);
+        this.tree_view       = new TreeView(this);
+        this.status_box      = new StatusBox(this);
+        this.grid            = new IdeGrid(this);
+        this.grid.show();
 
-        this.dockbin = new Dazzle.DockBin();
+        this.left_edge   = this.dockbin.get_left_edge() as Dazzle.DockRevealer;
+        this.bottom_edge =
+            this.dockbin.get_bottom_edge() as Dazzle.DockRevealer;
 
-        left_edge = this.dockbin.get_left_edge() as Dazzle.DockRevealer;
-        bottom_edge = this.dockbin.get_bottom_edge() as Dazzle.DockRevealer;
-
-        left_edge.transition_type =
+        this.left_edge.transition_type =
             Dazzle.DockRevealerTransitionType.SLIDE_RIGHT;
 
-        bottom_edge.transition_type =
+        this.bottom_edge.transition_type =
             Dazzle.DockRevealerTransitionType.SLIDE_UP;
 
-        left_edge.transition_duration = bottom_edge.transition_duration = 250;
+        this.left_edge.transition_duration   = 250;
+        this.bottom_edge.transition_duration = 250;
 
-        this.status_box = new StatusBox(this);
-        title_box.set_center_widget(this.status_box);
+        //
+        // Connections
 
-        tree_view.changed.connect((f) => {
+        this.tree_view.changed.connect((f) => {
             if (f.is_directory || !f.is_valid_textfile)
                 return ;
 
-            // manager.open(f);
-            grid.open_file(f);
+            this.grid.open_file(f);
         });
 
-        tree_view.renamed.connect((o, n) => {
-            manager.renamed(o, n);
+        this.tree_view.renamed.connect((o, n) => {
+            this.manager.renamed(o, n);
         });
 
-        // manager.created.connect((ed) => {
-        //     var ep = new EditorPage(ed);
-        //     editor_stack.add_named(ep, ed.file.path);
-        // });
-
-        manager.changed.connect((ed) => {
-            save_button.set_sensitive(false);
+        this.manager.changed.connect((ed) => {
+            this.save_button.set_sensitive(false);
 
             if (ed != null && ed.file != null)
-            {
-                save_button.set_sensitive(true);
-                // editor_stack.set_visible_child(ed.sview.get_parent().get_parent());
-            }
+                this.save_button.set_sensitive(true);
         });
 
-        manager.modified.connect((mod) => {
-            tree_view.items.get(manager.current_editor.file.path)
+        this.manager.modified.connect((mod) => {
+            this.tree_view.items.get(this.manager.current_editor.file.path)
                 .set_modified(mod);
         });
 
-        toggle_left_panel_button.set_active(settings.left_panel_visible);
-        toggle_left_panel_button.clicked.connect(() => {
-            if (toggle_left_panel_button.active != settings.left_panel_visible)
+        // Load previous state from settings
+        this.toggle_left_panel_button.set_active(settings.left_panel_visible);
+        this.toggle_left_panel_button.clicked.connect(() => {
+            if (this.toggle_left_panel_button.active !=
+                settings.left_panel_visible)
             {
                 settings.left_panel_visible = !settings.left_panel_visible;
             }
@@ -159,16 +158,19 @@ public class Proton.Window : Gtk.ApplicationWindow
         settings.notify["left-panel-visible"].connect(() => {
             this.left_edge.reveal_child = settings.left_panel_visible;
 
-            if (toggle_left_panel_button.active != settings.left_panel_visible)
+            if (this.toggle_left_panel_button.active !=
+                settings.left_panel_visible)
             {
-                toggle_left_panel_button
+                this.toggle_left_panel_button
                     .set_active(settings.left_panel_visible);
             }
         });
 
-        toggle_bottom_panel_button.set_active(settings.bottom_panel_visible);
-        toggle_bottom_panel_button.clicked.connect(() => {
-            if (toggle_bottom_panel_button.active
+        // Load previous state from settings
+        this.toggle_bottom_panel_button
+            .set_active(settings.bottom_panel_visible);
+        this.toggle_bottom_panel_button.clicked.connect(() => {
+            if (this.toggle_bottom_panel_button.active
                     != settings.bottom_panel_visible)
             {
                 settings.bottom_panel_visible = !settings.bottom_panel_visible;
@@ -178,49 +180,41 @@ public class Proton.Window : Gtk.ApplicationWindow
         settings.notify["bottom-panel-visible"].connect(() => {
             this.bottom_edge.reveal_child = settings.bottom_panel_visible;
 
-            if (toggle_bottom_panel_button.active
+            if (this.toggle_bottom_panel_button.active
                     != settings.bottom_panel_visible)
             {
-                toggle_bottom_panel_button
+                this.toggle_bottom_panel_button
                     .set_active(settings.bottom_panel_visible);
             }
         });
 
-        add_accel_group(accel_group);
-        manager.connect_accels(accel_group);
+        this.add_accel_group(this.accel_group);
+        this.manager.connect_accels(this.accel_group);
 
-        if (settings.width > 0 && settings.height > 0)
-            resize(settings.width, settings.height);
+        // TODO: maybe mark this.save_button_clicked as GtkCallback
+        this.save_button.clicked.connect(this.save_button_clicked);
 
-        if (settings.pos_x > 0 && settings.pos_y > 0)
-            move(settings.pos_x, settings.pos_y);
-
-        build_ui();
-
-        pm = new PluginManager(this);
-        pm.load.begin();
-
-        save_button.clicked.connect(save_button_clicked);
-
-        preferences_button.clicked.connect(() => {
-            if (preferences_window == null)
+        this.preferences_button.clicked.connect(() => {
+            if (this.preferences_window == null)
             {
-                preferences_window = new PreferencesWindow(this);
-                preferences_window.delete_event.connect(() => {
-                    preferences_window = null;
+                this.preferences_window = new PreferencesWindow(this);
+                this.preferences_window.delete_event.connect(() => {
+                    this.preferences_window = null;
                     return false;
                 });
             }
-            preferences_window.show();
+            this.preferences_window.show();
         });
 
         var a = new SimpleAction("about", null);
         a.activate.connect(on_about);
         this.add_action(a);
 
-        delete_event.connect(on_delete);
-        apply_settings();
-        bind_accels();
+        this.build_ui();
+        this.pm.load.begin();
+        this.delete_event.connect(on_delete);
+        this.apply_settings();
+        this.bind_accels();
     }
 
     private void on_about()
@@ -271,9 +265,16 @@ public class Proton.Window : Gtk.ApplicationWindow
 
     private void build_ui()
     {
-        side_panel_stack.add_titled(wrap_scroller(tree_view),
-                                    "treeview",
-                                    "Project");
+        if (settings.width > 0 && settings.height > 0)
+            this.resize(settings.width, settings.height);
+
+        if (settings.pos_x > 0 && settings.pos_y > 0)
+            this.move(settings.pos_x, settings.pos_y);
+
+        title_box.set_center_widget(this.status_box);
+
+        var sc = wrap_scroller(tree_view);
+        side_panel_stack.add_titled(sc, "treeview", "Project");
 
         side_panel_stack.set_visible_child_name("treeview");
 

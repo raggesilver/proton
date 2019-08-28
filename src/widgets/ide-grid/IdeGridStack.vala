@@ -115,7 +115,7 @@ public class Proton.IdeGridStack : Gtk.Box
     {
         pages.append(page);
 
-        page.show_all();
+        page.show();
 
         pop_entry_box.insert(page.pop_entry, -1);
 

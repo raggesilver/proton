@@ -20,60 +20,76 @@
 
 public class Proton.EditorGridPage : Proton.IdeGridPage
 {
-    public Editor    editor { get; protected set; }
+    public  Editor              editor   { get; protected set; }
 
-    Gtk.ScrolledWindow  scrolled;
+    private Gtk.ScrolledWindow  scrolled;
+    private Marble.Progressable progressable;
 
-    public EditorGridPage(Editor _editor)
+    public EditorGridPage(Editor editor)
     {
-        editor = _editor;
+        this.editor       = editor;
+        this.scrolled     = new Gtk.ScrolledWindow(null, null);
+        this.progressable = new Marble.Progressable();
 
-        scrolled = new Gtk.ScrolledWindow(null, null);
         /*
          * I have absolutely no idea how Gtk.PolicyType.EXTERNAL works but it
          * presented the best results in all tests cases for split views and
          * resizing
          */
-        scrolled.set_policy(Gtk.PolicyType.EXTERNAL, Gtk.PolicyType.AUTOMATIC);
+        this.scrolled.set_policy(Gtk.PolicyType.EXTERNAL,
+                                 Gtk.PolicyType.AUTOMATIC);
 
-        title = editor.file.name;
+        this.title = this.editor.file.name;
 
-        /*
-         * Connecting signals
-         */
-        update_ui();
-        editor.ui_modified.connect(update_ui);
+        this.update_ui();
+        this.connect_signals();
 
-        editor.modified.connect((m) => {
-            title = editor.file.name + ((m) ? " •" : "");
+        this.scrolled.add(this.editor.sview);
+        this.progressable.add(this.scrolled);
+        this.pack_start(this.progressable, true, true, 0);
+
+        this.scrolled.show();
+        this.progressable.show();
+        this.progressable.pulse();
+
+        this.progressable.loading = this.editor.is_loading;
+    }
+
+    private void connect_signals()
+    {
+        this.editor.ui_modified.connect(this.update_ui);
+
+        this.editor.modified.connect((m) => {
+            this.title = this.editor.file.name + ((m) ? " •" : "");
         });
 
-        editor.sview.focus_in_event.connect((e) => {
-            focused();
+        this.editor.sview.focus_in_event.connect((e) => {
+            this.focused(); // Proton.IdeGridPage.focused signal
             return (false);
         });
 
-        scrolled.add(editor.sview);
-        pack_start(scrolled, true, true, 0);
-        show_all();
+        this.editor.loading_finished.connect(() => {
+            debug("is-loading: %s", this.editor.is_loading.to_string());
+            this.progressable.loading = this.editor.is_loading;
+        });
     }
 
     void update_ui()
     {
-        var buff = editor.sview.buffer as Gtk.SourceBuffer;
+        var buff = this.editor.sview.buffer as Gtk.SourceBuffer;
 
         Gtk.SourceStyleScheme? scheme = null;
-        Gtk.SourceStyle? __style = null;
+        Gtk.SourceStyle?       style  = null;
 
         if (null == (scheme = buff.get_style_scheme()) ||
-            null == (__style = scheme.get_style("text")))
+            null == (style = scheme.get_style("text")))
         {
             bg = fg = null;
             return ;
         }
 
         string _bg, _fg;
-        __style.get("background", out _bg, "foreground", out _fg);
+        style.get("background", out _bg, "foreground", out _fg);
         bg = _bg;
         fg = _fg;
     }

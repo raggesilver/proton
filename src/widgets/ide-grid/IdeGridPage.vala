@@ -82,17 +82,3 @@ public abstract class Proton.IdeGridPage : Gtk.Box
         base.destroy();
     }
 }
-
-public class Proton.DummyPage : Proton.IdeGridPage
-{
-    static int _id;
-
-    public DummyPage()
-    {
-        title = "Dummy %d".printf(_id++);
-        var l = new Gtk.Label("Content %d".printf(_id - 1));
-        l.xalign = 0.5f;
-        pack_start(l, true, true, 0);
-        show_all();
-    }
-}

@@ -185,12 +185,15 @@ public class Proton.TreeView : Sortable
     private Array<string>   to_be_removed = new Array<string>();
     private Mutex           mutex = Mutex();
 
-    public TreeView(File root)
+    private weak Window     window;
+
+    public TreeView(Window window)
     {
         base(Gtk.Orientation.VERTICAL, 0);
 
         this.items = new HashTable<string, TreeItem>(str_hash, str_equal);
-        this.root = root;
+        this.window = window;
+        this.root = this.window.root;
         this.selected = null;
 
         this.margin_top = 5;
@@ -353,8 +356,18 @@ public class Proton.TreeView : Sortable
         r.right_click.connect(() => {
             this.select(r, true);
 
+            Gtk.Allocation alloc;
+            r.get_allocation(out alloc);
+
+            Gdk.Rectangle rect = { 0, 0, 0, 0 };
+
+            rect.width = this.window.left_edge.get_position();
+            rect.height = alloc.height;
+
+            this.popover.pointing_to = rect;
             this.popover.relative_to = r;
             this.popover.popup();
+
             return (false);
         });
 
