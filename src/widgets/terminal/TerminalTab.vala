@@ -72,6 +72,9 @@ public class Proton.TerminalTab : Proton.BottomPanelTab
         // Proton.BottomPanelTab properties
         this.content = this.stack;
         this.aux_content = this.box;
+
+        // Add initial terminal
+        this.add_terminal();
     }
 
     private void build_combo()
