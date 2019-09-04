@@ -213,4 +213,10 @@ public class Proton.IdeGridStack : Gtk.Box
         else if (close())
             destroy();
     }
+
+    [GtkCallback]
+    void on_new_terminal_button_clicked()
+    {
+        this.focused();
+    }
 }
