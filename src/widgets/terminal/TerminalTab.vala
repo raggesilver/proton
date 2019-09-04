@@ -20,125 +20,143 @@
 
 public class Proton.TerminalTab : Proton.BottomPanelTab
 {
-    unowned Window   win;
+    private weak Window window;
 
-    Array<Terminal?> terminals;
-    Gtk.ListStore    store;
+    private Array<Terminal?>    terminals;
+    private Gtk.ListStore       store;
+    private Gtk.Stack           stack;
+    private Gtk.ComboBox        combo;
+    private Gtk.Box             box;
+    private Gtk.Button          new_terminal_button;
+    private Gtk.Button          delete_terminal_button;
+    private bool                is_destroying = false;
 
-    Gtk.Stack        stack;
-    Gtk.ComboBox     combo;
-    Gtk.Box          box;
-    Gtk.Button       new_terminal_button;
-    Gtk.Button       delete_terminal_button;
-
-    public TerminalTab(Window _win)
+    public TerminalTab(Window window)
     {
-        name  = "terminal-tab";
-        title = "TERMINAL";
+        this.window = window;
 
-        win = _win;
-        terminals = new Array<Terminal?>();
+        // Proton.BottomPanelTab properties
+        this.name  = "terminal-tab";
+        this.title = "TERMINAL";
 
-        stack = new Gtk.Stack();
-        store = new Gtk.ListStore(2, typeof(string), typeof(string));
-        combo = new Gtk.ComboBox.with_model(store);
+        this.terminals = new Array<Terminal?>();
+        this.stack     = new Gtk.Stack();
+        this.store     = new Gtk.ListStore(2, typeof(string), typeof(string));
+        this.combo     = new Gtk.ComboBox.with_model(this.store);
+        this.box       = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 2);
 
-        combo.set_entry_text_column(1);
-        combo.set_id_column(0);
+        this.new_terminal_button = new Gtk.Button.from_icon_name(
+            "list-add-symbolic", Gtk.IconSize.MENU);
+        this.new_terminal_button.set_relief(Gtk.ReliefStyle.NONE);
+        this.new_terminal_button.clicked.connect(() => {
+            this.add_terminal();
+        });
 
-        combo.changed.connect(on_changed);
+        this.delete_terminal_button = new Gtk.Button.from_icon_name(
+            "user-trash-symbolic", Gtk.IconSize.MENU);
+        this.delete_terminal_button.set_relief(Gtk.ReliefStyle.NONE);
+        this.delete_terminal_button.clicked.connect(() => {
+            this.delete_terminal(this.combo.active_id);
+        });
+
+
+        this.build_combo();
+
+        this.box.pack_start(this.delete_terminal_button, false, true, 0);
+        this.box.pack_start(this.new_terminal_button, false, true, 0);
+        this.box.pack_end(this.combo, false, true, 0);
+
+        this.stack.show();
+        this.box.show_all();
+
+        // Proton.BottomPanelTab properties
+        this.content = this.stack;
+        this.aux_content = this.box;
+    }
+
+    private void build_combo()
+    {
+        this.combo.set_id_column(0);
+        this.combo.set_entry_text_column(1);
 
         var renderer = new Gtk.CellRendererText();
-        combo.pack_start(renderer, true);
-        combo.add_attribute(renderer, "text", 1);
+        this.combo.pack_start(renderer, true);
+        this.combo.add_attribute(renderer, "text", 1);
 
-        box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 2);
-        new_terminal_button = new Gtk.Button.from_icon_name("list-add-symbolic",
-                                                            Gtk.IconSize.MENU);
-
-        new_terminal_button.clicked.connect(() => { add_terminal(); });
-        new_terminal_button.set_relief(Gtk.ReliefStyle.NONE);
-
-        delete_terminal_button = new Gtk.Button.from_icon_name(
-                                        "user-trash-symbolic",
-                                        Gtk.IconSize.MENU);
-
-        delete_terminal_button.clicked.connect(() => { delete_current_terminal(); });
-        delete_terminal_button.set_relief(Gtk.ReliefStyle.NONE);
-
-        box.pack_start(delete_terminal_button, false, true, 0);
-        box.pack_start(new_terminal_button, false, true, 0);
-        box.pack_end(combo, false, true, 0);
-
-        stack.show();
-        box.show_all();
-
-        content = stack;
-        aux_content = box;
-
-        add_terminal();
-    }
-
-    public Terminal add_terminal(string? command = null,
-                                 bool self_destroy = false)
-    {
-        var term = new Terminal(win, command, self_destroy);
-        terminals.append_val(term);
-
-        uint id = terminals.length;
-        string sid = id.to_string();
-
-        term.child_exited.connect(() => {
-            delete_terminal(sid);
+        this.combo.changed.connect(this.on_combo_changed);
+        this.combo.destroy.connect(() => {
+            this.is_destroying = true;
         });
-
-        stack.add_named(terminals.index(id - 1), sid);
-
-        Gtk.TreeIter it;
-        store.append(out it);
-
-        store.set(it,
-                  0, sid,
-                  1, @"$id: $(term.window_title)");
-
-        term.window_title_changed.connect(() => {
-            store.set(it, 1, @"$id: $(term.window_title)");
-        });
-
-        combo.set_active_id(sid);
-        return (term);
     }
 
-    void on_changed()
+    private void on_combo_changed()
     {
-        stack.set_visible_child_name(combo.active_id);
+        string? active_id = this.combo.active_id;
+        if (active_id != null)
+        {
+            stack.set_visible_child(
+                this.terminals.index(int.parse(active_id))
+            );
+        }
     }
 
-    void delete_current_terminal()
+    private void delete_terminal(string? sid)
     {
-        var sid = combo.active_id;
-        delete_terminal(sid);
-    }
+        if (sid == null)
+            return ;
 
-    public void delete_terminal(string sid, bool no_create = false)
-    {
-        var id = int.parse(sid) - 1;
-        var term = terminals.index(id);
+        int          id   = int.parse(sid);
+        Terminal?    term = this.terminals.index(id);
+        Gtk.TreeIter iter;
 
         if (term == null)
             return ;
 
-        Gtk.TreeIter it;
+        if (this.combo.get_active_iter(out iter))
+        {
+            this.store.remove(ref iter);
+        }
 
-        if (combo.get_active_iter(out it))
-            store.remove(ref it);
-
+        this.terminals.data[id] = null;
         term.destroy();
-        terminals.data[id] = null;
 
-        if (stack.get_children().length() == 0 && !no_create)
-            add_terminal();
-        else
-            combo.set_active_id(stack.get_visible_child_name());
+        if (this.stack.get_children().length() != 0)
+        {
+            this.combo.set_active_id(
+                this.stack.get_visible_child_name()
+            );
+        }
+        else if (!this.is_destroying)
+        {
+            this.add_terminal();
+        }
+    }
+
+    public Terminal add_terminal(string? command      = null,
+                                 bool    self_destroy = false)
+    {
+        var          term = new Terminal(this.window, command, self_destroy);
+        Gtk.TreeIter it;
+        string       sid = this.terminals.length.to_string();
+
+        this.terminals.append_val(term);
+
+        term.child_exited.connect(() => {
+            this.delete_terminal(sid);
+        });
+
+        this.stack.add_named(term, sid);
+
+        this.store.append(out it);
+        this.store.set(it,
+            0, sid,
+            1, @"$sid: $(term.window_title)");
+
+        term.window_title_changed.connect(() => {
+            this.store.set(it, 1, @"$sid: $(term.window_title)");
+        });
+
+        this.combo.set_active_id(sid);
+        return (term);
     }
 }

@@ -147,8 +147,18 @@ public class Proton.TreeItem : Gtk.Box
     }
 
     /*
-    ** Static functions
-    */
+     * The box widget is the one that makes the set_size_request call. This
+     * function is necessary since the box is private and this information is
+     * needed elsewhere.
+     */
+    public void get_box_size_request(out int width, out int height)
+    {
+        this.box.get_size_request(out width, out height);
+    }
+
+    /*
+     * Static functions
+     */
 
     public static SortableBox? tree_is_sortable_function(void *a)
     {
@@ -362,7 +372,13 @@ public class Proton.TreeView : Sortable
             Gdk.Rectangle rect = { 0, 0, 0, 0 };
 
             rect.width = this.window.left_edge.get_position();
-            rect.height = alloc.height;
+            /*
+             * This is a hack to get the row's original height as the row might
+             * be expanded (thus altering the height)
+             */
+            int original_height;
+            r.get_box_size_request(null, out original_height);
+            rect.height = original_height;
 
             this.popover.pointing_to = rect;
             this.popover.relative_to = r;
