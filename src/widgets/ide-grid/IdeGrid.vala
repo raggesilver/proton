@@ -110,8 +110,10 @@ public class Proton.IdeGrid : Gtk.EventBox
         }
         else
         {
-            //                  Scrolled     IdeGridPage
-            var page = ed.sview.get_parent().get_parent();
+            //                Scrolled         IdeGridPage
+            //                    |   Loadable  |
+            //                    v      v      v
+            var page = ed.sview.parent.parent.parent;
             //    Gtk.Stack
             (page.get_parent() as Gtk.Stack).set_visible_child(page);
         }
