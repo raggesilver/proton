@@ -66,5 +66,10 @@
 	    <summary>Style scheme id</summary>
 	    <description>Style scheme id</description>
 	  </key>
+      <key name="scroll-over" type="b">
+	    <default>true</default>
+	    <summary>Whether or not the editor should have a margin at the bottom</summary>
+	    <description>Whether or not the editor should have a margin at the bottom</description>
+	  </key>
     </schema>
 </schemalist>

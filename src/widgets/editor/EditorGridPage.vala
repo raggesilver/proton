@@ -36,7 +36,7 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
          * presented the best results in all tests cases for split views and
          * resizing
          */
-        this.scrolled.set_policy(Gtk.PolicyType.EXTERNAL,
+        this.scrolled.set_policy(Gtk.PolicyType.AUTOMATIC,
                                  Gtk.PolicyType.AUTOMATIC);
 
         this.title = this.editor.file.name;

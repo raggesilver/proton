@@ -24,6 +24,7 @@ public class Proton.EditorSettings : Granite.Services.Settings
 
     public string font_family { get; set; }
     public string style_id    { get; set; }
+    public bool   scroll_over { get; set; }
 
     private EditorSettings()
     {
@@ -181,7 +182,7 @@ public class Proton.EditorManager : Object
 
             _editors.steal(old);
             ed.file = new File(_new);
-            ed._set_language();
+            ed.set_language(null);
             _editors.set(_new, ed);
 
             current_editor = ed;
