@@ -132,7 +132,7 @@ public class Proton.TreeItem : Gtk.Box
         this.label.xalign = 0;
         this.label.margin_end = 18;
 
-        this.box.pack_start(this.icon.image, false, true, 10);
+        this.box.pack_start(this.icon.image, false, true, 12);
         this.box.pack_start(this.label, true, true, 0);
 
         this.pack_start(eb, false, true, 0);
@@ -144,6 +144,15 @@ public class Proton.TreeItem : Gtk.Box
             this.container = new SortableBox(Gtk.Orientation.VERTICAL, 0);
             this.pack_end(this.container, false, true, 0);
         }
+        /*else
+        {
+            this.file.modified.connect((is_modified) => {
+                if (is_modified)
+                    this.label.label = this.file.name + " •";
+                else
+                    this.label.label = this.file.name;
+            });
+        }*/
     }
 
     /*

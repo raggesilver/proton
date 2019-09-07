@@ -45,6 +45,10 @@ public class Proton.Editor : Object
     private uint        id;
     private string?     last_saved_content = null;
     private Gtk.TextTag highlight_tag;
+    // Performance improvement based on GNOME Builder's implementation
+    // https://gitlab.gnome.org/GNOME/gnome-builder/blob/master/
+    // src/libide/sourceview/ide-source-view.c cached_char_height
+    private int         line_height;
 
     public File?                file        { get; set; }
     public bool                 is_modified { get; private set; }
@@ -115,13 +119,14 @@ public class Proton.Editor : Object
 
     private void connect_parent_set()
     {
-        this.sview.parent_set.connect((_) => {
+        this.sview.parent_set.connect((previous_parent) => {
             // Prevent on window close critical error messages
-            if (this.sview.parent == null || _ == null)
+            if (this.sview.parent == null && previous_parent != null)
+                // if there is no parent now and there was a previous parent
                 return ;
 
             // TODO: Check if font-size changes should also trigger this
-            this.sview.parent.size_allocate.connect(this.adjust_margin);
+            // this.sview.parent.size_allocate.connect(this.adjust_margin);
             this.sview.size_allocate.connect(this.adjust_margin);
 
             // TODO: The following commented code might actually be necessary
@@ -180,19 +185,19 @@ public class Proton.Editor : Object
         catch (Error e) { warning(e.message); }
     }
 
-    private void adjust_margin()
+    private int  previous_height = 0;
+    private void adjust_margin(Gtk.Allocation alloc)
     {
-        Gtk.TextIter    it;
-        int             line_height;
-
-        this.buffer.get_start_iter(out it);
-        this.sview.get_line_yrange(it, null, out line_height);
-
-        if (line_height == 0)
+        if (alloc.height == this.previous_height)
             return ;
 
-        this.sview.set_bottom_margin(
-            this.sview.parent.get_allocated_height() - line_height);
+        this.previous_height = alloc.height;
+
+        if (this.line_height <= 0)
+            return ;
+
+        this.sview.bottom_margin =
+            this.sview.parent.get_allocated_height() - this.line_height;
     }
 
     public void update_ui()
@@ -237,6 +242,28 @@ public class Proton.Editor : Object
 
             if (style != null)
                 style.apply(this.highlight_tag);
+        }
+
+        /*
+         * Copyright 2015-2019 Christian Hergert <christian@hergert.me>
+         *
+         * The following code block is a derivative work of the code from
+         * https://gitlab.gnome.org/GNOME/gnome-builder/ which is licensed under
+         * the GNU General Public License as published by the Free Software
+         * Foundation, either version 3 of the License, or any later version.
+         *
+         * SPDX-License-Identifier: GPL-3.0-or-later
+         *
+         * Based on: src/libide/sourceview/ide-source-view.c cached_char_height
+         *
+         * Updating this.line_height
+         */
+        {
+            Pango.Context   ctx     = this.sview.get_pango_context();
+            Pango.Layout    layout  = new Pango.Layout(ctx);
+
+            layout.set_text("X", 1);
+            layout.get_pixel_size(null, out this.line_height);
         }
 
         this.ui_modified();
@@ -338,8 +365,6 @@ public class Proton.Editor : Object
 
         if (current != this.is_modified)
             this.modified(this.is_modified);
-
-        warning("[Update] is modified? %s", this.is_modified.to_string());
     }
 
     public async bool save()
