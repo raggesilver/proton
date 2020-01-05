@@ -1,4 +1,5 @@
 app/
+app_build/
 _build/
 _native/
 _native_build/
@@ -17,3 +18,4 @@ data/icons/hicolor/icons.gresource.xml
 .proton/
 .flatpak-builder/
 src/plugins/autobracket
+!test.sh

@@ -1,4 +1,7 @@
-project('proton', ['c', 'vala'], version: '0.1.7', meson_version: '>= 0.40.0',)
+project('proton', ['c', 'vala'],
+          version: '0.1.8',
+    meson_version: '>= 0.49.0',
+    )
 
 i18n = import('i18n')
 

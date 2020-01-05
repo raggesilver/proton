@@ -4,3 +4,6 @@
 [submodule "src/plugins/editorconfig"]
 	path = src/plugins/editorconfig
 	url = ../proton-editorconfig-plugin.git
+[submodule "data/templates"]
+	path = data/templates
+	url = ../proton-templates

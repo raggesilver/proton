@@ -22,7 +22,7 @@ namespace Proton
 {
     public bool is_flatpak()
     {
-        return (new File("/.flatpak-info").exists);
+        return (FileUtils.test("/.flatpak-info", FileTest.EXISTS));
     }
 
     public bool run_async(string? cwd,
@@ -66,5 +66,28 @@ namespace Proton
             warning(e.message);
             return (false);
         }
+    }
+
+    /**
+     * Spawn a host command (both on flatpak and host) and get output. Your
+     * command must be wrapped in single quotes and should be properly escaped.
+     */
+    public bool spawn(string command, out string? stdout, out string? stderr,
+                      out int? status) throws SpawnError
+    {
+        string cmd = "";
+
+        if (is_flatpak())
+        {
+            cmd += "flatpak-spawn  --host ";
+        }
+
+        cmd += "/usr/bin/bash -c ";
+        cmd += command;
+
+        return (Process.spawn_command_line_sync(cmd,
+                                                out stdout,
+                                                out stderr,
+                                                out status));
     }
 }

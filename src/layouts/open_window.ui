@@ -7,44 +7,16 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkListStore" id="build_systems_list_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">None</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkFileFilter" id="filefilter1">
     <mime-types>
       <mime-type>folder</mime-type>
     </mime-types>
   </object>
-  <object class="GtkListStore" id="languages_list_store">
+  <object class="GtkListStore" id="np_language_list_store">
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
-    <data>
-      <row>
-        <col id="0">C</col>
-      </row>
-      <row>
-        <col id="0">JavaScript</col>
-      </row>
-      <row>
-        <col id="0">Vala</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Python</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Other</col>
-      </row>
-    </data>
   </object>
   <template class="ProtonOpenWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
@@ -659,7 +631,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="np_name_entry">
                         <property name="width_request">300</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -699,7 +671,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFileChooserButton" id="new_project_file_chooser_button">
+                      <object class="GtkFileChooserButton" id="np_file_chooser_button">
                         <property name="width_request">300</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -728,7 +700,7 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Language: </property>
+                        <property name="label" translatable="yes">Template: </property>
                         <property name="xalign">1</property>
                       </object>
                       <packing>
@@ -738,12 +710,11 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBox">
+                      <object class="GtkComboBox" id="np_language_combo">
                         <property name="width_request">300</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="model">languages_list_store</property>
-                        <property name="active">0</property>
+                        <property name="model">np_language_list_store</property>
                         <property name="id_column">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="name"/>
@@ -768,7 +739,6 @@
                 </child>
                 <child>
                   <object class="GtkBox">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
@@ -785,11 +755,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkComboBox">
+                      <object class="GtkComboBox" id="np_buildsystem_combo">
                         <property name="width_request">300</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="model">build_systems_list_store</property>
                         <property name="active">0</property>
                         <child>
                           <object class="GtkCellRendererText" id="build_system_renderer"/>
@@ -810,6 +779,18 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="np_error_label">
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -846,7 +827,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -867,7 +848,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSwitch">
+                      <object class="GtkSwitch" id="np_git_switch">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="active">True</property>
@@ -882,25 +863,61 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="create_project_button">
-                    <property name="label" translatable="yes">Create project</property>
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="halign">end</property>
-                    <style>
-                      <class name="suggested-action"/>
-                    </style>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkButton" id="np_create_button">
+                        <property name="label" translatable="yes">Create project</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="halign">end</property>
+                        <style>
+                          <class name="suggested-action"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="valign">center</property>
+                        <property name="relief">none</property>
+                        <signal name="clicked" handler="on_open_templates_clicked" swapped="no"/>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Open templates</property>
+                            <attributes>
+                              <attribute name="scale" value="0.80000000000000004"/>
+                            </attributes>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">6</property>
+                    <property name="position">7</property>
                   </packing>
                 </child>
               </object>

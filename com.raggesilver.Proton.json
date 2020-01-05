@@ -1,7 +1,7 @@
 {
     "app-id" : "com.raggesilver.Proton",
     "runtime" : "org.gnome.Sdk",
-    "runtime-version" : "master",
+    "runtime-version" : "3.34",
     "sdk" : "org.gnome.Sdk",
     "command" : "proton",
     "finish-args" : [
@@ -54,6 +54,11 @@
         {
             "name" : "vte",
             "buildsystem" : "meson",
+            "build-options" : {
+                "env" : {
+                    "CXXFLAGS" : "-fno-exceptions"
+                }
+            },
             "sources" : [
                 {
                     "type" : "git",
