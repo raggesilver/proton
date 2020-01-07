@@ -35,7 +35,7 @@ public class Proton.TerminalGridPage : IdeGridPage
         pack_start(scrolled, true, true, 0);
         show_all();
 
-        title = "terminal-%u".printf(terminal.id);
+        title = "Terminal %u".printf(terminal.id);
 
         // FIXME: create a way to change the title only on IdeGridStack.titlebar
         // and keep the initial on IdeGridStack.popover

@@ -53,7 +53,8 @@ public class Proton.IdeGridStack : Gtk.Box
     [GtkChild]
     Gtk.EventBox            background_event_box;
 
-    ulong?                  style_changed_handler = null;
+    ulong                   style_changed_handler = 0;
+    ulong                   title_changed_handler = 0;
     Gtk.CssProvider?        provider = null;
 
 
@@ -73,10 +74,10 @@ public class Proton.IdeGridStack : Gtk.Box
                 pages.remove(p);
                 pages.append(p);
 
-                if (style_changed_handler != null)
+                if (style_changed_handler != 0)
                 {
                     disconnect(style_changed_handler);
-                    style_changed_handler = null;
+                    style_changed_handler = 0;
                 }
 
                 style_changed_handler = p.style_changed.connect(() => {
@@ -84,6 +85,16 @@ public class Proton.IdeGridStack : Gtk.Box
                         set_titlebar_style(p);
                     else
                         reset_titlebar_style();
+                });
+
+                if (title_changed_handler != 0)
+                {
+                    disconnect(title_changed_handler);
+                    title_changed_handler = 0;
+                }
+
+                title_changed_handler = p.notify["title"].connect(() => {
+                    title_label.label = p.title;
                 });
 
                 if (p.bg != null && p.fg != null)

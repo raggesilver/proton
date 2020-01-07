@@ -400,7 +400,10 @@ public class Proton.Editor : Object
 
     private bool get_real_modified()
     {
-        return (this.last_saved_content != this.get_text());
+        bool is_mod = (this.last_saved_content != this.get_text());
+        // Auto-fires this.modified()
+        this.buffer.set_modified(is_mod);
+        return (is_mod);
     }
 
     public string get_text()
