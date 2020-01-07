@@ -1,4 +1,4 @@
 {
     "buildsystem": "simple",
-    "command": "sh test.sh"
+    "commands": [ "sh test.sh" ]
 }

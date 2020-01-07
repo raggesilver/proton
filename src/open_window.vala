@@ -43,6 +43,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
     [GtkChild] Gtk.ListStore np_language_list_store;
     [GtkChild] Gtk.ScrolledWindow scroll;
     [GtkChild] Gtk.Stack stack;
+    [GtkChild] Gtk.Switch np_git_switch;
     [GtkChild] Gtk.TextView git_text_view;
 
     File?   repo_file = null;
@@ -306,7 +307,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
         if (lang != null)
         {
             string tp = Constants.DATADIR + "/proton/templates/" + lang;
-            if (Posix.system(@"cp -r $tp $path") != 0)
+            if (Posix.system(@"cp -r '$tp' '$path'") != 0)
             {
                 warning("Could not create project from template");
                 return;
@@ -332,6 +333,12 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
             {
                 warning("Could not properly setup your template");
             }
+        }
+
+        if (this.np_git_switch.active &&
+            Posix.system(@"cd '$path' && git init") != 0)
+        {
+            warning("Failed to initialize git repo");
         }
 
         settings.add_recent(path);
@@ -378,11 +385,14 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
         try
         {
             string? fname = null;
-            var dir       = Dir.open(Constants.DATADIR + "/proton/templates");
+            string  dname = Constants.DATADIR + "/proton/templates";
+            var dir       = Dir.open(dname);
             Gtk.TreeIter iter;
 
             while ((fname = dir.read_name()) != null)
             {
+                if (!FileUtils.test(@"$dname/$fname", FileTest.IS_DIR))
+                    continue; // Don't load anything that is not a folder
                 this.np_language_list_store.append(out iter);
                 this.np_language_list_store.set(iter, 0, fname, -1);
                 debug("Added template: %s", fname);
