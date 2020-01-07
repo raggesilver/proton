@@ -26,11 +26,18 @@ proton_sources = [
     'utils/File.vala',
     'utils/utils.vala',
     'utils/terminal/terminal.vala',
+    'utils/assert/assert.c',
+    'utils/assert/assert.h',
+    'utils/assert/assert.vala',
     'services/Settings.vala',
     'services/PluginManager.vala',
     'services/Core.vala',
     'services/EditorManager.vala',
     'services/FileIconProvider.vala',
+]
+
+proton_inc_dirs = [
+    'utils/assert',
 ]
 
 subdir('widgets')
@@ -55,12 +62,13 @@ gnome = import('gnome')
 proton_sources += gnome.compile_resources('proton-resources',
     'proton.gresource.xml', c_name: 'proton')
 
-proton_core = library( 'proton_core', proton_sources, config_header,
-    dependencies: proton_deps,
-        vala_gir: 'Proton-1.0.gir',
-         install: true,
-     install_dir: [ true, true, true, true ],
-         version: '1.0',
+proton_core = library('proton_core', proton_sources, config_header,
+    include_directories: proton_inc_dirs,
+           dependencies: proton_deps,
+               vala_gir: 'Proton-1.0.gir',
+                install: true,
+            install_dir: [ true, true, true, true ],
+                version: '1.0',
     )
 
 # This works, but not really, since Granite's nested namespaces are not

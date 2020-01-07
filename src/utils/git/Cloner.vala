@@ -85,8 +85,8 @@ public class Proton.Cloner : Object
 
     public Cloner(string url, File target) throws Error
     {
-        assert(Cloner.is_valid_target(target));
-        assert(Cloner.is_valid_url(url));
+        assert_(Cloner.is_valid_target(target));
+        assert_(Cloner.is_valid_url(url));
 
         Ggit.init();
 
@@ -148,7 +148,7 @@ public class Proton.Cloner : Object
             {
                 repo = Ggit.Repository.clone(url, target.file, clone_ops);
                 debug("Got to line after");
-                assert(repo != null);
+                assert_(repo != null);
                 debug("Got after assert");
 
                 Idle.add((owned)callback);
