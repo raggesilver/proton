@@ -16,52 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-Gtk.ScrolledWindow wrap_scroller(Gtk.Widget w)
-{
-    var s = new Gtk.ScrolledWindow (null, null);
-    s.add (w);
-    w.show ();
-    s.show ();
-    return (s);
-}
-
-//  static TypeModule module = null;
-
 [GtkTemplate (ui = "/com/raggesilver/Proton/layouts/window.ui")]
 public class Proton.Window : Gtk.ApplicationWindow
 {
-    [GtkChild]
-    public Gtk.HeaderBar header_bar;
+    [GtkChild] Gtk.Box side_panel_box;
+    [GtkChild] Gtk.Box title_box;
+    [GtkChild] Gtk.Button preferences_button;
+    [GtkChild] Gtk.Button save_button;
+    [GtkChild] Gtk.ScrolledWindow tree_view_scrolled;
+    [GtkChild] Gtk.Stack side_panel_stack;
+    [GtkChild] Gtk.ToggleButton toggle_bottom_panel_button;
+    [GtkChild] Gtk.ToggleButton toggle_left_panel_button;
+    [GtkChild] Gtk.StackSwitcher side_panel_stack_switcher;
 
-    [GtkChild]
-    public Gtk.Box left_hb_box;
-
-    [GtkChild]
-    public Gtk.Box right_hb_box;
-
-    [GtkChild]
-    Gtk.Stack side_panel_stack;
-
-    [GtkChild]
-    Gtk.Button preferences_button;
-
-    [GtkChild]
-    Gtk.Button save_button;
-
-    [GtkChild]
-    Gtk.ToggleButton toggle_left_panel_button;
-
-    [GtkChild]
-    Gtk.ToggleButton toggle_bottom_panel_button;
-
-    [GtkChild]
-    Gtk.Box title_box;
-
-    [GtkChild]
-    Gtk.Box side_panel_box;
-
-    [GtkChild]
-    public Gtk.Overlay overlay;
+    [GtkChild] public Gtk.Box left_hb_box;
+    [GtkChild] public Gtk.Box right_hb_box;
+    [GtkChild] public Gtk.HeaderBar header_bar;
+    [GtkChild] public Gtk.Overlay overlay;
 
     //
     // Signals
@@ -265,6 +236,8 @@ public class Proton.Window : Gtk.ApplicationWindow
 
     private void build_ui()
     {
+        this.side_panel_stack_switcher.set_homogeneous(true);
+
         if (settings.width > 0 && settings.height > 0)
             this.resize(settings.width, settings.height);
 
@@ -273,8 +246,7 @@ public class Proton.Window : Gtk.ApplicationWindow
 
         title_box.set_center_widget(this.status_box);
 
-        var sc = wrap_scroller(tree_view);
-        side_panel_stack.add_titled(sc, "treeview", "Project");
+        this.tree_view_scrolled.add(this.tree_view);
 
         side_panel_stack.set_visible_child_name("treeview");
 

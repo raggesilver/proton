@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkPopoverMenu" id="popovermenu1">
@@ -51,47 +51,11 @@
     <property name="can_focus">False</property>
     <property name="default_width">600</property>
     <property name="default_height">300</property>
-    <child>
-      <object class="GtkOverlay" id="overlay">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-    </child>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="show_close_button">True</property>
-        <child type="title">
-          <object class="GtkBox" id="title_box">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="spacing">6</property>
-            <child>
-              <object class="GtkBox" id="center_left_box">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-        </child>
         <child>
           <object class="GtkBox" id="left_hb_box">
             <property name="visible">True</property>
@@ -124,6 +88,33 @@
           <packing>
             <property name="position">1</property>
           </packing>
+        </child>
+        <child type="title">
+          <object class="GtkBox" id="title_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkBox" id="center_left_box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
         </child>
         <child>
           <object class="GtkBox" id="right_hb_box">
@@ -230,94 +221,26 @@
         </child>
       </object>
     </child>
+    <child>
+      <object class="GtkOverlay" id="overlay">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
   </template>
   <object class="GtkBox" id="side_panel_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
     <child>
-      <object class="GtkBox">
+      <object class="GtkStackSwitcher" id="side_panel_stack_switcher">
+        <property name="name">spss</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">folder-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">edit-find-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">dialog-warning-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">text-x-git-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
+        <property name="stack">side_panel_stack</property>
         <style>
           <class name="panel-header"/>
         </style>
@@ -325,7 +248,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">0</property>
+        <property name="position">1</property>
       </packing>
     </child>
     <child>
@@ -334,7 +257,138 @@
         <property name="can_focus">False</property>
         <property name="transition_type">slide-left-right</property>
         <child>
-          <placeholder/>
+          <object class="GtkScrolledWindow" id="tree_view_scrolled">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="name">treeview</property>
+            <property name="title" translatable="yes">Project</property>
+            <property name="icon_name">folder-symbolic</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="label" translatable="yes">SEARCH</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="medium"/>
+                  <attribute name="scale" value="0.80000000000000004"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="name">global_search</property>
+            <property name="title" translatable="yes">Search</property>
+            <property name="icon_name">system-search-symbolic</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="label" translatable="yes">LINTER</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="medium"/>
+                  <attribute name="scale" value="0.80000000000000004"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="name">linter</property>
+            <property name="title" translatable="yes">Linter errors</property>
+            <property name="icon_name">dialog-warning-symbolic</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="label" translatable="yes">GIT</property>
+                <property name="xalign">0</property>
+                <attributes>
+                  <attribute name="weight" value="medium"/>
+                  <attribute name="scale" value="0.80000000000000004"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="name">git</property>
+            <property name="title" translatable="yes">Git</property>
+            <property name="icon_name">text-x-git-symbolic</property>
+            <property name="position">3</property>
+          </packing>
         </child>
       </object>
       <packing>
