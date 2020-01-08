@@ -76,6 +76,11 @@ public abstract class Proton.IdeGridPage : Gtk.Box
         });
     }
 
+    protected IdeGridPage()
+    {
+        Object(orientation: Gtk.Orientation.VERTICAL);
+    }
+
     public override void destroy()
     {
         pop_entry.destroy();

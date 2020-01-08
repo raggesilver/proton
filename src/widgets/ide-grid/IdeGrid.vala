@@ -110,12 +110,9 @@ public class Proton.IdeGrid : Gtk.EventBox
         }
         else
         {
-            //                Scrolled         IdeGridPage
-            //                    |   Loadable  |
-            //                    v      v      v
-            var page = ed.sview.parent.parent.parent;
-            //    Gtk.Stack
-            (page.get_parent() as Gtk.Stack).set_visible_child(page);
+            // EditorGridPage detects sview.focus and asks it's current
+            // IdeGridStack to be the visible child. Fixes #27 #31
+            ed.sview.grab_focus();
         }
     }
 

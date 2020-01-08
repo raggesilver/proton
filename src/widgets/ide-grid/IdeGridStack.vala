@@ -29,97 +29,85 @@ public class Proton.IdeGridStack : Gtk.Box
     public signal bool close();
     public signal void focused();
 
-    [GtkChild]
-    public Gtk.Box          titlebar        { get; private set; }
+    [GtkChild] public Gtk.Box titlebar { get; private set; }
+    [GtkChild] public Gtk.ListBox pop_entry_box { get; private set; }
+    [GtkChild] public Gtk.MenuButton title_button { get; private set; }
+    [GtkChild] public Gtk.Popover popover { get; private set; }
+    [GtkChild] public Gtk.Stack stack { get; private set; }
 
-    [GtkChild]
-    public Gtk.MenuButton   title_button    { get; private set; }
+    [GtkChild] Gtk.EventBox background_event_box;
+    [GtkChild] Gtk.EventBox titlebar_eb;
+    [GtkChild] Gtk.Label title_label;
 
-    [GtkChild]
-    public Gtk.Stack        stack           { get; private set; }
-
-    [GtkChild]
-    public Gtk.ListBox      pop_entry_box   { get; private set; }
-
-    [GtkChild]
-    public Gtk.Popover      popover         { get; private set; }
-
-    [GtkChild]
-    Gtk.EventBox            titlebar_eb;
-
-    [GtkChild]
-    Gtk.Label               title_label;
-
-    [GtkChild]
-    Gtk.EventBox            background_event_box;
-
-    ulong                   style_changed_handler = 0;
-    ulong                   title_changed_handler = 0;
-    Gtk.CssProvider?        provider = null;
-
-
-    List<IdeGridPage>       pages = new List<IdeGridPage>();
+    private Gtk.CssProvider? provider = null;
+    private Gtk.Widget? prev_page = null;
+    private List<IdeGridPage> pages = new List<IdeGridPage>();
+    private ulong[] handlers = { 0, 0 };
 
     public IdeGridStack()
     {
-        stack.notify["visible-child"].connect((c) => {
-            if (stack.visible_child != background_event_box)
-            {
-                var p = stack.visible_child as IdeGridPage;
-                title_label.label = p.title;
+        this.connect_signals();
+    }
 
-                /*
-                ** This adds history behavior to closing pages.
-                */
-                pages.remove(p);
-                pages.append(p);
+    private void connect_signals()
+    {
+        this.stack.notify["visible-child"].connect(this.on_child_changed);
 
-                if (style_changed_handler != 0)
-                {
-                    disconnect(style_changed_handler);
-                    style_changed_handler = 0;
-                }
-
-                style_changed_handler = p.style_changed.connect(() => {
-                    if (p.bg != null && p.fg != null)
-                        set_titlebar_style(p);
-                    else
-                        reset_titlebar_style();
-                });
-
-                if (title_changed_handler != 0)
-                {
-                    disconnect(title_changed_handler);
-                    title_changed_handler = 0;
-                }
-
-                title_changed_handler = p.notify["title"].connect(() => {
-                    title_label.label = p.title;
-                });
-
-                if (p.bg != null && p.fg != null)
-                    set_titlebar_style(p);
-                else
-                    reset_titlebar_style();
-            }
-            else
-                title_label.label = "";
-        });
-
-        titlebar_eb.button_release_event.connect((e) => {
-            // Middle click on titlebar
+        this.titlebar_eb.button_release_event.connect((e) => {
             if (e.button == 2)
             {
-                on_close_button_clicked();
+                this.on_close_button_clicked();
                 return (true);
             }
             return (false);
         });
 
-        background_event_box.button_press_event.connect(() => {
-            focused();
+        this.background_event_box.button_press_event.connect(() => {
+            this.focused();
             return (false);
         });
+    }
+
+    private void on_child_changed()
+    {
+        IdeGridPage page;
+
+        if (this.prev_page != null)
+        {
+            foreach (ulong h in this.handlers)
+                if (h > 0)
+                    this.prev_page.disconnect(h);
+            this.prev_page = null;
+        }
+
+        if (this.stack.visible_child == this.background_event_box)
+        {
+            this.title_label.label = "";
+            return;
+        }
+
+        page = this.stack.visible_child as IdeGridPage;
+        this.title_label.label = page.title;
+
+        // History behavior
+        this.pages.remove(page);
+        this.pages.append(page);
+
+        this.handlers[0] = page.style_changed.connect(() => {
+            if (page.bg != null && page.fg != null)
+                this.set_titlebar_style(page);
+            else
+                this.reset_titlebar_style();
+        });
+
+        this.handlers[1] = page.notify["title"].connect(() => {
+            this.title_label.label = page.title;
+        });
+
+        if (page.bg != null && page.fg != null)
+            this.set_titlebar_style(page);
+        else
+            this.reset_titlebar_style();
     }
 
     public void add_page(IdeGridPage page)
@@ -131,7 +119,10 @@ public class Proton.IdeGridStack : Gtk.Box
         pop_entry_box.insert(page.pop_entry, -1);
 
         page.focused.connect(() => {
-            focused();
+            this.focused();
+            // Workaround for #27
+            if (this.stack.get_visible_child() != page)
+                this.stack.set_visible_child(page);
         });
 
         page.destroy.connect(() => {

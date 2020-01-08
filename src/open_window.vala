@@ -62,11 +62,11 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
 
     private void build_ui()
     {
-        string home = Environment.get_home_dir();
+        string projects_path = Environment.get_home_dir() + "/Projects";
 
         // Set new project file chooser to ~/Projects/ if it exists
-        if (FileUtils.test(home + "/Projects", FileTest.IS_DIR))
-            np_file_chooser_button.set_filename("Projects");
+        if (FileUtils.test(projects_path, FileTest.IS_DIR))
+            np_file_chooser_button.set_filename(projects_path);
 
         // Connect signals
         this.np_create_button.clicked.connect(this.on_create_project);
@@ -115,7 +115,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
                 this.get_style_context().add_class("open-window");
                 break;
         }
-        this.back_button.set_visible(page == "welcome_page");
+        this.back_button.set_visible(page != "welcome_page");
         this.stack.set_visible_child_name(page);
     }
 

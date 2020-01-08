@@ -24,12 +24,18 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
 
     private Gtk.ScrolledWindow  scrolled;
     private Marble.Progressable progressable;
+    private Gtk.Revealer        revealer;
+    private EditorSearchBox     search_box;
+    private Gtk.Overlay         overlay;
 
     public EditorGridPage(Editor editor)
     {
         this.editor       = editor;
         this.scrolled     = new Gtk.ScrolledWindow(null, null);
         this.progressable = new Marble.Progressable();
+        this.search_box   = new EditorSearchBox(editor.sview);
+        this.revealer     = new Gtk.Revealer();
+        this.overlay      = new Gtk.Overlay();
 
         /*
          * I have absolutely no idea how Gtk.PolicyType.EXTERNAL works but it
@@ -39,6 +45,20 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
         this.scrolled.set_policy(Gtk.PolicyType.AUTOMATIC,
                                  Gtk.PolicyType.AUTOMATIC);
 
+        this.overlay.show();
+
+        this.revealer.set_transition_type(
+            Gtk.RevealerTransitionType.SLIDE_DOWN);
+        this.revealer.set_transition_duration(200);
+        this.revealer.halign = Gtk.Align.END;
+        this.revealer.valign = Gtk.Align.START;
+
+        this.revealer.add(this.search_box);
+        this.revealer.show();
+        this.revealer.set_reveal_child(false);
+
+        this.overlay.add_overlay(this.revealer);
+
         this.title = this.editor.file.name;
 
         this.update_ui();
@@ -46,7 +66,9 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
 
         this.scrolled.add(this.editor.sview);
         this.progressable.add(this.scrolled);
-        this.pack_start(this.progressable, true, true, 0);
+        this.overlay.add(this.progressable);
+
+        this.pack_start(this.overlay, true, true, 0);
 
         this.scrolled.show();
         this.progressable.show();

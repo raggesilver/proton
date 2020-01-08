@@ -24,9 +24,25 @@ public class Proton.EditorSearchBox : Gtk.Box
     weak Gtk.SourceView   view;
     weak Gtk.SourceBuffer buff;
 
+    [GtkChild] Gtk.Revealer advanced_revealer;
+    [GtkChild] Gtk.Button advanced_toggle_button;
+    [GtkChild] Gtk.Image toggle_image;
+
     public EditorSearchBox(Gtk.SourceView view)
     {
         this.view = view;
         this.buff = view.buffer as Gtk.SourceBuffer;
+    }
+
+    [GtkCallback]
+    private void on_advanced_toggled()
+    {
+        bool now = !this.advanced_revealer.get_reveal_child();
+        this.advanced_revealer.set_reveal_child(now);
+
+        this.toggle_image.set_from_icon_name(
+            (now) ? "go-down-symbolic" : "go-next-symbolic",
+            Gtk.IconSize.MENU
+        );
     }
 }
