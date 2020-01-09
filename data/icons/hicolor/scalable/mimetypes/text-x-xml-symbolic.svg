@@ -9,43 +9,44 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="128"
-   height="128"
-   viewBox="0 0 33.866666 33.866668"
+   width="24"
+   height="24"
+   viewBox="0 0 6.48 6.48"
    version="1.1"
-   id="svg2126"
+   id="svg8"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
    sodipodi:docname="text-x-xml-symbolic.svg">
   <defs
-     id="defs2120" />
+     id="defs2" />
   <sodipodi:namedview
      id="base"
-     pagecolor="#ffffff"
+     pagecolor="#232323"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="15.639982"
-     inkscape:cy="94.232002"
+     inkscape:zoom="22.4"
+     inkscape:cx="7.4563574"
+     inkscape:cy="10.129789"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
-     inkscape:window-width="2048"
-     inkscape:window-height="1088"
+     scale-x="0.27"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1" />
   <metadata
-     id="metadata2123">
+     id="metadata5">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -53,26 +54,16 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-263.13332)">
+     transform="translate(0,-290.64999)">
     <g
        aria-label="&lt;/&gt;"
-       style="font-style:normal;font-weight:normal;font-size:10.58333397px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458335"
-       id="text863"
-       transform="matrix(1.5704628,0,0,1.5704628,-13.947073,-142.93485)">
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.87489176px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26419717"
+       id="text9245"
+       transform="matrix(1.1160145,0,0,1.1160145,-0.75177399,-34.095495)">
       <path
-         d="m 16.027816,267.74892 -4.392497,1.65365 4.392497,1.63814 v 0.94568 l -5.4622,-2.16008 v -0.85782 l 5.4622,-2.16008 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458335"
-         id="path865"
-         inkscape:connector-curvature="0" />
-      <path
-         d="m 21.071435,264.99974 h 0.981853 l -4.061768,8.69714 H 17.0045 Z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458335"
-         id="path867"
-         inkscape:connector-curvature="0" />
-      <path
-         d="m 23.29869,267.74892 v -0.94051 l 5.462199,2.16008 v 0.85782 l -5.462199,2.16008 v -0.94568 l 4.392497,-1.63814 z"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:monospace;-inkscape-font-specification:monospace;stroke-width:0.26458335"
-         id="path869"
+         d="m 4.4988374,292.47217 0.1569828,-0.32588 -0.4868453,-0.22455 -1.4029096,2.91114 -1.5499567,-0.91209 1.2896435,-0.75312 -0.2742231,-0.4332 -1.55790521,0.96575 v 0.44511 l 1.86590941,1.16048 -0.1589699,0.32788 0.4908196,0.22454 1.4009224,-2.91312 1.667197,0.97568 -1.2916306,0.75908 0.2841588,0.42723 1.5479696,-0.96177 v -0.44909 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';stroke-width:0.26419717"
+         id="path9247"
          inkscape:connector-curvature="0" />
     </g>
   </g>

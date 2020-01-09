@@ -9,29 +9,30 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="128"
-   height="128"
-   viewBox="0 0 33.866666 33.866668"
+   width="24"
+   height="24"
+   viewBox="0 0 6.48 6.48"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
-   sodipodi:docname="text-x-vala-symbolic.svg">
+   sodipodi:docname="text-x-xml.svg">
   <defs
      id="defs2" />
   <sodipodi:namedview
      id="base"
-     pagecolor="#ffffff"
+     pagecolor="#232323"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.9999998"
-     inkscape:cx="2.607379"
-     inkscape:cy="62.502798"
+     inkscape:zoom="22.4"
+     inkscape:cx="7.4563574"
+     inkscape:cy="10.129789"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
+     scale-x="0.27"
      inkscape:window-width="1920"
      inkscape:window-height="1016"
      inkscape:window-x="0"
@@ -53,12 +54,17 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-263.13332)">
-    <path
-       style="font-style:normal;font-weight:normal;font-size:22.57777786px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.48600507"
-       d="M 11.167948,265.77916 7.3226186,265.78 v 8.5e-4 h -0.012294 l -0.8445216,0.0242 -4.808863,16.31074 6.3712262,-10.94651 3.0963728,23.18487 H 17.8371 L 32.209727,265.78078 H 28.48573 L 15.878068,290.2489 13.14034,265.7807 Z"
-       id="text903"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccccccccccc" />
+     transform="translate(0,-290.64999)">
+    <g
+       aria-label="&lt;/&gt;"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.87489176px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code';letter-spacing:0px;word-spacing:0px;fill:#e44d26;fill-opacity:1;stroke:none;stroke-width:0.26419717"
+       id="text9245"
+       transform="matrix(1.1160145,0,0,1.1160145,-0.75177399,-34.095495)">
+      <path
+         d="m 4.4988374,292.47217 0.1569828,-0.32588 -0.4868453,-0.22455 -1.4029096,2.91114 -1.5499567,-0.91209 1.2896435,-0.75312 -0.2742231,-0.4332 -1.55790521,0.96575 v 0.44511 l 1.86590941,1.16048 -0.1589699,0.32788 0.4908196,0.22454 1.4009224,-2.91312 1.667197,0.97568 -1.2916306,0.75908 0.2841588,0.42723 1.5479696,-0.96177 v -0.44909 z"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';stroke-width:0.26419717;fill:#e44d26;fill-opacity:1"
+         id="path9247"
+         inkscape:connector-curvature="0" />
+    </g>
   </g>
 </svg>

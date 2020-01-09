@@ -33,26 +33,32 @@ public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
         this.ext_table = new HashTable<string, string>(str_hash, str_equal);
         this.name_table = new HashTable<string, string>(str_hash, str_equal);
 
-        this.ext_table.insert("c", "text-x-c-symbolic");
-        this.ext_table.insert("h", "text-x-c-symbolic");
-        this.ext_table.insert("c++", "text-x-cpp-symbolic");
-        this.ext_table.insert("cpp", "text-x-cpp-symbolic");
-        this.ext_table.insert("cc", "text-x-cpp-symbolic");
-        this.ext_table.insert("h++", "text-x-cpp-symbolic");
-        this.ext_table.insert("hpp", "text-x-cpp-symbolic");
-        this.ext_table.insert("vala", "text-x-vala-symbolic");
-        this.ext_table.insert("css", "text-x-css-symbolic");
-        this.ext_table.insert("sh", "text-x-script-symbolic");
-        this.ext_table.insert("xml", "text-x-xml2-symbolic");
-        this.ext_table.insert("ui", "text-x-xml2-symbolic");
-        this.ext_table.insert("glade", "text-x-xml2-symbolic");
-        this.ext_table.insert("json", "text-x-json-symbolic");
+        this.ext_table.insert("c", "text-x-c");
+        this.ext_table.insert("h", "text-x-c");
+        this.ext_table.insert("c++", "text-x-cpp");
+        this.ext_table.insert("cpp", "text-x-cpp");
+        this.ext_table.insert("cc", "text-x-cpp");
+        this.ext_table.insert("h++", "text-x-cpp");
+        this.ext_table.insert("hpp", "text-x-cpp");
+        this.ext_table.insert("vala", "text-x-vala");
+        this.ext_table.insert("vapi", "text-x-vala");
+        this.ext_table.insert("css", "text-x-css");
+        this.ext_table.insert("sh", "text-x-script2");
+        this.ext_table.insert("xml", "text-x-xml");
+        this.ext_table.insert("ui", "text-x-xml");
+        this.ext_table.insert("glade", "text-x-xml");
+        this.ext_table.insert("json", "text-x-json");
+        this.ext_table.insert("md", "text-x-markdown");
+        this.ext_table.insert("js", "text-x-js");
 
-        this.name_table.insert(".gitattributes", "text-x-git-symbolic");
-        this.name_table.insert(".gitmodules", "text-x-git-symbolic");
-        this.name_table.insert(".gitignore", "text-x-git-symbolic");
-        this.name_table.insert("meson.build", "text-x-meson-symbolic");
-        this.name_table.insert(".editorconfig", "text-x-editorconfig-symbolic");
+        this.name_table.insert(".gitattributes", "text-x-git");
+        this.name_table.insert(".gitmodules", "text-x-git");
+        this.name_table.insert(".gitignore", "text-x-git");
+        this.name_table.insert("meson.build", "text-x-meson");
+        this.name_table.insert(".editorconfig", "text-x-editorconfig");
+        this.name_table.insert("Makefile", "text-x-makefile");
+        this.name_table.insert("makefile", "text-x-makefile");
+        this.name_table.insert(".gitlab-ci.yml", "text-x-gitlab");
     }
 
     public string get_icon_name_for_file(File f)
@@ -87,7 +93,7 @@ public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
     string get_dir_icon_name(File f)
     {
         if (f.name == ".git")
-            return ("text-x-git-symbolic");
+            return ("text-x-git");
         else
             return ("folder-symbolic");
     }

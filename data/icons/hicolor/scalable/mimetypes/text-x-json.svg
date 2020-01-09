@@ -18,7 +18,7 @@
    inkscape:export-xdpi="191.998"
    inkscape:export-ydpi="191.998"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
-   sodipodi:docname="text-x-json-symbolic.svg">
+   sodipodi:docname="text-x-json.svg">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -29,7 +29,7 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="15.839192"
-     inkscape:cx="7.1656863"
+     inkscape:cx="22.033869"
      inkscape:cy="13.076133"
      inkscape:document-units="px"
      inkscape:current-layer="text817"
@@ -63,15 +63,15 @@
        id="text817">
       <g
          aria-label="{}"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.26012039px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.01257283"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.26012039px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code';letter-spacing:0px;word-spacing:0px;fill:#d4aa00;fill-opacity:1;stroke:none;stroke-width:0.01257283"
          id="text893">
         <path
            d="m 2.3178497,290.67887 c -1.1813971,0 -1.63084165,0.3114 -1.53453211,1.19103 l 0.0963095,0.91173 c 0.0513651,0.48797 -0.34029373,0.63243 -0.879627174784659,0.63243 v 0.82184 C 0.54575405,294.2359 0.93099223,294.38037 0.87962714,294.86834 l -0.0963095,0.91815 c -0.0898889,0.86678 0.35313501,1.1846 1.53453211,1.1846 v -0.70627 c -0.3884485,0 -0.6292224,-0.0835 -0.5971192,-0.40771 l 0.09952,-0.94704 c 0.077048,-0.72874 -0.3114009,-0.98236 -0.99840899,-1.08509 0.64848429,-0.0963 1.07545659,-0.36597 0.99840899,-1.08509 l -0.09952,-0.94704 c -0.032103,-0.32424 0.2054604,-0.40771 0.5971192,-0.40771 z"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';fill:#000000;stroke-width:0.01257283"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';fill:#d4aa00;stroke-width:0.01257283"
            id="path902" />
         <path
            d="m 4.0321504,290.67887 v 0.70627 c 0.3884485,0 0.6292224,0.0835 0.5971192,0.40771 l -0.09952,0.94704 c -0.077048,0.72554 0.3114009,0.98236 1.0016193,1.08509 -0.6516946,0.0963 -1.0786669,0.36277 -1.0016193,1.08509 l 0.09952,0.94704 c 0.032103,0.32425 -0.2054604,0.40771 -0.5971192,0.40771 v 0.70627 c 1.1813971,0 1.6308416,-0.3114 1.5345321,-1.19102 l -0.096309,-0.91173 c -0.051365,-0.48797 0.3402937,-0.63244 0.8796271,-0.63244 v -0.82184 c -0.5457541,0 -0.9309922,-0.14446 -0.8796271,-0.63243 l 0.096309,-0.91815 c 0.089889,-0.86679 -0.353135,-1.18461 -1.5345321,-1.18461 z"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';fill:#000000;stroke-width:0.01257283"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';fill:#d4aa00;stroke-width:0.01257283"
            id="path904" />
       </g>
       <g
@@ -81,7 +81,7 @@
          transform="matrix(0.40271585,0,0,0.40271585,1.7725175,174.52653)">
         <path
            d="m 1.1830695,300.59207 c 0,0.27199 0.2247793,0.50126 0.5012577,0.50126 0.2764785,0 0.5012577,-0.22927 0.5012577,-0.50126 0,-0.27198 -0.2247792,-0.50125 -0.5012577,-0.50125 -0.2764784,0 -0.5012577,0.22927 -0.5012577,0.50125 z m 1.7982338,0 c 0,0.27199 0.2247793,0.50126 0.5012577,0.50126 0.2764785,0 0.5012577,-0.22927 0.5012577,-0.50126 0,-0.27198 -0.2247792,-0.50125 -0.5012577,-0.50125 -0.2764784,0 -0.5012577,0.22927 -0.5012577,0.50125 z m 1.7982339,0 c 0,0.27199 0.2247792,0.50126 0.5012576,0.50126 0.2764785,0 0.5012577,-0.22927 0.5012577,-0.50126 0,-0.27198 -0.2247792,-0.50125 -0.5012577,-0.50125 -0.2764784,0 -0.5012576,0.22927 -0.5012576,0.50125 z"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';stroke-width:0.00880321;fill:#000000"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';stroke-width:0.00880321;fill:#d4aa00"
            id="path899"
            inkscape:connector-curvature="0" />
       </g>
