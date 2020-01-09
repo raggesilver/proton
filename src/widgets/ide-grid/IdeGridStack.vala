@@ -83,6 +83,7 @@ public class Proton.IdeGridStack : Gtk.Box
         if (this.stack.visible_child == this.background_event_box)
         {
             this.title_label.label = "";
+            this.reset_titlebar_style();
             return;
         }
 
@@ -112,11 +113,10 @@ public class Proton.IdeGridStack : Gtk.Box
 
     public void add_page(IdeGridPage page)
     {
-        pages.append(page);
-
+        this.pages.append(page);
         page.show();
 
-        pop_entry_box.insert(page.pop_entry, -1);
+        this.pop_entry_box.insert(page.pop_entry, -1);
 
         page.focused.connect(() => {
             this.focused();
@@ -126,16 +126,12 @@ public class Proton.IdeGridStack : Gtk.Box
         });
 
         page.destroy.connect(() => {
-            pages.remove(page);
-            if (pages.length() > 0)
-            {
-                reset_titlebar_style();
-                stack.set_visible_child(pages.last().data);
-            }
-            else if (close())
-                destroy();
-            else
-                reset_titlebar_style();
+            this.pages.remove(page);
+
+            if (this.pages.length() > 0)
+                this.stack.set_visible_child(this.pages.last().data);
+            else if (this.close())
+                this.destroy();
         });
 
         stack.add(page);
