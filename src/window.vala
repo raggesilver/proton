@@ -112,8 +112,11 @@ public class Proton.Window : Gtk.ApplicationWindow
         });
 
         this.manager.modified.connect((mod) => {
-            this.tree_view.items.get(this.manager.current_editor.file.path)
-                .set_modified(mod);
+            TreeItem? item = this.tree_view.items.get(
+                                this.manager.current_editor.file.path);
+
+            if (item != null)
+                item.set_modified(mod);
         });
 
         // Load previous state from settings
