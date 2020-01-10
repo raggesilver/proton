@@ -225,7 +225,7 @@ public class Proton.Editor : Object
                     family, font_desc.get_size() / Pango.SCALE
                 );
 
-                Marble.Utils.set_theming_for_data(
+                Marble.set_theming_for_data(
                     this.sview,
                     data,
                     null,

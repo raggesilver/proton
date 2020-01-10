@@ -45,7 +45,6 @@ subdir('widgets')
 proton_deps = [
     dependency('gio-2.0', version: '>= 2.50'),
     dependency('gmodule-2.0', version: '>= 2.50'),
-    dependency('granite'), # this ain't no elementary app ok babydora?
     dependency('gtksourceview-4', version: '>= 4.2.0'),
     dependency('gtk+-3.0', version: '>= 3.22'),
     dependency('json-glib-1.0', version: '>= 1.4.4'),
@@ -74,20 +73,21 @@ proton_core = library('proton_core', proton_sources, config_header,
 # This works, but not really, since Granite's nested namespaces are not
 # supported we get an error and are unable to continue.
 
-# g_ir_compiler = find_program('g-ir-compiler')
-# custom_target('proton_core typelib',
-#   command: [
-#     g_ir_compiler,
-#     '--shared-library', proton_core.full_path(),
-#     '--output', '@OUTPUT@',
-#     '--debug', '--verbose',
-#     join_paths(meson.current_build_dir(), 'Proton-1.0.gir')
-#   ],
-#   output: 'Proton-1.0.typelib',
-#   depends: proton_core,
-#   install: true,
-#   install_dir: get_option('libdir') / 'girepository-1.0',
-#  )
+g_ir_compiler = find_program('g-ir-compiler')
+custom_target('proton_core typelib',
+  command: [
+    g_ir_compiler,
+    '--shared-library', proton_core.full_path(),
+    # '--module', 'marble',
+    '--output', '@OUTPUT@',
+    '--debug', '--verbose',
+    join_paths(meson.current_build_dir(), 'Proton-1.0.gir')
+  ],
+  output: 'Proton-1.0.typelib',
+  depends: proton_core,
+  install: true,
+  install_dir: get_option('libdir') / 'girepository-1.0',
+  )
 
 pkg = import('pkgconfig')
 

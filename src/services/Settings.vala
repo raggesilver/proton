@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-public class Proton.Settings : Granite.Services.Settings
+public class Proton.Settings : Marble.Settings
 {
     private static Proton.Settings? instance = null;
 

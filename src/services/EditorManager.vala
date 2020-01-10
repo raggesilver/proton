@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-public class Proton.EditorSettings : Granite.Services.Settings
+public class Proton.EditorSettings : Marble.Settings
 {
     private static Proton.EditorSettings? instance = null;
 

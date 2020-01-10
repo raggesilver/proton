@@ -30,7 +30,7 @@ button.slim-button {
     padding-bottom: 2px;
     margin: 4px 5px;
     box-shadow: none;
-    font-size: small;
+    font-size: 12px;
     color: alpha(@theme_fg_color, .7);
 }
 

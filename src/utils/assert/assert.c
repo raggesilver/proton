@@ -20,9 +20,9 @@
 
 #include "assert.h"
 
-#define ASSERTION_ERROR assertion_error_quark()
+#define PROTON_ASSERTION_ERROR proton_assertion_error_quark()
 
-GQuark      assertion_error_quark(void)
+GQuark      proton_assertion_error_quark(void)
 {
     return g_quark_from_static_string("assertion-error-quark");
 }
@@ -33,8 +33,8 @@ gboolean    proton_assert_(gboolean expr, gchar *msg, GError **error)
 
     if (!expr)
     {
-        err = g_error_new_literal(ASSERTION_ERROR,
-                                  ASSERTION_ERROR_ASSERT_ERROR,
+        err = g_error_new_literal(PROTON_ASSERTION_ERROR,
+                                  PROTON_ASSERTION_ERROR_ASSERT_ERROR,
                                   msg);
         g_propagate_error(error, err);
         return (FALSE);

@@ -53,10 +53,12 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 
         font_button.font = EditorSettings.get_instance().font_family;
 
-        this.dark_mode_switch.active = this.settings.dark_mode;
-        this.settings.notify["dark-mode"].connect(() => {
-            debug("Settings dark mode: %s", this.settings.dark_mode.to_string());
-        });
+        // this.dark_mode_switch.active = this.settings.dark_mode;
+        // this.settings.notify["dark-mode"].connect(() => {
+        //     if (this.dark_mode_switch.active != this.settings.dark_mode)
+        //         this.dark_mode_switch.active = this.settings.dark_mode;
+        // });
+        this.settings.schema.bind("dark-mode", this.dark_mode_switch, "active", SettingsBindFlags.DEFAULT);
     }
 
     [GtkCallback]
@@ -67,11 +69,10 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     }
 
     [GtkCallback]
-    bool on_dark_mode_set(bool bla)
+    bool on_dark_mode_set(bool dark)
     {
-        debug("Dark mode '%s', bla: '%s'", dark_mode_switch.active.to_string(), bla.to_string());
-        if (bla != this.settings.dark_mode)
-            this.settings.dark_mode = bla;
+        // if (this.settings.dark_mode != dark)
+        //     this.settings.set_property("dark-mode", dark);
         return (false);
     }
 }

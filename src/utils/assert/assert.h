@@ -22,14 +22,14 @@
 
 #include <glib.h>
 
-typedef enum    e_AssertionError
+typedef enum    e_ProtonAssertionError
 {
-    ASSERTION_ERROR_ASSERT_ERROR
-}               AssertionError;
+    PROTON_ASSERTION_ERROR_ASSERT_ERROR
+}               ProtonAssertionError;
 
-#define ASSERTION_ERROR assertion_error_quark()
+#define PROTON_ASSERTION_ERROR proton_assertion_error_quark()
 #define PROTON_ASSERT_(expr, err) \
     proton_assert_((expr), "Assertion " #expr " failed", err)
 
-GQuark      assertion_error_quark(void);
+GQuark      proton_assertion_error_quark(void);
 gboolean    proton_assert_(gboolean expr, gchar *msg, GError **error);

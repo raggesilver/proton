@@ -77,16 +77,6 @@
             ]
         },
         {
-            "name" : "libgranite",
-            "buildsystem" : "meson",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/elementary/granite"
-                }
-            ]
-        },
-        {
             "name" : "libeditorconfig",
             "buildsystem" : "cmake",
             "sources" : [
@@ -99,6 +89,9 @@
         {
             "name" : "libdazzle",
             "buildsystem" : "meson",
+            "config-opts" : [
+                "-Denable_tests=false"
+            ],
             "sources" : [
                 {
                     "type" : "git",
