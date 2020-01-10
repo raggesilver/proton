@@ -81,6 +81,8 @@ public class Proton.Terminal : Vte.Terminal
         win.style_updated.connect(this.update_ui);
         this.update_ui();
 
+        settings.notify["transparency"].connect(this.update_ui);
+
         this.connect_accels();
         show();
     }
@@ -111,6 +113,9 @@ public class Proton.Terminal : Vte.Terminal
     {
         win.get_style_context().lookup_color("theme_base_color", out bg);
         win.get_style_context().lookup_color("theme_fg_color", out fg);
+
+        if (settings.transparency)
+            this.bg.alpha = 0.96;
 
         set_colors(fg, bg, solarized_palette);
     }

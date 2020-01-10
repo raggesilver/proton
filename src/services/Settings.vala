@@ -23,6 +23,7 @@ public class Proton.Settings : Marble.Settings
     private static Proton.Settings? instance = null;
 
     public bool     dark_mode            { get; set; }
+    public bool     transparency         { get; set; }
     public int      width                { get; set; }
     public int      height               { get; set; }
     public int      pos_x                { get; set; }

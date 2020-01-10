@@ -365,5 +365,15 @@ public class Proton.Window : Gtk.ApplicationWindow
             Gtk.Settings.get_default()
                 .gtk_application_prefer_dark_theme = settings.dark_mode;
         });
+
+        if (settings.transparency)
+            this.get_style_context().add_class("transparent");
+
+        settings.notify["transparency"].connect(() => {
+            if (settings.transparency)
+                this.get_style_context().add_class("transparent");
+            else
+                this.get_style_context().remove_class("transparent");
+        });
     }
 }

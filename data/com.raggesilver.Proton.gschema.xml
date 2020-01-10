@@ -6,6 +6,11 @@
 	    <summary>Use dark mode</summary>
 	    <description>Use dark mode</description>
 	  </key>
+	  <key name="transparency" type="b">
+	    <default>false</default>
+	    <summary>Transparency</summary>
+	    <description>Enable transparency on a few panels</description>
+	  </key>
 	  <key name="width" type="i">
 	    <default>800</default>
 	    <summary>Width</summary>

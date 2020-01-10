@@ -48,6 +48,7 @@
     </child>
   </object>
   <template class="ProtonWindow" parent="GtkApplicationWindow">
+    <property name="name">proton_window</property>
     <property name="can_focus">False</property>
     <property name="default_width">600</property>
     <property name="default_height">300</property>
@@ -230,8 +231,12 @@
         </child>
       </object>
     </child>
+    <style>
+      <class name="transparent"/>
+    </style>
   </template>
   <object class="GtkBox" id="side_panel_box">
+    <property name="name">side_panel_box</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="orientation">vertical</property>
@@ -399,6 +404,7 @@
     </child>
     <style>
       <class name="base-color"/>
+      <class name="transparent"/>
     </style>
   </object>
   <object class="GtkListStore" id="terminal_combo_store">

@@ -180,3 +180,6 @@ button.close:not(.titlebutton) {
 #search_box entry { border-radius: 0; font-size: 14px; min-height: 26px; }
 #search_box.no-results label { color: #C97362; }
 #search_box button.slim-button { padding: 0 2px; }
+
+#proton_window.transparent { background: transparent; }
+#proton_window.transparent .transparent { background: alpha(@theme_base_color, .96); }

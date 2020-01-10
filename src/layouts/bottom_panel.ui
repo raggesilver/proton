@@ -85,6 +85,7 @@
     </child>
     <style>
       <class name="base-color"/>
+      <class name="transparent"/>
     </style>
   </template>
 </interface>

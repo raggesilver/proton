@@ -21,14 +21,10 @@
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/preferences_window.ui")]
 public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 {
-    [GtkChild]
-    Gtk.Box color_scheme_box;
-
-    [GtkChild]
-    Gtk.FontButton font_button;
-
-    [GtkChild]
-    Gtk.Switch dark_mode_switch;
+    [GtkChild] Gtk.Box color_scheme_box;
+    [GtkChild] Gtk.FontButton font_button;
+    [GtkChild] Gtk.Switch dark_mode_switch;
+    [GtkChild] Gtk.Switch transparency_switch;
 
     private weak Window window;
     private Settings    settings;
@@ -53,12 +49,13 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 
         font_button.font = EditorSettings.get_instance().font_family;
 
-        // this.dark_mode_switch.active = this.settings.dark_mode;
-        // this.settings.notify["dark-mode"].connect(() => {
-        //     if (this.dark_mode_switch.active != this.settings.dark_mode)
-        //         this.dark_mode_switch.active = this.settings.dark_mode;
-        // });
-        this.settings.schema.bind("dark-mode", this.dark_mode_switch, "active", SettingsBindFlags.DEFAULT);
+        this.dark_mode_switch.active = this.settings.dark_mode;
+        this.settings.schema.bind("dark-mode", this.dark_mode_switch,
+                                  "active", SettingsBindFlags.DEFAULT);
+
+        this.transparency_switch.active = this.settings.transparency;
+        this.settings.schema.bind("transparency", this.transparency_switch,
+                                  "active", SettingsBindFlags.DEFAULT);
     }
 
     [GtkCallback]
@@ -66,13 +63,5 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     {
         debug("Font set '%s'", font_button.font);
         EditorSettings.get_instance().font_family = font_button.font;
-    }
-
-    [GtkCallback]
-    bool on_dark_mode_set(bool dark)
-    {
-        // if (this.settings.dark_mode != dark)
-        //     this.settings.set_property("dark-mode", dark);
-        return (false);
     }
 }
