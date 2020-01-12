@@ -36,6 +36,8 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
         this.window = _win;
         this.settings = Settings.get_instance();
 
+        this.set_transient_for(_win);
+
         var c = new Gtk.SourceStyleSchemeChooserButton();
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
             .get_scheme(EditorSettings.get_instance().style_id));
@@ -49,13 +51,13 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 
         font_button.font = EditorSettings.get_instance().font_family;
 
-        this.dark_mode_switch.active = this.settings.dark_mode;
         this.settings.schema.bind("dark-mode", this.dark_mode_switch,
                                   "active", SettingsBindFlags.DEFAULT);
+        this.dark_mode_switch.active = this.settings.dark_mode;
 
-        this.transparency_switch.active = this.settings.transparency;
         this.settings.schema.bind("transparency", this.transparency_switch,
                                   "active", SettingsBindFlags.DEFAULT);
+        this.transparency_switch.active = this.settings.transparency;
     }
 
     [GtkCallback]

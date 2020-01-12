@@ -183,3 +183,5 @@ button.close:not(.titlebutton) {
 
 #proton_window.transparent { background: transparent; }
 #proton_window.transparent .transparent { background: alpha(@theme_base_color, .96); }
+
+dzlmultipaned.handle { border: 1px solid darker(@theme_base_color); }
