@@ -10,10 +10,12 @@
   </object>
   <template class="ProtonPreferencesWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
-    <property name="window_position">center</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">800</property>
     <property name="default_height">350</property>
     <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
     <child type="titlebar">
       <object class="GtkHeaderBar">
         <property name="visible">True</property>

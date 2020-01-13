@@ -18,12 +18,15 @@
     </p>
 </div>
 
-![Preview](https://imgur.com/efOlmZ5.png)
+![Preview](https://imgur.com/VpePB31.png)
 
 ## Features
 - Integrated terminal
 - Plugin system (all [../proton-*-plugin](https://gitlab.com/raggesilver-proton/) are core plugins)
 - Overlay command palette + file discover
+- [Build system](https://gitlab.com/raggesilver-proton/proton-runner-plugin)
+- New project [templates](https://gitlab.com/raggesilver-proton/proton-templates)
+- Clone existing projects from a Git repo
 
 ## Install
 
@@ -39,6 +42,9 @@
 
 ## Compile
 
+> Proton can be run on GNOME Builder. If you have Proton 0.1.8+ you can also
+> run Proton on Proton 😜️. (for either one just press play and behold magic)
+
 **Flatpak from source**
 
 ```bash
@@ -47,7 +53,14 @@ git clone --recursive https://gitlab.com/raggesilver-proton/proton
 # cd into the repo
 cd proton
 # Assuming you have both flatpak and flatpak-builder installed
-flatpak-builder --install --user --force-clean _build com.raggesilver.Proton.json
+# test.sh has a few useful scripts that will build and install proton as a
+# flatpak locally on ./app_build and ./app
+sh test.sh
+# You can also
+# sh test.sh [command]
+#
+#   update - update all flatpak dependencies
+#   export - export proton as a flatpak. Generates ./proton.flatpak and ./repo
 ```
 
 **Regular from source (unsupported)**
@@ -63,11 +76,16 @@ ninja -C _build
 ninja -C _build install
 ```
 
-*Note: Proton can be ran from GNOME Builder*
-
 ## Gallery
 
-Welcome window
-<img src="https://imgur.com/ezTDdnt.png" /> <br>
-Settings window
-<img src="https://imgur.com/DOun2WI.png" />
+> These pictures are rarely updated (might be outdated)
+
+| Welcome window | Preferences window |
+| -------------- | ------------------ |
+| ![](https://imgur.com/ezTDdnt.png) | ![](https://imgur.com/DOun2WI.png) |
+
+## Credits
+
+Code derived/based on other projects is properly attributed on each file.
+
+
