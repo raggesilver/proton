@@ -178,7 +178,7 @@ button.close:not(.titlebutton) {
 
 #search_box * { font-size: 14px; }
 #search_box entry { border-radius: 0; font-size: 14px; min-height: 26px; }
-#search_box.no-results label { color: #C97362; }
+#search_box label.no-results { color: #C97362; }
 #search_box button.slim-button { padding: 0 2px; }
 
 #proton_window.transparent { background: transparent; }

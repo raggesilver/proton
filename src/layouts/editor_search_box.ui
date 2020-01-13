@@ -203,12 +203,15 @@
                         <property name="relief">none</property>
                         <signal name="clicked" handler="do_replace_one" swapped="no"/>
                         <child>
-                          <object class="GtkImage">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="tooltip_text" translatable="yes">Replace one</property>
-                            <property name="pixel_size">12</property>
-                            <property name="icon_name">replace-one-symbolic</property>
+                            <property name="margin_left">3</property>
+                            <property name="margin_right">3</property>
+                            <property name="label" translatable="yes">Replace</property>
+                            <attributes>
+                              <attribute name="scale" value="0.80000000000000004"/>
+                            </attributes>
                           </object>
                         </child>
                         <style>
@@ -228,14 +231,19 @@
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Replace all</property>
                         <property name="valign">center</property>
+                        <property name="margin_left">3</property>
                         <property name="relief">none</property>
                         <signal name="clicked" handler="do_replace_all" swapped="no"/>
                         <child>
-                          <object class="GtkImage">
+                          <object class="GtkLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixel_size">12</property>
-                            <property name="icon_name">replace-all-symbolic</property>
+                            <property name="margin_left">3</property>
+                            <property name="margin_right">3</property>
+                            <property name="label" translatable="yes">Replace all</property>
+                            <attributes>
+                              <attribute name="scale" value="0.80000000000000004"/>
+                            </attributes>
                           </object>
                         </child>
                         <style>

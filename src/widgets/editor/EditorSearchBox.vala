@@ -89,7 +89,7 @@ public class Proton.EditorSearchBox : Gtk.Box
     {
         int res = this.editor.search.context.occurrences_count;
         int cur = this.editor.search.current_result;
-        var ctx = this.get_style_context();
+        var ctx = this.result_count_label.get_style_context();
 
         cur = (cur == -1) ? 0 : cur;
 
@@ -150,9 +150,6 @@ public class Proton.EditorSearchBox : Gtk.Box
     [GtkCallback]
     private void do_replace_all()
     {
-        if (this.on_before_replace())
-            return ;
-
         string s = this.replace_entry.get_text();
 
         this.editor.search.replace_all(s);
