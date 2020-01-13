@@ -33,7 +33,7 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
         this.editor       = editor;
         this.scrolled     = new Gtk.ScrolledWindow(null, null);
         this.progressable = new Marble.Progressable();
-        this.search_box   = new EditorSearchBox(editor.sview);
+        this.search_box   = new EditorSearchBox(editor);
         this.revealer     = new Gtk.Revealer();
         this.overlay      = new Gtk.Overlay();
 
@@ -94,6 +94,55 @@ public class Proton.EditorGridPage : Proton.IdeGridPage
             debug("is-loading: %s", this.editor.is_loading.to_string());
             this.progressable.loading = this.editor.is_loading;
         });
+
+        this.key_press_event.connect((e) => {
+            if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0)
+            {
+                switch (Gdk.keyval_name(e.keyval))
+                {
+                    case "f": this.on_ctrl_f(); return (true);
+                    case "h": this.on_ctrl_h(); return (true);
+                }
+            }
+            else if (Gdk.keyval_name(e.keyval) == "Escape" &&
+                     this.revealer.reveal_child)
+            {
+                this.revealer.set_reveal_child(false);
+                return (true);
+            }
+            return (false);
+        });
+
+        this.search_box.close_button.clicked.connect(() => {
+            this.revealer.set_reveal_child(false);
+        });
+
+        this.revealer.notify["reveal-child"].connect(() => {
+            this.search_box.on_revealed(this.revealer.reveal_child);
+
+            // Focus editor on search closed
+            if (this.revealer.reveal_child == false)
+                this.editor.sview.grab_focus();
+        });
+    }
+
+    // Simple search
+    private void on_ctrl_f()
+    {
+        this.revealer.set_reveal_child(true);
+        this.search_box.search_entry.grab_focus();
+    }
+
+    // Advanced search
+    private void on_ctrl_h()
+    {
+        this.revealer.set_reveal_child(true);
+        this.search_box.show_advanced = true;
+
+        if (this.search_box.replace_entry.has_focus)
+            this.search_box.search_entry.grab_focus();
+        else
+            this.search_box.replace_entry.grab_focus();
     }
 
     void update_ui()

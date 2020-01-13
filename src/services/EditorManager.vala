@@ -53,7 +53,7 @@ public class Proton.EditorManager : Object
     public signal void modified(bool is_modified);
     public signal void created(Editor editor);
 
-    public Editor? current_editor;
+    public Editor? current_editor { get; private set; }
     public weak Window win { get; private set; }
 
     private HashTable<string, Editor> _editors;
@@ -191,4 +191,3 @@ public class Proton.EditorManager : Object
         }
     }
 }
-

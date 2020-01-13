@@ -1,5 +1,5 @@
 project('proton', ['c', 'vala'],
-          version: '0.1.8',
+          version: '0.1.9',
     meson_version: '>= 0.49.0',
     )
 

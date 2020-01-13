@@ -18,7 +18,7 @@
         <child>
           <object class="GtkButton" id="advanced_toggle_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <property name="receives_default">True</property>
             <property name="margin_right">6</property>
             <property name="margin_top">6</property>
@@ -60,6 +60,7 @@
                     <property name="can_focus">True</property>
                     <property name="valign">center</property>
                     <property name="placeholder_text" translatable="yes">Search</property>
+                    <signal name="activate" handler="on_next" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -68,7 +69,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="result_count_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="valign">center</property>
@@ -85,7 +86,7 @@
                 <child>
                   <object class="GtkButton" id="close_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
                     <property name="valign">center</property>
                     <property name="relief">none</property>
@@ -106,12 +107,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="previous_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Previous result</property>
                     <property name="valign">center</property>
                     <property name="relief">none</property>
+                    <signal name="clicked" handler="on_previous" swapped="no"/>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
@@ -132,12 +135,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="next_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Next result</property>
                     <property name="valign">center</property>
                     <property name="relief">none</property>
+                    <signal name="clicked" handler="on_next" swapped="no"/>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
@@ -174,11 +179,12 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="replace_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="valign">center</property>
                         <property name="placeholder_text" translatable="yes">Replace</property>
+                        <signal name="activate" handler="do_replace_one" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -189,11 +195,13 @@
                     <child>
                       <object class="GtkButton">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Replace one</property>
                         <property name="valign">center</property>
                         <property name="margin_left">6</property>
                         <property name="relief">none</property>
+                        <signal name="clicked" handler="do_replace_one" swapped="no"/>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
@@ -216,10 +224,12 @@
                     <child>
                       <object class="GtkButton">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="can_focus">False</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_text" translatable="yes">Replace all</property>
                         <property name="valign">center</property>
                         <property name="relief">none</property>
+                        <signal name="clicked" handler="do_replace_all" swapped="no"/>
                         <child>
                           <object class="GtkImage">
                             <property name="visible">True</property>
@@ -261,8 +271,5 @@
         <property name="position">2</property>
       </packing>
     </child>
-    <style>
-      <class name="no-results"/>
-    </style>
   </template>
 </interface>

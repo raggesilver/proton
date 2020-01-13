@@ -19,3 +19,5 @@ data/icons/hicolor/icons.gresource.xml
 .flatpak-builder/
 src/plugins/autobracket
 !test.sh
+repo/
+*.flatpak

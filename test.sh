@@ -2,6 +2,9 @@
 
 MODULE="proton"
 MANIFEST="com.raggesilver.Proton.json"
+APP_ID="com.raggesilver.Proton"
+
+run=1
 
 if [[ $# -ge 1 ]]; then
 
@@ -11,6 +14,19 @@ if [[ $# -ge 1 ]]; then
             echo "Run update";
             flatpak-builder --ccache --force-clean --download-only --stop-at=$MODULE app $MANIFEST
             flatpak-builder --ccache --force-clean --disable-updates --disable-download --stop-at=$MODULE app $MANIFEST
+            exit 0;
+            ;;
+
+        "--no-run")
+            run=0
+            ;;
+
+        "export")
+            sh ${BASH_SOURCE[0]} --no-run
+            flatpak-builder --finish-only --repo=repo app $MANIFEST
+            flatpak build-export repo app
+            flatpak build-bundle repo "${MODULE}.flatpak" $APP_ID
+            exit 0;
             ;;
 
         *)
@@ -18,17 +34,17 @@ if [[ $# -ge 1 ]]; then
             exit 1;
             ;;
     esac
-    exit 0;
 fi
 
 if [ ! -d "app" ]; then
   flatpak-builder --stop-at=$MODULE app $MANIFEST || exit $?
 fi
 
-if [ ! -d "app_build" ]; then
-  flatpak-builder --run app $MANIFEST meson --prefix=/app app_build || exit $?
-fi
+flatpak-builder --run app $MANIFEST meson --prefix=/app app_build || exit $?
 
 flatpak-builder --run app $MANIFEST ninja -C app_build || exit $?
 flatpak-builder --run app $MANIFEST ninja -C app_build install || exit $?
-flatpak-builder --run app $MANIFEST $MODULE || exit $?
+
+if [[ $run -eq 1 ]]; then
+  flatpak-builder --run app $MANIFEST $MODULE || exit $?
+fi

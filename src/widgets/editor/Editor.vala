@@ -18,6 +18,158 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+public class Proton.EditorSearch : Object
+{
+    public Gtk.SourceSearchContext context { get; private set; }
+    public Gtk.SourceSearchSettings settings { get; private set; }
+
+    public int current_result { get; private set; }
+
+    private weak Proton.Editor editor;
+
+    internal EditorSearch(Proton.Editor editor)
+    {
+        this.editor = editor;
+
+        this.settings = new Gtk.SourceSearchSettings();
+        this.context  = new Gtk.SourceSearchContext(this.editor.buffer,
+                                                    this.settings);
+
+        // Back at the begining makes the search go to the bottom
+        // Forward at the bottom makes the search go to the top
+        this.settings.set_wrap_around(true);
+        this.context.set_highlight(true);
+
+        this.update_ui();
+
+        // Update UI on editor ui_modified
+        this.editor.ui_modified.connect(this.update_ui);
+        this.context.notify["occurrences-count"].connect(() => {
+            this.update_current_result();
+        });
+    }
+
+    public void search(string? text)
+    {
+        this.current_result = 0;
+        this.settings.set_search_text(text);
+    }
+
+    public bool replace(string text)
+    {
+        var buf = this.editor.buffer;
+        Gtk.TextIter s = {};
+        Gtk.TextIter e = {};
+
+        // If nothing is selected or can't get the selection, return
+        if (!buf.has_selection || !buf.get_selection_bounds(out s, out e))
+            return (false);
+
+        try {
+            var r = this.context.replace(s, e, text, text.length);
+            return (r);
+        }
+        catch (Error e) { warning(e.message); }
+        return (false);
+    }
+
+    public bool replace_all(string text)
+    {
+        try {
+            this.context.replace_all(text, text.length);
+            return (true);
+        }
+        catch (Error e) { warning(e.message); }
+        return (false);
+    }
+
+    public async bool next(out Gtk.TextIter start,
+                           out Gtk.TextIter end)
+    {
+        Gtk.TextIter cur;
+
+        this.get_cursor_position(out cur);
+        try
+        {
+            var res = yield this.context.forward_async(cur, null,
+                                                       out start, out end,
+                                                       null);
+
+            if (res)
+            {
+                this.current_result = this.context
+                                          .get_occurrence_position(start, end);
+            }
+
+            return (res);
+        }
+        catch (Error e) { warning(e.message); }
+        return (false);
+    }
+
+    public async bool prev(out Gtk.TextIter start,
+                           out Gtk.TextIter end)
+    {
+        Gtk.TextIter cur;
+
+        this.get_cursor_position(out cur, true);
+        try
+        {
+            var res = yield this.context.backward_async(cur, null,
+                                                        out start, out end,
+                                                        null);
+
+            if (res)
+            {
+                this.current_result = this.context
+                                          .get_occurrence_position(start, end);
+            }
+
+            return (res);
+        }
+        catch (Error e) { warning(e.message); }
+        return (false);
+    }
+
+    public void update_current_result()
+    {
+        var buf = this.editor.buffer;
+        Gtk.TextIter s = {};
+        Gtk.TextIter e = {};
+
+        if (buf.has_selection && buf.get_selection_bounds(out s, out e))
+        {
+            this.current_result = this.context.get_occurrence_position(s, e);
+        }
+        else
+            this.current_result = -1;
+    }
+
+    private void update_ui()
+    {
+        var scheme = this.editor.buffer.style_scheme;
+
+        this.context.set_highlight(false);
+        this.context.set_match_style(scheme.get_style("search-match"));
+        this.context.set_highlight(true);
+    }
+
+    private void get_cursor_position(out Gtk.TextIter iter, bool back = false)
+    {
+        Gtk.SourceBuffer buf = this.editor.buffer;
+
+        iter = {};
+
+        if (buf.has_selection)
+        {
+            if (back && buf.get_selection_bounds(out iter, null)) return;
+            if (!back && buf.get_selection_bounds(null, out iter)) return;
+        }
+
+        buf.get_iter_at_offset(out iter, buf.cursor_position);
+    }
+}
+
 public class Proton.Editor : Object
 {
     // The modified signal now uses this.buffer's builtin modified property,
@@ -42,47 +194,45 @@ public class Proton.Editor : Object
 
     public signal void loading_finished();
 
-    private uint        id;
-    private string?     last_saved_content = null;
-    private Gtk.TextTag highlight_tag;
     // Performance improvement based on GNOME Builder's implementation
     // https://gitlab.gnome.org/GNOME/gnome-builder/blob/master/
     // src/libide/sourceview/ide-source-view.c cached_char_height
-    private int         line_height;
+    private int line_height;
 
-    public File?                file        { get; set; }
-    public bool                 is_modified { get; private set; }
-    public bool                 is_loading  { get; private set; }
-    public Gtk.SourceView       sview       { get; private set; }
-    public new Gtk.SourceBuffer buffer;
-    public Gtk.SourceLanguage   language;
-
+    private uint id;
+    private string? last_saved_content = null;
     private EditorSettings _settings = EditorSettings.get_instance();
+
+    public File? file { get; set; }
+    public bool is_modified { get; private set; }
+    public bool is_loading { get; private set; }
+    public Gtk.SourceView sview { get; private set; }
+    public Gtk.TextTag highlight_tag { get; private set; }
+    public Gtk.TextTag search_tag { get; private set; }
+
+    public new Gtk.SourceBuffer buffer;
+    public Gtk.SourceLanguage language;
+
+    public Proton.EditorSearch search { get; private set; }
 
     public Editor(string? path, uint id)
     {
         this.id = id;
-        this.sview = new Gtk.SourceView();
-        this.highlight_tag = this.sview.buffer.create_tag(
-            "highlight-tag",
-            /* Null-terminated roperties */
-            "background", "yellow",
-            null
-        );
-
-        this.buffer      = this.sview.buffer as Gtk.SourceBuffer;
         this.is_modified = false;
-        this.is_loading  = false;
+        this.is_loading = false;
 
+        this.build_ui();
         this.editor_apply_settings();
-        this.update_ui();
         this.add_completion_words();
+        this.update_ui();
 
         if (path != null)
         {
             this.file = new Proton.File(path);
             this.open();
         }
+
+        this.connect_signals();
 
         // TODO: Implement Proton.SourceGutterRenderer and insert it here
         // FIXME this is a terrible temporary solution to gutter padding
@@ -96,10 +246,32 @@ public class Proton.Editor : Object
             gt.reorder(rend, 1);
             rend.set_padding(10, -1);
         }
+    }
 
-        //
-        // Connections
+    private void build_ui()
+    {
+        this.sview = new Gtk.SourceView();
+        this.buffer = this.sview.buffer as Gtk.SourceBuffer;
+        this.search = new Proton.EditorSearch(this);
 
+        this.highlight_tag = this.sview.buffer.create_tag(
+            "highlight-tag",
+            /* Null-terminated roperties */
+            "background", "yellow",
+            null
+        );
+        this.search_tag = this.sview.buffer.create_tag(
+            "search-tag",
+            /* Null-terminated roperties */
+            "background", "yellow",
+            null
+        );
+
+        this.sview.show();
+    }
+
+    private void connect_signals()
+    {
         // Overscroll
         if (this._settings.scroll_over)
             this.connect_parent_set();
@@ -113,8 +285,6 @@ public class Proton.Editor : Object
         this.buffer.notify["has-selection"].connect(
             this.maybe_highlight_selected
         );
-
-        this.sview.show();
     }
 
     private void connect_parent_set()
@@ -225,12 +395,8 @@ public class Proton.Editor : Object
                     family, font_desc.get_size() / Pango.SCALE
                 );
 
-                Marble.set_theming_for_data(
-                    this.sview,
-                    data,
-                    null,
-                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-                );
+                Marble.set_theming_for_data(this.sview, data, null,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
             }
         }
 
@@ -241,7 +407,10 @@ public class Proton.Editor : Object
             var style  = scheme.get_style("search-match");
 
             if (style != null)
+            {
                 style.apply(this.highlight_tag);
+                style.apply(this.search_tag);
+            }
         }
 
         /*
@@ -413,5 +582,13 @@ public class Proton.Editor : Object
         this.buffer.get_bounds(out start, out end);
 
         return (this.buffer.get_text(start, end, true));
+    }
+
+    public void remove_search_tags()
+    {
+        Gtk.TextIter buf_siter, buf_eiter;
+
+        this.buffer.get_bounds(out buf_siter, out buf_eiter);
+        this.buffer.remove_tag_by_name("search-tag", buf_siter, buf_eiter);
     }
 }
