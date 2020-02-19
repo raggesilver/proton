@@ -290,8 +290,6 @@ public class Proton.Editor : Object
             this.maybe_highlight_selected
         );
 
-        //  this.buffer.paste_done.connect(this.on_paste_done);
-
         // This is a hack that prevents Ctrl + c from copying source tags, and
         // makes Ctrl + p paste lines copied from this hack properly.
         this.sview.key_press_event.connect((e) => {
@@ -304,6 +302,11 @@ public class Proton.Editor : Object
             else if (Gdk.keyval_name(e.keyval) == "v")
                 return (this.do_paste());
             return (false);
+        });
+
+        // This is a stupid fix to #39. Fixing #37 will most likely change this.
+        this.destroy.connect(() => {
+            this.modified(false);
         });
     }
 
