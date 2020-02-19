@@ -199,6 +199,10 @@ public class Proton.Editor : Object
     // src/libide/sourceview/ide-source-view.c cached_char_height
     private int line_height;
 
+    // Copy/paste whole line hack
+    private bool copied_whole_line = false;
+    private string? copied_text = null;
+
     private uint id;
     private string? last_saved_content = null;
     private EditorSettings _settings = EditorSettings.get_instance();
@@ -285,6 +289,22 @@ public class Proton.Editor : Object
         this.buffer.notify["has-selection"].connect(
             this.maybe_highlight_selected
         );
+
+        //  this.buffer.paste_done.connect(this.on_paste_done);
+
+        // This is a hack that prevents Ctrl + c from copying source tags, and
+        // makes Ctrl + p paste lines copied from this hack properly.
+        this.sview.key_press_event.connect((e) => {
+            // If key combination wasn't ctrl+<something>
+            if ((e.state & Gdk.ModifierType.CONTROL_MASK) !=
+                Gdk.ModifierType.CONTROL_MASK)
+                return (false);
+            if (Gdk.keyval_name(e.keyval) == "c")
+                return (this.do_copy());
+            else if (Gdk.keyval_name(e.keyval) == "v")
+                return (this.do_paste());
+            return (false);
+        });
     }
 
     private void connect_parent_set()
@@ -339,6 +359,79 @@ public class Proton.Editor : Object
             this.buffer.apply_tag(this.highlight_tag, mstart, mend);
             this.highlight_selected(text, mend);
         }
+    }
+
+    /*
+    ** This function handles copy with and without selected text. It also
+    ** prevents text marks from being copied.
+    */
+    private bool do_copy()
+    {
+        Gtk.TextIter start, end;
+        Gtk.Clipboard cb;
+        string text;
+
+        this.copied_whole_line = false;
+        this.copied_text = null;
+        cb = Gtk.Clipboard.get_default(this.sview.get_screen().get_display());
+        if (this.buffer.has_selection)
+        {
+            this.buffer.get_selection_bounds(out start, out end);
+        }
+        else
+        {
+            // If nothing is selected copy the whole line
+            this.buffer.get_iter_at_offset(out start,
+                                           this.buffer.cursor_position);
+            start.set_line_index(0);
+            end = start;
+            // If we call forward_to_line_end on an iter that is already at the
+            // end of a line it will be moved to the end of the following line,
+            // we don't want that.
+            if (!end.ends_line())
+                end.forward_to_line_end();
+            // Try and get the new-line
+            end.forward_char();
+            this.copied_whole_line = true;
+        }
+        text = this.buffer.get_text(start, end, false);
+        cb.set_text(text, text.length);
+        if (this.copied_whole_line)
+            this.copied_text = text;
+        return (true);
+    }
+
+    /*
+    ** Handle paste whole line or return `false`.
+    */
+    private bool do_paste()
+    {
+        Gtk.Clipboard cb;
+        string? text;
+
+        if (!this.copied_whole_line || this.copied_text == null)
+            return (false);
+        cb = Gtk.Clipboard.get_default(this.sview.get_screen().get_display());
+        text = cb.wait_for_text();
+        if (text == null || text != this.copied_text)
+            return (false);
+        this.paste_whole_line(text);
+        return (true);
+    }
+
+    /*
+    ** Insert a line `text` at the begining of the current line.
+    */
+    private void paste_whole_line(string text)
+    {
+        Gtk.TextIter it;
+
+        this.buffer.get_iter_at_offset(out it, this.buffer.cursor_position);
+        it.set_line_index(0);
+        this.buffer.begin_user_action();
+        this.buffer.place_cursor(it);
+        this.buffer.insert_at_cursor(text, text.length);
+        this.buffer.end_user_action();
     }
 
     // TODO make this optional
