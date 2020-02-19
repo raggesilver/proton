@@ -69,9 +69,6 @@ public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
         {
             string? ic = null;
 
-            if (f.name.has_suffix("~"))
-                return ("text-x-temp-symbolic");
-
             if ((ic = this.name_table.get(f.name)) != null)
                 return (ic);
 
