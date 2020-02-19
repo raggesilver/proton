@@ -231,9 +231,6 @@
         </child>
       </object>
     </child>
-    <style>
-      <class name="transparent"/>
-    </style>
   </template>
   <object class="GtkBox" id="side_panel_box">
     <property name="name">side_panel_box</property>
