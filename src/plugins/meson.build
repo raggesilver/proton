@@ -1,3 +1,3 @@
 subdir('editorconfig')
 subdir('runner')
-# subdir('autobracket')
+subdir('autobracket')

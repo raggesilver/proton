@@ -17,7 +17,6 @@ data/icons/hicolor/icons.gresource.xml
 
 .proton/
 .flatpak-builder/
-src/plugins/autobracket
 !test.sh
 repo/
 *.flatpak

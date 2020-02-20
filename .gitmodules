@@ -1,9 +1,12 @@
 [submodule "src/plugins/runner"]
 	path = src/plugins/runner
-	url = ../proton-runner-plugin.git
+	url = ../proton-runner-plugin
 [submodule "src/plugins/editorconfig"]
 	path = src/plugins/editorconfig
-	url = ../proton-editorconfig-plugin.git
+	url = ../proton-editorconfig-plugin
 [submodule "data/templates"]
 	path = data/templates
 	url = ../proton-templates
+[submodule "src/plugins/autobracket"]
+	path = src/plugins/autobracket
+	url = ../proton-autobracket-plugin
