@@ -189,6 +189,20 @@ public class Proton.TreeItem : Gtk.Box
     }
 }
 
+[GtkTemplate (ui = "/com/raggesilver/Proton/layouts/treeview_popover.ui")]
+public class Proton.TreeViewPopover : Gtk.Popover
+{
+    [GtkChild] private Gtk.Stack stack;
+
+    internal TreeViewPopover() {}
+
+    [GtkCallback]
+    private void on_closed()
+    {
+        this.stack.set_visible_child_name("main");
+    }
+}
+
 public class Proton.TreeView : Sortable
 {
     public signal void changed(File file);
@@ -214,14 +228,8 @@ public class Proton.TreeView : Sortable
         this.window = window;
         this.root = this.window.root;
         this.selected = null;
-
         this.margin_top = 5;
-
-        var b = new Gtk.Builder.from_resource(
-            "/com/raggesilver/Proton/layouts/treeview_popover.ui"
-        );
-        this.popover = b.get_object("menu") as Gtk.Popover;
-
+        this.popover = new TreeViewPopover();
         this.loading = true; // this is a loadable compopnent
 
         this.build.begin(this.root, (_, res) => {
