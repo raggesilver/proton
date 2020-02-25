@@ -168,20 +168,35 @@ public class Proton.Window : Gtk.ApplicationWindow
         // TODO: maybe mark this.save_button_clicked as GtkCallback
         this.save_button.clicked.connect(this.save_button_clicked);
 
-        this.preferences_button.clicked.connect(() => {
-            if (this.preferences_window == null)
-            {
-                this.preferences_window = new PreferencesWindow(this);
-                this.preferences_window.delete_event.connect(() => {
-                    this.preferences_window = null;
-                    return false;
-                });
-            }
-            this.preferences_window.show();
-        });
-
         var a = new SimpleAction("about", null);
         a.activate.connect(on_about);
+        this.add_action(a);
+
+        a = new SimpleAction("new_project", null);
+        a.activate.connect(() => {
+            var w = new OpenWindow.open_at(this.application,
+                                           "new_project_page");
+            w.show();
+        });
+        this.add_action(a);
+
+        a = new SimpleAction("clone_project", null);
+        a.activate.connect(() => {
+            var w = new OpenWindow.open_at(this.application,
+                                           "clone_page");
+            w.show();
+        });
+        this.add_action(a);
+
+        a = new SimpleAction("open_project", null);
+        a.activate.connect(() => {
+            var w = new OpenWindow(this.application);
+            w.show();
+        });
+        this.add_action(a);
+
+        a = new SimpleAction("preferences", null);
+        a.activate.connect(this.on_preferences);
         this.add_action(a);
 
         this.build_ui();
@@ -202,6 +217,14 @@ public class Proton.Window : Gtk.ApplicationWindow
                             Gdk.ModifierType.CONTROL_MASK,
                             0,
                             toggle_bottom_panel);
+
+        accel_group.connect(Gdk.Key.comma,
+                            Gdk.ModifierType.CONTROL_MASK,
+                            0,
+                            () => {
+            this.on_preferences();
+            return (false);
+        });
 
         accel_group.connect(Gdk.Key.b,
                             Gdk.ModifierType.CONTROL_MASK,
@@ -348,6 +371,19 @@ public class Proton.Window : Gtk.ApplicationWindow
             return true;
 
         return false;
+    }
+
+    private void on_preferences()
+    {
+        if (this.preferences_window == null)
+        {
+            this.preferences_window = new PreferencesWindow(this);
+            this.preferences_window.delete_event.connect(() => {
+                this.preferences_window = null;
+                return false;
+            });
+        }
+        this.preferences_window.show();
     }
 
     public void apply_settings()

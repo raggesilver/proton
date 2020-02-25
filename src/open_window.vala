@@ -60,6 +60,12 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
         this.get_recent();
     }
 
+    public OpenWindow.open_at(Gtk.Application app, string page)
+    {
+        this(app);
+        this.on_change_page(page);
+    }
+
     private void build_ui()
     {
         string projects_path = Environment.get_home_dir() + "/Projects";
@@ -122,23 +128,20 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
     // Open project from folder chooser dialog
     private void on_open_other()
     {
-        var d = new Gtk.FileChooserDialog("Project folder", this,
-                                          Gtk.FileChooserAction.SELECT_FOLDER,
-                                          "Cancel", Gtk.ResponseType.CANCEL,
-                                          "_Open", Gtk.ResponseType.OK,
-                                          null);
+        Gtk.FileChooserDialog d;
+        int res;
 
-        if (d.run() == Gtk.ResponseType.OK)
-        {
-            var f = new File(d.get_filename());
-            settings.add_recent(f.path);
-            var w = new Window(this.application, f);
-            w.show();
-            d.destroy();
-            destroy();
-        }
+        d = new Gtk.FileChooserDialog("Project folder", this,
+                                      Gtk.FileChooserAction.SELECT_FOLDER,
+                                      "Cancel", Gtk.ResponseType.CANCEL,
+                                      "_Open", Gtk.ResponseType.OK,
+                                      null);
 
+        res = d.run();
         d.destroy();
+        if (res != Gtk.ResponseType.OK)
+            return ;
+        this.safe_spawn_and_close(this.application, new File(d.get_filename()));
     }
 
     // Create and return new recent project button
@@ -168,10 +171,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
         b.pack_start(lbl, true, true, 0);
 
         r.clicked.connect(() => {
-            settings.add_recent(f.path);
-            var w = new Window(this.application, f);
-            w.show();
-            destroy();
+            this.safe_spawn_and_close(this.application, f);
         });
 
         r.add(b);
@@ -236,10 +236,8 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
             c.complete.connect((res) => {
                 if (res)
                 {
-                    var w = new Window(this.application,
-                                       new File(repo_file.path));
-                    w.show();
-                    destroy();
+                    this.safe_spawn_and_close(this.application,
+                                              new File(repo_file.path));
                 }
                 else
                 {
@@ -341,10 +339,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
             warning("Failed to initialize git repo");
         }
 
-        settings.add_recent(path);
-        var w = new Window(this.application, new File(path));
-        w.show();
-        destroy();
+        this.safe_spawn_and_close(this.application, new File(path));
     }
 
     bool validate_np(out string? _path, out string? lang)
@@ -403,6 +398,18 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
             warning(e.message);
             warning("[Proton] Could not load templates");
         }
+    }
+
+    private void safe_spawn_and_close(Gtk.Application app, File f)
+    {
+        Window win = null;
+
+        settings.add_recent(f.path);
+        app.window_added.connect((w) => {
+            w.show();
+            destroy();
+        });
+        win = new Window(app, f);
     }
 
     [GtkCallback]

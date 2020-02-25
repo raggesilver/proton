@@ -291,7 +291,7 @@ public class Proton.Editor : Object
         );
 
         // This is a hack that prevents Ctrl + c from copying source tags, and
-        // makes Ctrl + p paste lines copied from this hack properly.
+        // makes Ctrl + v paste lines copied from this hack properly.
         this.sview.key_press_event.connect((e) => {
             // If key combination wasn't ctrl+<something>
             if ((e.state & Gdk.ModifierType.CONTROL_MASK) !=

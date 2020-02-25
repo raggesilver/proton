@@ -90,4 +90,25 @@ namespace Proton
                                                 out stderr,
                                                 out status));
     }
+
+    /**
+     * Search for a string `str` in a string array `arr`. Return a pointer to
+     * the result or null.
+     */
+
+    public unowned string? strvstr(string[] arr, string str)
+    {
+        size_t len;
+        size_t i;
+
+        len = arr.length;
+        i = 0;
+        while (i < len)
+        {
+            if (arr[i] == str)
+                return (arr[i]);
+            ++i;
+        }
+        return (null);
+    }
 }

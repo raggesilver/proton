@@ -20,6 +20,10 @@ button.slim-button {
     padding: 0;
 }
 
+button.slim {
+    padding: 0 2px;
+}
+
 #bottom_panel > box > stackswitcher > button {
     background: transparent;
     border: 0;
@@ -185,3 +189,5 @@ button.close:not(.titlebutton) {
 #proton_window.transparent .transparent { background: alpha(@theme_base_color, .96); }
 
 dzlmultipaned.handle { border: 1px solid darker(@theme_base_color); }
+
+entry.slim { min-height: 2em; font-size: 0.85em; }
