@@ -89,23 +89,23 @@ public class Proton.Terminal : Vte.Terminal
 
     private void connect_accels()
     {
-        this.win.on_accel.connect((ac) => {
-            if (!this.has_focus)
-                return (false);
-
-            switch(ac)
+        this.key_press_event.connect((e) => {
+            if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0)
             {
-                case "<ctrl><shift>C":
-                    if (!this.get_has_selection())
-                        return (false);
-                    this.copy_clipboard();
-                    return (true);
-                case "<ctrl><shift>V":
-                    this.paste_clipboard();
-                    return (true);
-                default:
-                    return (false);
+                switch (Gdk.keyval_name(e.keyval))
+                {
+                    case "C": {
+                        if (this.get_has_selection())
+                            this.copy_clipboard();
+                        return (true);
+                    }
+                    case "V": {
+                        this.paste_clipboard();
+                        return (true);
+                    }
+                }
             }
+            return (false);
         });
     }
 
