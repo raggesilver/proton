@@ -52,8 +52,7 @@ public class Proton.Terminal : Vte.Terminal
     private Gdk.RGBA bg;
     private Gdk.RGBA fg;
 
-    public Terminal(Window _win,
-                    string? command = null,
+    public Terminal(Window _win, string? command = null,
                     bool self_destroy = false)
     {
         Object(allow_bold: true,
@@ -64,11 +63,11 @@ public class Proton.Terminal : Vte.Terminal
 
         this.spawn(command, self_destroy);
 
-        win.style_updated.connect(this.update_ui);
+        this.win.style_updated.connect(this.update_ui);
         this.update_ui();
 
         this.connect_accels();
-        show();
+        this.show();
     }
 
     public Terminal.no_spawn(Window win)
@@ -78,10 +77,10 @@ public class Proton.Terminal : Vte.Terminal
         this.win = win;
         this.id = sid++;
 
-        win.style_updated.connect(this.update_ui);
+        this.win.style_updated.connect(this.update_ui);
         this.update_ui();
 
-        settings.notify["transparency"].connect(this.update_ui);
+        Proton.settings.notify["transparency"].connect(this.update_ui);
 
         this.connect_accels();
         show();
@@ -89,35 +88,41 @@ public class Proton.Terminal : Vte.Terminal
 
     private void connect_accels()
     {
-        this.key_press_event.connect((e) => {
-            if ((e.state & Gdk.ModifierType.CONTROL_MASK) != 0)
-            {
-                switch (Gdk.keyval_name(e.keyval))
-                {
-                    case "C": {
-                        if (this.get_has_selection())
-                            this.copy_clipboard();
-                        return (true);
-                    }
-                    case "V": {
-                        this.paste_clipboard();
-                        return (true);
-                    }
-                }
-            }
+        this.key_press_event.connect(this.on_key_press);
+    }
+
+    private bool on_key_press(Gdk.EventKey e)
+    {
+        if ((e.state & Gdk.ModifierType.CONTROL_MASK) == 0)
             return (false);
-        });
+        switch (Gdk.keyval_name(e.keyval))
+        {
+            case "C": {
+                if (this.get_has_selection())
+                    this.copy_clipboard();
+                return (true);
+            }
+            case "V": {
+                this.paste_clipboard();
+                return (true);
+            }
+        }
+        return (false);
     }
 
     private void update_ui()
     {
-        win.get_style_context().lookup_color("theme_base_color", out bg);
-        win.get_style_context().lookup_color("theme_fg_color", out fg);
+        Gtk.StyleContext context;
 
-        if (settings.transparency)
+        context = this.win.get_style_context();
+        if (!context.lookup_color("theme_base_color", out this.bg) ||
+            !context.lookup_color("theme_fg_color", out this.fg))
+            return ;
+
+        if (Proton.settings.transparency)
             this.bg.alpha = 0.96;
 
-        set_colors(fg, bg, solarized_palette);
+        this.set_colors(this.fg, this.bg, solarized_palette);
     }
 
     public void spawn(string? command = null,
@@ -211,9 +216,13 @@ public class Proton.IdleTerminal : Vte.Terminal
 
     private void update_ui()
     {
-        win.get_style_context().lookup_color("theme_base_color", out bg);
-        win.get_style_context().lookup_color("theme_fg_color", out fg);
+        Gtk.StyleContext context;
 
-        set_colors(fg, bg, solarized_palette);
+        context = this.win.get_style_context();
+        if (!context.lookup_color("theme_base_color", out this.bg) ||
+            !context.lookup_color("theme_fg_color", out this.fg))
+            return ;
+
+        this.set_colors(this.fg, this.bg, solarized_palette);
     }
 }
