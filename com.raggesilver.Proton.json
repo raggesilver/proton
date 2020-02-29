@@ -47,7 +47,8 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/gtksourceview"
+                    "url" : "https://gitlab.gnome.org/GNOME/gtksourceview",
+                    "branch": "gtksourceview-4-6"
                 }
             ]
         },
