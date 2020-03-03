@@ -18,6 +18,7 @@
         <property name="margin_bottom">6</property>
         <property name="hhomogeneous">False</property>
         <property name="vhomogeneous">False</property>
+        <property name="transition_duration">125</property>
         <property name="transition_type">slide-left-right</property>
         <property name="interpolate_size">True</property>
         <child>

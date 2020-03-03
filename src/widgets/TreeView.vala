@@ -228,7 +228,6 @@ public class Proton.TreeView : Sortable
         this.window = window;
         this.root = this.window.root;
         this.selected = null;
-        this.margin_top = 5;
         this.popover = new TreeViewPopover();
         this.loading = true; // this is a loadable compopnent
 

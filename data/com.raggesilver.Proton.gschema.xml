@@ -77,4 +77,14 @@
 	    <description>Whether or not the editor should have a margin at the bottom</description>
 	  </key>
     </schema>
+    <schema
+      id="com.raggesilver.Proton.global-search"
+      path="/com/raggesilver/Proton/global-search/"
+    >
+      <key name="auto-save-modified" type="b">
+	    <default>false</default>
+	    <summary>Whether or not to save unsaved modified editors</summary>
+	    <description>Editors that are modified (and not saved) and that got text replaced via Global Search are not saved by default. You can turn this feature on with this key.</description>
+	  </key>
+    </schema>
 </schemalist>

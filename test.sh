@@ -17,11 +17,18 @@ if [[ $# -ge 1 ]]; then
             exit 0;
             ;;
 
+        "update-soft")
+            echo "Run soft update";
+            flatpak-builder --force-clean --ccache --stop-at=$MODULE app $MANIFEST
+            exit 0;
+            ;;
+
         "--no-run")
             run=0
             ;;
 
         "export")
+            echo "Run export";
             sh ${BASH_SOURCE[0]} --no-run
             flatpak-builder --finish-only --repo=repo app $MANIFEST
             flatpak build-export repo app
@@ -30,7 +37,7 @@ if [[ $# -ge 1 ]]; then
             ;;
 
         *)
-            echo "Invalid option $1";
+            echo "Invalid option '$1'";
             exit 1;
             ;;
     esac

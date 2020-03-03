@@ -11,6 +11,8 @@
     padding-right: 10px;
 }
 
+.square { border-radius: 0; }
+
 button {
     -gtk-icon-shadow: none;
     outline: 0;
@@ -191,3 +193,7 @@ button.close:not(.titlebutton) {
 dzlmultipaned.handle { border: 1px solid darker(@theme_base_color); }
 
 entry.slim { min-height: 2em; font-size: 0.85em; }
+checkbutton.slim { font-size: .8em; }
+checkbutton.slim check { min-width: .8em; min-height: .8em; }
+
+#global_search { padding: 0 10px; }

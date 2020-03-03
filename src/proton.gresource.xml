@@ -6,6 +6,8 @@
     <file>layouts/editor_grid_page.ui</file>
     <file>layouts/editor_search_box.ui</file>
     <file>layouts/editor_stack.ui</file>
+    <file>layouts/global_search.ui</file>
+    <file>layouts/global_search_result.ui</file>
     <file>layouts/open_window.ui</file>
     <file>layouts/preferences_window.ui</file>
     <file>layouts/proton_grid_stack.ui</file>

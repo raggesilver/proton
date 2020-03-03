@@ -21,10 +21,9 @@ public class Proton.Window : Gtk.ApplicationWindow
 {
     [GtkChild] Gtk.Box side_panel_box;
     [GtkChild] Gtk.Box title_box;
-    [GtkChild] Gtk.Button preferences_button;
     [GtkChild] Gtk.Button save_button;
     [GtkChild] Gtk.ScrolledWindow tree_view_scrolled;
-    [GtkChild] Gtk.Stack side_panel_stack;
+    [GtkChild] public Gtk.Stack side_panel_stack;
     [GtkChild] Gtk.ToggleButton toggle_bottom_panel_button;
     [GtkChild] Gtk.ToggleButton toggle_left_panel_button;
     [GtkChild] Gtk.StackSwitcher side_panel_stack_switcher;
@@ -54,6 +53,7 @@ public class Proton.Window : Gtk.ApplicationWindow
     public StatusBox           status_box      { get; private set; }
     public TerminalTab         terminal_tab    { get; protected set; }
     public TreeView            tree_view       { get; private set; }
+    public GlobalSearch        global_search   { get; private set; }
 
     private PreferencesWindow  preferences_window = null;
     private PluginManager      pm;
@@ -73,6 +73,7 @@ public class Proton.Window : Gtk.ApplicationWindow
         this.manager         = new EditorManager(this);
         this.pm              = new PluginManager(this);
         this.tree_view       = new TreeView(this);
+        this.global_search   = new GlobalSearch(this);
         this.status_box      = new StatusBox(this);
         this.grid            = new IdeGrid(this);
         this.grid.show();
@@ -274,7 +275,13 @@ public class Proton.Window : Gtk.ApplicationWindow
 
         this.tree_view_scrolled.add(this.tree_view);
 
-        side_panel_stack.set_visible_child_name("treeview");
+        this.side_panel_stack.set_visible_child_name("treeview");
+
+        this.side_panel_stack.add_titled(this.global_search,
+                                         "globalsearch", "Global Search");
+        this.side_panel_stack.child_set_property(this.global_search,
+                                                 "icon-name",
+                                                 "system-search-symbolic");
 
         this.left_edge.add(this.side_panel_box);
         this.side_panel_box.set_vexpand(true);
