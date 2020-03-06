@@ -25,6 +25,7 @@ public class Proton.EditorSettings : Marble.Settings
     public string font_family { get; set; }
     public string style_id    { get; set; }
     public bool   scroll_over { get; set; }
+    public bool   word_wrap   { get; set; }
 
     private EditorSettings()
     {

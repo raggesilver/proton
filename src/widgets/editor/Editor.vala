@@ -304,6 +304,8 @@ public class Proton.Editor : Object
             return (false);
         });
 
+        this._settings.notify.connect(this.editor_apply_settings);
+
         // This is a stupid fix to #39. Fixing #37 will most likely change this.
         this.destroy.connect(() => {
             this.modified(false);
@@ -551,7 +553,10 @@ public class Proton.Editor : Object
         this.sview.set_smart_backspace(true);
         this.sview.set_smart_home_end(Gtk.SourceSmartHomeEndType.ALWAYS);
         this.sview.set_tab_width(4);
-        this.sview.set_wrap_mode(Gtk.WrapMode.WORD_CHAR);
+
+        this.sview.set_wrap_mode(this._settings.word_wrap ?
+            Gtk.WrapMode.WORD_CHAR : Gtk.WrapMode.NONE
+        );
 
         // TODO: implement this on settings
         // sview.background_pattern = Gtk.SourceBackgroundPatternType.GRID;

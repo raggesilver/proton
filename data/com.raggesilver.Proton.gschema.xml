@@ -76,6 +76,11 @@
 	    <summary>Whether or not the editor should have a margin at the bottom</summary>
 	    <description>Whether or not the editor should have a margin at the bottom</description>
 	  </key>
+      <key name="word-wrap" type="b">
+	    <default>true</default>
+	    <summary>Whether or not the editor should wrap text</summary>
+	    <description>Whether or not the editor should wrap text</description>
+	  </key>
     </schema>
     <schema
       id="com.raggesilver.Proton.global-search"

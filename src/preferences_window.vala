@@ -25,9 +25,11 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
     [GtkChild] Gtk.FontButton font_button;
     [GtkChild] Gtk.Switch dark_mode_switch;
     [GtkChild] Gtk.Switch transparency_switch;
+    [GtkChild] Gtk.Switch word_wrap_switch;
 
-    private weak Window window;
-    private Settings    settings;
+    private weak Window     window;
+    private Settings        settings;
+    private EditorSettings  ed_settings;
 
     public PreferencesWindow(Window _win)
     {
@@ -35,21 +37,22 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
 
         this.window = _win;
         this.settings = Settings.get_instance();
+        this.ed_settings = EditorSettings.get_instance();
 
         this.set_transient_for(_win);
 
         var c = new Gtk.SourceStyleSchemeChooserButton();
         c.set_style_scheme(Gtk.SourceStyleSchemeManager.get_default()
-            .get_scheme(EditorSettings.get_instance().style_id));
+            .get_scheme(this.ed_settings.style_id));
 
         c.notify["style-scheme"].connect(() => {
-            EditorSettings.get_instance().style_id = c.style_scheme.id;
+            this.ed_settings.style_id = c.style_scheme.id;
         });
 
         color_scheme_box.add(c);
         color_scheme_box.show_all();
 
-        font_button.font = EditorSettings.get_instance().font_family;
+        font_button.font = this.ed_settings.font_family;
 
         this.settings.schema.bind("dark-mode", this.dark_mode_switch,
                                   "active", SettingsBindFlags.DEFAULT);
@@ -58,6 +61,10 @@ public class Proton.PreferencesWindow : Gtk.ApplicationWindow
         this.settings.schema.bind("transparency", this.transparency_switch,
                                   "active", SettingsBindFlags.DEFAULT);
         this.transparency_switch.active = this.settings.transparency;
+
+        this.ed_settings.schema.bind("word-wrap", this.word_wrap_switch,
+                                     "active", SettingsBindFlags.DEFAULT);
+        this.word_wrap_switch.active = this.ed_settings.word_wrap;
     }
 
     [GtkCallback]
