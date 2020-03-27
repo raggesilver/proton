@@ -297,6 +297,8 @@ public class Proton.Editor : Object
             if ((e.state & Gdk.ModifierType.CONTROL_MASK) !=
                 Gdk.ModifierType.CONTROL_MASK)
                 return (false);
+            // FIXME: There must be a better way to write this than infinite if
+            // else statements.
             if (Gdk.keyval_name(e.keyval) == "c")
                 return (this.do_copy());
             else if (Gdk.keyval_name(e.keyval) == "v")
@@ -307,7 +309,9 @@ public class Proton.Editor : Object
                 return (this.do_indent());
             else if (Gdk.keyval_name(e.keyval) == "bracketleft")
                 return (this.do_indent(true));
-                //  else
+            else if (Gdk.keyval_name(e.keyval) == "slash")
+                return (this.do_toggle_comment());
+            //  else
             //      message(Gdk.keyval_name(e.keyval));
             return (false);
         });
@@ -469,6 +473,72 @@ public class Proton.Editor : Object
         else
             this.sview.indent_lines(start, end);
         return (true);
+    }
+
+    private bool do_toggle_comment()
+    {
+        string? comment_start = null;
+        Gtk.TextIter start, end;
+
+        if (this.language == null)
+            return (true);
+        comment_start = this.language.get_metadata("line-comment-start");
+        if (comment_start == null)
+            return (true);
+        this.buffer.begin_user_action();
+
+        if (this.buffer.has_selection)
+        {
+            int s, e;
+
+            this.buffer.get_selection_bounds(out start, out end);
+            s = start.get_line();
+            e = end.get_line();
+            for (; e >= s; e--)
+            {
+                this.buffer.get_iter_at_line(out end, e);
+                this.comment_line(end, comment_start, comment_start.length);
+            }
+        }
+        else
+        {
+            this.buffer.get_iter_at_offset(out start,
+                                           this.buffer.cursor_position);
+            this.comment_line(start, comment_start, comment_start.length);
+        }
+
+        this.buffer.end_user_action();
+        return (true);
+    }
+
+    private void comment_line(Gtk.TextIter start, string comment_start, int len)
+    {
+        string cs = comment_start + " ";
+        string text;
+        Gtk.TextIter end;
+
+        start.set_line_offset(0);
+        end = start;
+        // If line is literally empty
+        if (end.ends_line())
+            return ;
+        else
+            end.forward_to_line_end();
+        text = this.buffer.get_text(start, end, false).strip();
+        // If line is whitespace-only
+        if (text == "")
+            return ;
+        while (start.get_char().isspace() && !start.ends_line())
+            start.forward_char();
+        // If line is commented already
+        if (text.has_prefix(cs))
+        {
+            end = start;
+            end.forward_chars(len + 1);
+            this.buffer.delete(ref start, ref end);
+        }
+        else
+            this.buffer.insert(ref start, cs, len + 1);
     }
 
     /*
