@@ -301,6 +301,14 @@ public class Proton.Editor : Object
                 return (this.do_copy());
             else if (Gdk.keyval_name(e.keyval) == "v")
                 return (this.do_paste());
+            else if (Gdk.keyval_name(e.keyval) == "Return")
+                return (this.do_ctrl_enter());
+            else if (Gdk.keyval_name(e.keyval) == "bracketright")
+                return (this.do_indent());
+            else if (Gdk.keyval_name(e.keyval) == "bracketleft")
+                return (this.do_indent(true));
+                //  else
+            //      message(Gdk.keyval_name(e.keyval));
             return (false);
         });
 
@@ -421,6 +429,45 @@ public class Proton.Editor : Object
         if (text == null || text != this.copied_text)
             return (false);
         this.paste_whole_line(text);
+        return (true);
+    }
+
+    /*
+    ** Handle ctrl+Return (enter)
+    */
+    private bool do_ctrl_enter()
+    {
+        Gtk.TextIter it;
+
+        this.buffer.get_iter_at_offset(out it, this.buffer.cursor_position);
+        this.buffer.begin_user_action();
+        it.forward_to_line_end();
+        this.buffer.place_cursor(it);
+        this.buffer.insert_at_cursor("\n", 1);
+        this.buffer.end_user_action();
+        return (true);
+    }
+
+    /*
+    ** Handles ctrl+[ and ctrl+] with and without selected text, however from
+    ** Gtk docs: ** The empty lines are not indented. **
+    */
+    private bool do_indent(bool back = false)
+    {
+        Gtk.TextIter start, end;
+
+        if (this.buffer.has_selection)
+            this.buffer.get_selection_bounds(out start, out end);
+        else
+        {
+            this.buffer.get_iter_at_offset(out start,
+                                           this.buffer.cursor_position);
+            end = start;
+        }
+        if (back)
+            this.sview.unindent_lines(start, end);
+        else
+            this.sview.indent_lines(start, end);
         return (true);
     }
 
