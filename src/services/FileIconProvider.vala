@@ -50,6 +50,15 @@ public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
         this.ext_table.insert("json", "text-x-json");
         this.ext_table.insert("md", "text-x-markdown");
         this.ext_table.insert("js", "text-x-js");
+        this.ext_table.insert("flatpak", "package-x-generic");
+        this.ext_table.insert("deps", "package-x-generic-symbolic");
+        this.ext_table.insert("a", "package-x-generic");
+        this.ext_table.insert("png", "image-x-generic");
+        this.ext_table.insert("jpg", "image-x-generic");
+        this.ext_table.insert("jpeg", "image-x-generic");
+        this.ext_table.insert("gif", "image-x-generic");
+        this.ext_table.insert("bmp", "image-x-generic");
+        this.ext_table.insert("svg", "image-x-generic");
 
         this.name_table.insert(".gitattributes", "text-x-git");
         this.name_table.insert(".gitmodules", "text-x-git");
@@ -59,6 +68,7 @@ public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
         this.name_table.insert("Makefile", "text-x-makefile");
         this.name_table.insert("makefile", "text-x-makefile");
         this.name_table.insert(".gitlab-ci.yml", "text-x-gitlab");
+        this.name_table.insert(".git", "text-x-git");
     }
 
     public string get_icon_name_for_file(File f)
@@ -74,10 +84,10 @@ public class Proton.ProtonIconProvider : Object, Proton.FileIconProvider
 
             string[]? arr = (f.name != null) ? f.name.split(".") : null;
 
-            if (arr != null && arr.length > 0)
+            if (arr != null && arr.length > 1)
             {
                 string ext = arr[arr.length - 1];
-                if (ext == "in" && arr.length > 1)
+                if (ext == "in" && arr.length > 2)
                     ext = arr[arr.length - 2];
 
                 ic = this.ext_table.get(ext);
