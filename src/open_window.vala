@@ -128,6 +128,7 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
     // Open project from folder chooser dialog
     private void on_open_other()
     {
+        File file;
         Gtk.FileChooserDialog d;
         int res;
 
@@ -138,10 +139,12 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
                                       null);
 
         res = d.run();
+        if (res == Gtk.ResponseType.OK)
+        {
+            file = new File(d.get_filename());
+            this.safe_spawn_and_close(this.application, file);
+        }
         d.destroy();
-        if (res != Gtk.ResponseType.OK)
-            return ;
-        this.safe_spawn_and_close(this.application, new File(d.get_filename()));
     }
 
     // Create and return new recent project button
@@ -406,8 +409,9 @@ public class Proton.OpenWindow : Gtk.ApplicationWindow
 
         settings.add_recent(f.path);
         app.window_added.connect((w) => {
+            this.hide();
             w.show();
-            destroy();
+            this.destroy();
         });
         win = new Window(app, f);
     }
