@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.22"/>
   <template class="ProtonBottomPanel" parent="GtkBox">
@@ -65,16 +65,7 @@
         <property name="can_focus">False</property>
         <property name="transition_type">slide-down</property>
         <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">INITIAL</property>
-          </object>
-          <packing>
-            <property name="name">initial</property>
-            <property name="title" translatable="yes">INITIAL</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
       <packing>

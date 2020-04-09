@@ -33,19 +33,16 @@ public class Proton.BottomPanelTab : Object
 [GtkTemplate (ui="/com/raggesilver/Proton/layouts/bottom_panel.ui")]
 public class Proton.BottomPanel : Gtk.Box
 {
-    [GtkChild]
-    Gtk.Stack stack;
+    [GtkChild] Gtk.Stack stack;
+    [GtkChild] Gtk.Stack aux_stack;
 
-    [GtkChild]
-    Gtk.Stack aux_stack;
-
-    unowned Window win;
+    private Window win;
 
     public BottomPanel(Window _win)
     {
-        win = _win;
+        this.win = _win;
 
-        stack.notify["visible-child-name"].connect(on_switched);
+        this.stack.notify["visible-child-name"].connect(this.on_switched);
     }
 
     public bool add_tab(BottomPanelTab tab)
@@ -69,7 +66,9 @@ public class Proton.BottomPanel : Gtk.Box
 
     void on_switched()
     {
-        var _child = aux_stack.get_child_by_name(stack.visible_child_name);
+        string? stack_vc = stack.visible_child_name;
+        var _child = (stack_vc != null) ?
+            this.aux_stack.get_child_by_name(stack_vc) : null;
 
         if (_child != null)
             aux_stack.set_visible_child(_child);
