@@ -121,13 +121,17 @@ public class Proton.StatusBox : Gtk.EventBox
             else
                 this.box.get_style_context().remove_class("click");
         });
+
+        this.destroy.connect(() => {
+            Source.remove(this.cycle_id);
+        });
     }
 
     public void show_status(Status s)
     {
         Source.remove(this.cycle_id);
         this.set_status(s);
-        Timeout.add_seconds(s.p, this.cycle_step);
+        cycle_id = Timeout.add_seconds(s.p, this.cycle_step);
     }
 
     public void add_status(Status s)
