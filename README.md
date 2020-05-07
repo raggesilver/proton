@@ -41,7 +41,7 @@ Wow, such empty!
 
 **Download**
 
-[Flatpak](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/proton2/raw/proton.flatpak?job=deploy) • [Zip](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/proton2/download?job=deploy)
+[Flatpak](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/proton2/raw/proton.flatpak?job=build) • [Zip](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/proton2/download?job=build)
 
 *Note: these two links might not work if the latest pipeline failed/is still running*
 
