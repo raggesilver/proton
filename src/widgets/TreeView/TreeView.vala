@@ -1,4 +1,4 @@
-/* IModule.vala
+/* TreeView.vala
  *
  * Copyright 2020 Paulo Queiroz
  *
@@ -16,14 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Modules are core sections of Proton, they keep a weak reference to the
- * Proton.Window they belong to, before the window's destruction it will emit
- * a signal that may be cancelled by any Module that isn't ready for exiting
- * just yet.
- */
+public class Proton.TreeView : Gtk.TreeView, IModule {
+    public weak Window win { get; protected set; }
 
-public interface Proton.IModule
-{
-    public abstract weak Proton.Window win { get; protected set; }
+    private new Gtk.TreeStore model { get; set; }
+
+    construct {
+        this.model = new Gtk.TreeStore.newv({ typeof(TreeViewItem) });
+
+        this.activate_on_single_click = true;
+        this.headers_visible = false;
+        this.show_expanders = false;
+        this.level_indentation = 18;
+    }
+
+    public TreeView (Window win) {
+        this.win = win;
+        this.show_all();
+    }
 }

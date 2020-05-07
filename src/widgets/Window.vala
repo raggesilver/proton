@@ -25,14 +25,15 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild] Gtk.Button play_button;
     [GtkChild] Gtk.MenuButton build_menu_button;
     [GtkChild] Gtk.Revealer pause_revealer;
+    [GtkChild] Gtk.Box tree_view_container;
+
+    public TreeView tree_view { get; private set; }
 
     private bool is_playing = false;
 
     construct {
-        // this.header_bar = new Gtk.HeaderBar();
-        // this.header_bar.set_title("Proton 2");
-        // this.header_bar.show_close_button = true;
-        // this.set_titlebar(this.header_bar);
+        this.tree_view = new TreeView(this);
+        this.tree_view_container.pack_start(this.tree_view, true, true, 0);
     }
 
     public Window (Gtk.Application app) {

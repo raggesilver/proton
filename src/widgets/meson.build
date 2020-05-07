@@ -1,3 +1,5 @@
 proton_sources += files([
-    'Window.vala'
+    'TreeView/TreeView.vala',
+    'TreeView/TreeViewItem.vala',
+    'Window.vala',
 ])

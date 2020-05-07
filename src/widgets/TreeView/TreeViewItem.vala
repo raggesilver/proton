@@ -1,4 +1,4 @@
-/* IModule.vala
+/* TreeViewItem.vala
  *
  * Copyright 2020 Paulo Queiroz
  *
@@ -16,14 +16,5 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Modules are core sections of Proton, they keep a weak reference to the
- * Proton.Window they belong to, before the window's destruction it will emit
- * a signal that may be cancelled by any Module that isn't ready for exiting
- * just yet.
- */
-
-public interface Proton.IModule
-{
-    public abstract weak Proton.Window win { get; protected set; }
+public class Proton.TreeViewItem : Object {
 }

@@ -3,6 +3,8 @@ proton_sources = [
 ]
 
 subdir('widgets')
+subdir('extra')
+subdir('utils')
 
 conf_data = configuration_data()
 conf_data.set_quoted('PROJECT_NAME', meson.project_name())
