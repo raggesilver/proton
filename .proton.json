@@ -1,4 +1,0 @@
-{
-    "buildsystem": "simple",
-    "commands": [ "sh test.sh" ]
-}

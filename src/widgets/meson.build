@@ -1,21 +1,3 @@
-proton_sources += [
-    'widgets/BottomPanel.vala',
-    'widgets/CommandPalette.vala',
-    'widgets/Container.vala',
-    'widgets/editor/Editor.vala',
-    'widgets/editor/EditorGridPage.vala',
-    'widgets/editor/EditorSearchBox.vala',
-    'widgets/global-search/GlobalSearch.vala',
-    'widgets/global-search/GlobalSearchResult.vala',
-    'widgets/ide-grid/IdeGrid.vala',
-    'widgets/ide-grid/IdeGridPage.vala',
-    'widgets/ide-grid/IdeGridStack.vala',
-    'widgets/Loadable.vala',
-    'widgets/MultiPaned.vala',
-    'widgets/SortableBox.vala',
-    'widgets/StatusBox.vala',
-    'widgets/terminal/Terminal.vala',
-    'widgets/terminal/TerminalGridPage.vala',
-    'widgets/terminal/TerminalTab.vala',
-    'widgets/TreeView.vala',
-]
+proton_sources += files([
+    'Window.vala'
+])

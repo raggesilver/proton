@@ -1,14 +1,14 @@
 {
     "app-id" : "com.raggesilver.Proton",
     "runtime" : "org.gnome.Sdk",
-    "runtime-version" : "3.34",
+    "runtime-version" : "3.36",
     "sdk" : "org.gnome.Sdk",
     "command" : "proton",
     "finish-args" : [
         "--allow=devel",
         "--share=network",
         "--share=ipc",
-        "--socket=x11",
+        "--socket=fallback-x11",
         "--socket=wayland",
         "--filesystem=home",
         "--filesystem=host",
@@ -18,16 +18,6 @@
         "--talk-name=org.freedesktop.Flatpak",
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
-    "x-run-args" : [
-    ],
-    "build-options" : {
-        "cflags" : "-O2 -g",
-        "cxxflags" : "-O2 -g",
-        "env" : {
-            "V" : "1",
-            "GDK_DEBUG" : null
-        }
-    },
     "cleanup" : [
         "/include",
         "/lib/pkgconfig",
@@ -42,145 +32,24 @@
     ],
     "modules" : [
         {
-            "name" : "gtksourceview",
-            "buildsystem" : "meson",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/gtksourceview",
-                    "branch": "gtksourceview-4-6"
-                }
-            ]
-        },
-        {
-            "name" : "vte",
-            "buildsystem" : "meson",
-            "build-options" : {
-                "env" : {
-                    "CXXFLAGS" : "-fno-exceptions"
-                }
-            },
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/vte"
-                }
-            ]
-        },
-        {
-            "name" : "json-glib",
-            "buildsystem" : "meson",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/json-glib"
-                }
-            ]
-        },
-        {
-            "name" : "libeditorconfig",
-            "buildsystem" : "cmake",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/editorconfig/editorconfig-core-c"
-                }
-            ]
-        },
-        {
-            "name" : "libdazzle",
-            "buildsystem" : "meson",
-            "config-opts" : [
-                "-Denable_tests=false"
-            ],
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/libdazzle"
-                }
-            ]
-        },
-        {
-            "name" : "libssh2",
-            "buildsystem" : "cmake-ninja",
-            "config-opts" : [
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-                "-DCMAKE_INSTALL_LIBDIR:PATH=/app/lib",
-                "-DBUILD_SHARED_LIBS:BOOL=ON"
-            ],
-            "cleanup" : [
-                "/share/doc"
-            ],
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/libssh2/libssh2.git",
-                    "branch" : "libssh2-1.8.0"
-                }
-            ]
-        },
-        {
-            "name" : "libgit2",
-            "buildsystem" : "cmake-ninja",
-            "config-opts" : [
-                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-                "-DBUILD_SHARED_LIBS:BOOL=ON",
-                "-DTHREADSAFE=ON"
-            ],
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://github.com/libgit2/libgit2.git",
-                    "branch" : "maint/v0.27"
-                }
-            ]
-        },
-        {
-            "name" : "libgit2-glib",
-            "config-opts" : [
-                "--libdir=/app/lib",
-                "--buildtype=debugoptimized"
-            ],
-            "buildsystem" : "meson",
-            "builddir" : true,
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://gitlab.gnome.org/GNOME/libgit2-glib.git"
-                }
-            ]
-        },
-        {
             "name" : "marble",
             "buildsystem" : "meson",
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://gitlab.com/raggesilver/marble"
+                    "url" : "https://gitlab.com/raggesilver/marble",
+                    "tag": "v1.2.2"
                 }
-            ]
-        },
-        {
-            "name" : "ripgrep",
-            "sources" : [
-                {
-                    "type" : "archive",
-                    "url" : "https://github.com/BurntSushi/ripgrep/releases/download/11.0.2/ripgrep-11.0.2-x86_64-unknown-linux-musl.tar.gz",
-                    "sha256": "2e7978e346553fbc45c0940d9fa11e12f9afbae8213b261aad19b698150e169a"
-                }
-            ],
-            "buildsystem": "simple",
-            "build-commands": [
-                "cp rg /app/bin"
             ]
         },
         {
             "name" : "proton",
+            "builddir" : true,
             "buildsystem" : "meson",
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://gitlab.com/raggesilver-proton/proton"
+                    "url" : "https://gitlab.com/raggesilver/proton2"
                 }
             ]
         }

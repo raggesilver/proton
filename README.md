@@ -1,11 +1,11 @@
 <div align="center">
     <h1>
-        <img src="https://gitlab.com/raggesilver-proton/proton/raw/master/data/icons/hicolor/scalable/apps/com.raggesilver.Proton.svg" /> Proton
+        <img src="https://gitlab.com/raggesilver-proton/proton/raw/proton2/data/icons/hicolor/scalable/apps/com.raggesilver.Proton.svg" /> Proton
     </h1>
-    <h4>A soon-to-be IDE</h4>
+    <h4>A native IDE for Linux</h4>
     <p>
         <a href="https://gitlab.com/raggesilver-proton/proton/pipelines">
-            <img src="https://gitlab.com/raggesilver-proton/proton/badges/master/pipeline.svg" alt="Build Status" />
+            <img src="https://gitlab.com/raggesilver-proton/proton/badges/proton2/pipeline.svg" alt="Build Status" />
         </a>
         <a href="https://www.patreon.com/raggesilver">
             <img src="https://img.shields.io/badge/patreon-donate-orange.svg?logo=patreon" alt="Proton on Patreon" />
@@ -14,25 +14,34 @@
     <p>
         <a href="#install">Install</a> •
         <a href="#features">Features</a> •
-        <a href="https://gitlab.com/raggesilver-proton/proton/blob/master/COPYING">License</a>
+        <!-- <a href="#features">Features</a> • -->
+        <a href="https://gitlab.com/raggesilver-proton/proton/blob/proton2/LICENSE">License</a>
     </p>
 </div>
 
-![Preview](https://imgur.com/VpePB31.png)
+> THIS IS A REWORK BRANCH, NOTHING HERE IS EXPECTED TO WORK UNTIL IT IS
+> MERGED INTO MASTER.
+>
+> Read more about the rewrite [here](https://www.patreon.com/posts/proton-rewrite-36815536)
+
+<div align="center">
+    <img src="https://imgur.com/yw2EpLI.png" alt="Preview"/>
+</div>
+
+This is a preview of the new layout. Editors will look the same, but this
+time we'll have a working grid system.
 
 ## Features
-- Integrated terminal
-- Plugin system (all [../proton-*-plugin](https://gitlab.com/raggesilver-proton/) are core plugins)
-- Overlay command palette + file discover
-- [Build system](https://gitlab.com/raggesilver-proton/proton-runner-plugin)
-- New project [templates](https://gitlab.com/raggesilver-proton/proton-templates)
-- Clone existing projects from a Git repo
+
+<div align="center">
+Wow, such empty!
+</div>
 
 ## Install
 
 **Download**
 
-[Flatpak](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/master/raw/proton.flatpak?job=deploy) • [Zip](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/master/download?job=deploy)
+[Flatpak](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/proton2/raw/proton.flatpak?job=deploy) • [Zip](https://gitlab.com/raggesilver-proton/proton/-/jobs/artifacts/proton2/download?job=deploy)
 
 *Note: these two links might not work if the latest pipeline failed/is still running*
 
@@ -42,28 +51,37 @@
 
 ## Compile
 
-> Proton can be run on GNOME Builder. If you have Proton 0.1.8+ you can also
-> run Proton on Proton 😜️. (for either one just press play and behold magic)
+> Proton can be compiled on GNOME Builder. If you have Proton
+> (0.1.8~0.3.0) you can also run Proton on Proton 😜️. (for either one
+> just press play and behold magic)
 
-**Flatpak from source**
+**Flatpak**
 
 ```bash
 # Clone the repo
 git clone --recursive https://gitlab.com/raggesilver-proton/proton
 # cd into the repo
 cd proton
-# Assuming you have both flatpak and flatpak-builder installed
-# test.sh has a few useful scripts that will build and install proton as a
+# Assuming you have make, flatpak and flatpak-builder installed
+# Makefile has a few useful rules that will build and install Proton as a
 # flatpak locally on ./app_build and ./app
-sh test.sh
+make run
 # You can also
-# sh test.sh [command]
+# make [command]
 #
-#   update - update all flatpak dependencies
-#   export - export proton as a flatpak. Generates ./proton.flatpak and ./repo
+#   update      - update outdated dependencies
+#   hard-update - remove and update all dependencies
+#   export      - export proton as a flatpak. Generates ./proton.flatpak
+#   install     - runs `export` then `flatpak install --user proton.flatpak`
+#   clean       - cleans build files
+#   fclean      - cleans build files and dependencies
+#   ffclean     - cleans build files, dependencies and .flatpak-builder
 ```
 
-**Regular from source (unsupported)**
+**Regular (unsupported)**
+
+Building Proton from source without Flatpak is possible, but I won't spend
+my time debugging user mismatched dependency versions.
 
 ```bash
 # Clone the repo
@@ -74,18 +92,18 @@ meson _build
 ninja -C _build
 # sudo
 ninja -C _build install
+proton
 ```
 
-## Gallery
+## UI Mocks
 
-> These pictures are rarely updated (might be outdated)
-
-| Welcome window | Preferences window |
-| -------------- | ------------------ |
-| ![](https://imgur.com/ezTDdnt.png) | ![](https://imgur.com/DOun2WI.png) |
+<div align="center">
+Wow, such empty!
+</div>
 
 ## Credits
 
 Code derived/based on other projects is properly attributed on each file.
 
-
+Thanks @gavr123456789 for being a [Patron](https://patreon.com/raggesilver)
+for over 4 months.

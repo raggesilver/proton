@@ -1,10 +1,5 @@
 subdir('icons')
 
-install_subdir('themes',
-    install_dir: join_paths(get_option('datadir'), 'proton'))
-
-subdir('templates')
-
 desktop_file = i18n.merge_file(
   input: 'com.raggesilver.Proton.desktop.in',
   output: 'com.raggesilver.Proton.desktop',
@@ -26,7 +21,7 @@ appstream_file = i18n.merge_file(
   output: 'com.raggesilver.Proton.appdata.xml',
   po_dir: '../po',
   install: true,
-  install_dir: join_paths(get_option('datadir'), 'metainfo')
+  install_dir: join_paths(get_option('datadir'), 'appdata')
 )
 
 appstream_util = find_program('appstream-util', required: false)

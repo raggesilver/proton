@@ -1,6 +1,6 @@
 /* main.vala
  *
- * Copyright 2019 Paulo Queiroz
+ * Copyright 2020 Paulo Queiroz
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,32 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-int main (string[] args)
-{
-    var app = new Proton.Application();
+int main (string[] args) {
+    var app = new Gtk.Application ("com.raggesilver.Proton",
+                                   ApplicationFlags.FLAGS_NONE);
 
-    app.activate.connect(() => {
-        var win = new Proton.OpenWindow(app);
-        win.show();
+    app.activate.connect (() => {
+        var win = app.active_window;
+        if (win == null) {
+            win = new Proton.Window (app);
+            Gtk.IconTheme.get_default().append_search_path(
+                @"$(Proton.DATADIR)/proton/icons");
+            Marble.add_css_provider_from_resource(
+                "/com/raggesilver/Proton/resources/style.css");
+        }
+        win.present ();
     });
 
-    app.open.connect((files, hint) => {
-
-        if (files.length != 1)
-        {
-            error("Provide one directory");
-        }
-
-        var f = new Proton.File(files[0].get_path());
-
-        if (!f.is_directory)
-        {
-            error("Provide one directory");
-        }
-
-        var win = new Proton.Window(app, f);
-        win.show();
-    });
-
-    return app.run(args);
+    return app.run (args);
 }

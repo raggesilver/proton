@@ -2,48 +2,19 @@ stages:
     - build
     - deploy
 
-variables:
-    BUILD_DIR: _build
-    CONFIG_CMD: meson --buildtype=debug build
-    BUILD_CMD: ninja -v -C $BUILD_DIR
-    INSTALL_CMD: ninja -v -C $BUILD_DIR install
-
-    APP_ID: com.raggesilver.Proton
-    BUNDLE: proton.flatpak
-    FLATPAK_MODULE: proton
-    GIT_SUBMODULE_STRATEGY: normal
-    MANIFEST_PATH: com.raggesilver.Proton.json
-    RUNTIME_REPO: "https://sdk.gnome.org/gnome-nightly.flatpakrepo"
+cache:
+    # Cache per branch
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+        - .flatpak-builder/downloads/
+        - .flatpak-builder/git/
 
 build:
     stage: build
-    image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.34'
+    image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.36'
     script:
-        - flatpak-builder --stop-at=${FLATPAK_MODULE} app ${MANIFEST_PATH}
-        - flatpak-builder --run app ${MANIFEST_PATH} meson --prefix=/app ${MESON_ARGS} _build
-        - flatpak-builder --run app ${MANIFEST_PATH} ninja -C _build install
-        - flatpak-builder --finish-only --repo=repo app ${MANIFEST_PATH}
-        - flatpak build-export repo app
-        - flatpak build-bundle repo ${BUNDLE} ${APP_ID}
+        - make update export
     artifacts:
         paths:
-            - "${BUNDLE}"
-        expire_in: 5 days
-    cache:
-        key: "flatpak"
-        paths:
-            - .flatpak-builder/downloads/
-            - .flatpak-builder/git/
-
-deploy:
-    stage: deploy
-    dependencies:
-        - build
-    script:
-        - echo "Generating Flatpak"
-    artifacts:
-        paths:
-            - "${BUNDLE}"
-    environment:
-        name: deploy/$CI_COMMIT_REF_NAME
-        url: https://gnome.com/$CI_PROJECT_PATH/-/jobs/$CI_JOB_ID/artifacts/raw/${BUNDLE}
+            - "proton.flatpak"
+        expire_in: 30 days
