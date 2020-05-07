@@ -13,7 +13,13 @@ build:
     stage: build
     image: 'registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.36'
     script:
-        - make update export
+        # This is the output of `make update export --just-print`
+        - flatpak-builder --ccache --force-clean --stop-at=proton app com.raggesilver.Proton.json
+        - flatpak-builder --run app com.raggesilver.Proton.json meson --prefix=/app app_build
+        - flatpak-builder --run app com.raggesilver.Proton.json ninja -C app_build install
+        - flatpak-builder --finish-only app com.raggesilver.Proton.json
+        - flatpak-builder --export-only --repo=repo app com.raggesilver.Proton.json
+        - flatpak build-bundle repo "proton.flatpak" com.raggesilver.Proton
     artifacts:
         paths:
             - "proton.flatpak"
