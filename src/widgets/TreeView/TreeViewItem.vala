@@ -17,4 +17,36 @@
  */
 
 public class Proton.TreeViewItem : Object {
+    public File file { get; protected set; }
+
+    public bool is_directory {
+        get {
+            return (this.file.is_directory);
+        }
+    }
+
+    public bool is_populated { get; set; default = false; }
+    public bool is_expanded { get; set; default = false; }
+
+    public TreeViewItem(File file) {
+        this.file = file;
+    }
+
+    //  ~TreeViewItem() {
+    //      message("I was destroyed");
+    //  }
+
+    public inline TreeViewItem.from_path(string path) {
+        base(new File(path));
+    }
+
+    public static TreeViewItem get_from_model(Gtk.TreeModel model,
+                                              Gtk.TreeIter iter,
+                                              int index)
+    {
+        Value val;
+
+        model.get_value(iter, index, out val);
+        return ((TreeViewItem)val);
+    }
 }

@@ -27,13 +27,20 @@ public class Proton.Window : Gtk.ApplicationWindow {
     [GtkChild] Gtk.Revealer pause_revealer;
     [GtkChild] Gtk.Box tree_view_container;
 
-    public TreeView tree_view { get; private set; }
+    public TreeViewPanel tree_view_panel { get; private set; }
+    public ArrayList<File> workspaces { get; private set; }
 
     private bool is_playing = false;
 
     construct {
-        this.tree_view = new TreeView(this);
-        this.tree_view_container.pack_start(this.tree_view, true, true, 0);
+        this.workspaces = new ArrayList<File>();
+        this.tree_view_panel = new TreeViewPanel(this);
+
+        this.tree_view_container.pack_start(
+            this.tree_view_panel, true, true, 0
+        );
+
+        this.workspaces.add(new File("."));
     }
 
     public Window (Gtk.Application app) {
@@ -59,5 +66,12 @@ public class Proton.Window : Gtk.ApplicationWindow {
         this.is_playing = !this.is_playing;
         this.pause_revealer.reveal_child = this.is_playing;
         this.build_menu_button.sensitive = !this.is_playing;
+    }
+
+    [GtkCallback]
+    private void on_destroy_tv() {
+        if (this.workspaces.size > 0) {
+            this.workspaces.remove(this.workspaces.get(0));
+        }
     }
 }

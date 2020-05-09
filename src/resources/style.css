@@ -74,3 +74,6 @@ button { outline: none; }
 .side-bar.right { border-left: 1px solid darker(@theme_base_color); }
 
 .pause-button { border-radius: 0; border-right: none; }
+
+.side-bar.left label.header { padding: 6px 12px; font-size: .8rem; }
+/* .side-bar.left treeview { background: @theme_bg_color; } */
