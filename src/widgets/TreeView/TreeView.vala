@@ -26,12 +26,19 @@ const float PIX_XALIGN = 1f;
 public class Proton.TreeView : Gtk.TreeView, IModule {
     // Signal emited when a file (not dir) is selected
     public signal void changed(File f);
+    // Basically the same as
+    // https://valadoc.org/gio-2.0/GLib.FileMonitor.changed.html but may be
+    // emitted from any monitor. The parameters are slightly different, event
+    // comes first and file objects are not `GLib.File`s but `Proton.File`s
+    public signal void monitor_event(FileMonitorEvent e, File f, File? of);
 
     public weak Window win { get; protected set; }
     public File root { get; private set; }
     public TreeViewItem? selected { get; private set; }
 
     private new Gtk.TreeStore model { get; set; }
+
+    private HashTable<string, FileMonitor> monitors;
 
     //  private Mutex mut = Mutex();
     private Gtk.TreeViewColumn col;
@@ -70,6 +77,8 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
 
         this.set_model(this.model);
         this.append_column(this.col);
+
+        this.monitors = new HashTable<string, FileMonitor>(str_hash, str_equal);
     }
 
     public TreeView (Window win, File root) {
@@ -81,7 +90,7 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
 
         // Create the root element manually
         var it = Gtk.TreeIter();
-        var item = new TreeViewItem(root);
+        var item = new TreeViewItem(root, this);
         item.is_populated = true;
         this.model.append(out it, null);
         this.model.set(it, 0, item, -1);
@@ -99,10 +108,47 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
         // Gotta free these refs
         this.col.set_cell_data_func(this.pxb, null);
         this.col.set_cell_data_func(this.txt, null);
+
+        this.monitors.foreach_remove((k, v) => {
+            v.cancel();
+            return (true);
+        });
     }
 
     ~TreeView() {
         message("TreeView destroyed");
+    }
+
+    private void on_monitor_changed(Gtk.TreeIter? parent,
+                                    GLib.File file,
+                                    GLib.File? other_file,
+                                    FileMonitorEvent e)
+    {
+        // Not likely to happen
+        if (parent == null) {
+            return;
+        }
+
+        var f = new File(file.get_path());
+        var of = (other_file == null) ? null : new File(other_file.get_path());
+        var folderItem = TreeViewItem.get_from_model(this.model, parent, 0);
+
+        message("Monitor event %s in %s", e.to_string(), folderItem.file.path);
+
+        if (e == FileMonitorEvent.CREATED || e == FileMonitorEvent.MOVED_IN) {
+            this.t_insert_file(f, parent);
+        }
+        else if (
+            e == FileMonitorEvent.DELETED
+            || e == FileMonitorEvent.MOVED_OUT
+        ) {
+            this.remove_file(f, parent);
+        }
+        else if (e == FileMonitorEvent.RENAMED) {
+            message("Renamed %s %s", f.path, of.path);
+        }
+
+        this.monitor_event(e, f, of);
     }
 
     private void cell_txt_render_function(Gtk.CellLayout _cell_layout,
@@ -147,8 +193,7 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
         return (a.file.name.ascii_casecmp(b.file.name));
     }
 
-    private async void build(File _root, Gtk.TreeIter? parent = null)
-    {
+    private async void build(File _root, Gtk.TreeIter? parent = null) {
         // this.disable_sorting();
 
         new Thread<bool>("proton-tree-view-build", () => {
@@ -162,17 +207,18 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
         // this.enable_sorting();
     }
 
-    private void t_build(File _root, Gtk.TreeIter? parent)
-    {
+    private void t_build(File _root, Gtk.TreeIter? parent) {
         try {
             string? fname = null;
-            var dir = Dir.open(_root.path);
-            File f;
+            var     dir = Dir.open(_root.path);
+            File    f;
 
-            // We're gonna have a dedicated service for directory watching. Each
-            // TreeView will have to interact with it directly.
-            // var m = _root.file.monitor_directory(FileMonitorFlags.WATCH_MOVES);
-            // this.monitors += m;
+            var m = _root.file.monitor_directory(FileMonitorFlags.WATCH_MOVES);
+            this.monitors.set(_root.path, m);
+
+            m.changed.connect((f, of, e) => {
+                this.on_monitor_changed(parent, f, of, e);
+            });
 
             while ((fname = dir.read_name()) != null) {
                 f = new File(Path.build_filename(_root.path, fname, null));
@@ -184,18 +230,9 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
         }
     }
 
-    private void t_insert_file(File f, Gtk.TreeIter? parent = null)
-    {
-        //  this.mut.lock();
-        //  if (f.path in this.to_be_removed.data)
-        //  {
-        //      this.remove_from_to_be_removed(f.path);
-        //      return ;
-        //  }
-        //  this.mut.unlock();
-
+    private void t_insert_file(File f, Gtk.TreeIter? parent = null) {
         var it = Gtk.TreeIter();
-        var item = new TreeViewItem(f);
+        var item = new TreeViewItem(f, this);
 
         Idle.add(() => {
             this.model.append(out it, parent);
@@ -204,7 +241,59 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
         });
     }
 
-    private void on_row_activated(Gtk.TreePath path, Gtk.TreeViewColumn column)
+    private Gtk.TreeIter? find_iter_by_file(File f, Gtk.TreeIter parent) {
+        Gtk.TreeIter it;
+        TreeViewItem item;
+
+        for (int i = 0;; i++) {
+            if (!this.model.iter_nth_child(out it, parent, i)) {
+                return (null);
+            }
+            this.model.get(it, 0, out item, -1);
+            if (File.equ(f, item.file)) {
+                return (it);
+            }
+        }
+    }
+
+    private void remove_file_by_iter(Gtk.TreeIter it) {
+        Gtk.TreeIter subit;
+        TreeViewItem item;
+
+        item = TreeViewItem.get_from_model(this.model, it, 0);
+        if (this.model.iter_has_child(it)) {
+            for (int i = 0;; i++) {
+                if (!this.model.iter_nth_child(out subit, it, i)) {
+                    break;
+                }
+                this.remove_file_by_iter(subit);
+            }
+            var mon = this.monitors.get(item.file.path);
+            if (mon != null) {
+                mon.cancel();
+                this.monitors.remove(item.file.path);
+            }
+        }
+        this.model.remove(ref it);
+    }
+
+    private void remove_file(File f, Gtk.TreeIter? parent) {
+        Gtk.TreeIter? it = null;
+
+        if (parent == null && this.model.get_iter_from_string(out it, "0")) {
+            ;
+        }
+        else {
+            it = this.find_iter_by_file(f, parent);
+        }
+
+        return_if_fail(it != null);
+
+        this.remove_file_by_iter(it);
+    }
+
+    private void on_row_activated(Gtk.TreePath path,
+                                  Gtk.TreeViewColumn column)
     {
         Gtk.TreeIter iter;
         TreeViewItem item;
@@ -212,12 +301,10 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
 
         this.model.get_iter_from_string(out iter, path.to_string());
         item = TreeViewItem.get_from_model(this.model, iter, 0);
-        exp = this.is_row_expanded(path);
+        exp = this.is_row_expanded(path) || item.is_expanded;
 
-        if (item.is_directory)
-        {
-            if (!item.is_populated && !exp)
-            {
+        if (item.is_directory) {
+            if (!item.is_populated && !exp) {
                 item.is_populated = true;
                 item.is_expanded = true;
                 this.build.begin(item.file, iter, (_, res) => {
@@ -225,18 +312,40 @@ public class Proton.TreeView : Gtk.TreeView, IModule {
                     this.expand_row(path, false);
                 });
             }
-            else
-            {
-                if (exp) this.collapse_row(path);
-                else this.expand_row(path, false);
+            else {
+                if (exp) {
+                    this.collapse_children(iter);
+                    this.collapse_row(path);
+                }
+                else {
+                    this.expand_row(path, false);
+                }
                 item.is_expanded = !exp;
             }
         }
-        else
-        {
+        else {
             // Only emited with files
             this.changed(item.file);
         }
         this.selected = item;
+    }
+
+    private bool collapse_children(Gtk.TreeIter parent) {
+        Gtk.TreeIter it;
+        TreeViewItem item;
+        bool         collapsed = false;
+
+        for (int i = 0;; i++) {
+            if (!this.model.iter_nth_child(out it, parent, i)) {
+                break;
+            }
+            item = TreeViewItem.get_from_model(this.model, it, 0);
+            if (item.is_expanded) {
+                this.collapse_children(it);
+                collapsed = true;
+            }
+            item.is_expanded = false;
+        }
+        return (collapsed);
     }
 }

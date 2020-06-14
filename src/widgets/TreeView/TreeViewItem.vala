@@ -25,19 +25,21 @@ public class Proton.TreeViewItem : Object {
         }
     }
 
+    public weak TreeView tree_view { get; private set; }
     public bool is_populated { get; set; default = false; }
     public bool is_expanded { get; set; default = false; }
 
-    public TreeViewItem(File file) {
+    public TreeViewItem(File file, TreeView tree_view) {
         this.file = file;
+        this.tree_view = tree_view;
     }
-
-    //  ~TreeViewItem() {
-    //      message("I was destroyed");
-    //  }
 
     public inline TreeViewItem.from_path(string path) {
         base(new File(path));
+    }
+
+    ~TreeViewItem() {
+        message("I was destroyed");
     }
 
     public static TreeViewItem get_from_model(Gtk.TreeModel model,
